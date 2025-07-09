@@ -29,12 +29,22 @@ class Server
         int _sockfd; //-> server socket FD
         std::vector<Client> _clients; //-> vector of clients to store their IPs and FDs
         std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
+        static bool _signalReceived;
 
         void createServSocket(char* port_num);
+
+        void acceptNewClient();
+        void receiveNewData(int clientFD);
+
+        void closeFDs(); //-> close ALL fds
+        void clearClient(int fd);
 
     public:
         Server();
         ~Server();
 
         void initServer(char* port_num);
+        void runServer(char* password);
+
+        static void signalHandler(int signum); //-> signal handler for any signals
 };

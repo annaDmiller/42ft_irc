@@ -13,6 +13,7 @@ int main(int argc, char** argv)
     try
     {
         serv.initServer(argv[1]);
+        serv.runServer(argv[2]);
     }
     catch(const std::exception& e)
     {

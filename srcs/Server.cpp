@@ -1,6 +1,13 @@
 #include "Server.hpp"
 
+bool Server::_signalReceived = false;
 
+void Server::signalHandler(int signum)
+{
+    (void)signum;
+    Server::_signalReceived = true;
+    return ;
+}
 
 Server::Server() : _sockfd(-1), _port(0)
 {
@@ -91,6 +98,52 @@ void Server::createServSocket(char* port_num)
     new_poll.events = POLLIN;
     new_poll.revents = 0;
     this->_pollfds.push_back(new_poll);
+
+    return ;
+}
+
+void Server::runServer(char* password)
+{
+    while (!Server::_signalReceived)
+    {
+        if (poll(&(this->_pollfds[0]), this->_pollfds.size(), -1) == -1 && Server::_signalReceived == false)
+            throw (std::runtime_error("Failed to use poll() function"));
+        
+        for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
+        {
+            if (this->_pollfds[ind].revents & POLLIN)
+            {
+                if (this->_pollfds[ind].fd == this->_sockfd)
+                    this->acceptNewClient();
+                else
+                    this->receiveNewData(this->_pollfds[ind].fd);
+            }
+        }
+    }
+
+    this->closeFDs();
+    return ;
+}
+
+void Server::acceptNewClient()
+{
+
+    return ;
+}
+
+void Server::receiveNewData(int clientFD)
+{
+    
+    return ;
+}
+
+void Server::closeFDs()
+{
+    for (size_t ind = 0; ind < this->_clients.size(); ind++)
+        close(this->_clients[ind].getFD());
+    
+    if (this->_sockfd != -1)
+        close(this->_sockfd);
 
     return ;
 }
