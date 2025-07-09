@@ -13,6 +13,7 @@ class Client
         ~Client();
 
         int getFD() const;
+        std::string getIPAddr() const;
 
         void setFD(int fd);
         void setIPAddr(std::string addr);

@@ -1,0 +1,2 @@
+https://beej.us/guide/bgnet/html/#port-numbers
+https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9

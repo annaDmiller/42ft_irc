@@ -15,17 +15,26 @@
 # include <netinet/in.h> //-> for sockaddr_in
 # include <arpa/inet.h> //-> for inet_ntoa()
 # include <netdb.h> //-> for getaddrinfo() and related structures
+# include <fcntl.h> //-> for fcntl() function
+# include <poll.h> //-> for poll() function
 
 # include "Client.hpp"
+
+# define SOCKMAXCONN 10 //-> maximum number of connections to socket at a time
 
 class Server
 {
     private:
         int _port; //-> server port
         int _sockfd; //-> server socket FD
-        std::vector<Client> clients; //-> vector of clients to store their IPs and FDs
+        std::vector<Client> _clients; //-> vector of clients to store their IPs and FDs
+        std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
+
+        void createServSocket(char* port_num);
 
     public:
         Server();
         ~Server();
+
+        void initServer(char* port_num);
 };
