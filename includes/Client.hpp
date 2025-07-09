@@ -8,6 +8,9 @@ class Client
         int _fd; //-> client FD
         std::string _ipAddr; //-> client IP address
 
+        Client(const Client& other);
+        Client& operator=(const Client& other);
+
     public:
         Client();
         ~Client();

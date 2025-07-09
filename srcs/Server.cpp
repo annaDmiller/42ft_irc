@@ -9,7 +9,7 @@ void Server::signalHandler(int signum)
     return ;
 }
 
-Server::Server() : _sockfd(-1), _port(0)
+Server::Server() : _sockfd(-1), _port(0), _password(NULL)
 {
     return ;
 }
@@ -19,11 +19,22 @@ Server::~Server()
     return ;
 }
 
-void Server::initServer(char* port_num)
+Server::Server(const Server& other)
+{
+    (void)other;
+    return ;
+}
+
+Server& Server::operator=(const Server& other)
+{
+    (void)other;
+    return (*this);
+}
+
+void Server::initServer(char* port_num, char* password)
 {
     this->_port = atoi(port_num);
-    if (this->_port < 0 || this->_port > 65535)
-        throw (std::runtime_error("Incorrect port number"));
+    this->_password = password;
     
     this->createServSocket(port_num);
 
@@ -102,7 +113,7 @@ void Server::createServSocket(char* port_num)
     return ;
 }
 
-void Server::runServer(char* password)
+void Server::runServer()
 {
     while (!Server::_signalReceived)
     {
@@ -127,13 +138,58 @@ void Server::runServer(char* password)
 
 void Server::acceptNewClient()
 {
+    Client new_client;
+    struct sockaddr_in6 client_addr;
+    struct pollfd new_poll;
+    socklen_t len_addr = sizeof(client_addr);
+    int client_fd = -1;
+    char client_ip[INET6_ADDRSTRLEN];
+
+    client_fd = accept(this->_sockfd, reinterpret_cast<sockaddr*>(&client_addr), &len_addr);
+    if (client_fd == -1)
+    {
+        std::cerr << "Failed accept() of new client" << std::endl;
+        return ;
+    }
+
+    if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
+    {
+        std::cerr << "Failed O_NONBLOCK option for new client" << std::endl;
+        close(client_fd);
+        return ;
+    }
+
+    new_poll.fd = client_fd;
+    new_poll.events = POLLIN;
+    new_poll.revents = 0;
+    this->_pollfds.push_back(new_poll);
+
+    new_client.setFD(client_fd);
+    new_client.setIPAddr(inet_ntop(AF_INET, &(client_addr.sin6_addr), client_ip, sizeof(client_ip)));
+    this->_clients.push_back(new_client);
 
     return ;
 }
 
 void Server::receiveNewData(int clientFD)
 {
-    
+    char buffer[1024];
+    ssize_t bytes;
+
+    memset(buffer, 0, sizeof(buffer));
+
+    bytes = recv(clientFD, buffer, sizeof(buffer) - 1, 0);
+    if (bytes <= 0)
+    {
+        this->clearClient(clientFD);
+        close(clientFD);
+    }
+    else
+    {
+        buffer[bytes] = '\0';
+        std::cout << "Client <" << clientFD << "> Data: " << buffer;
+    }
+
     return ;
 }
 

@@ -27,9 +27,13 @@ class Server
     private:
         int _port; //-> server port
         int _sockfd; //-> server socket FD
+        std::string _password;
         std::vector<Client> _clients; //-> vector of clients to store their IPs and FDs
         std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
         static bool _signalReceived;
+
+        Server(const Server& other);
+        Server& operator=(const Server&other);
 
         void createServSocket(char* port_num);
 
@@ -43,8 +47,8 @@ class Server
         Server();
         ~Server();
 
-        void initServer(char* port_num);
-        void runServer(char* password);
+        void initServer(char* port_num, char* password);
+        void runServer();
 
         static void signalHandler(int signum); //-> signal handler for any signals
 };

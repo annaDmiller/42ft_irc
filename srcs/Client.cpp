@@ -10,6 +10,18 @@ Client::~Client()
     return ;
 }
 
+Client::Client(const Client& other)
+{
+    (void)other;
+    return ;
+}
+
+Client& Client::operator=(const Client& other)
+{
+    (void)other;
+    return (*this);
+}
+
 int Client::getFD() const
 {
     return (this->_fd);
