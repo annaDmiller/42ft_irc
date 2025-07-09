@@ -1,2 +1,15 @@
 https://beej.us/guide/bgnet/html/#port-numbers
 https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9
+
+https://github.com/AhmedFatir/ft_irc/tree/master
+https://irssi.org/documentation/help/
+https://modern.ircdocs.horse/#operator-messages
+https://github.com/barimehdi77/ft_irc
+https://github.com/42YerevanProjects/ft_irc
+https://www.mirc.com/servers.html
+https://medium.com/@leonardo_santangelo/implementing-an-irc-server-from-scratch-in-rust-d387e6850b6e
+https://medium.com/@leonardo_santangelo/implementing-an-irc-server-from-scratch-in-rust-part-2-fc71de7df51b
+https://medium.com/@leonardo_santangelo/implementing-an-irc-server-from-scratch-in-rust-part-3-2f3e9baeb714
+https://github.com/okbrandon/ft_irc
+https://github.com/KarinaLogvina/ft_irc
+https://datatracker.ietf.org/doc/html/rfc1459
