@@ -1,11 +1,13 @@
 #pragma once
 
 # include <iostream>
+# include <sstream> //-> to use std::istringstream to extract words from string
 # include <cerrno> //-> for using errno global var
 # include <cstdlib> //-> for using exit function
 # include <csignal> //-> for signal handling
 # include <cstring> //-> for using memset
 # include <vector> //-> for vector using
+# include <algorithm>
 
 # include <unistd.h> //-> for using C-type close() function for socket fds
 //C++-type of closing can't be used as it requires non-raw FD
@@ -19,8 +21,7 @@
 # include <poll.h> //-> for poll() function
 
 # include "Client.hpp"
-
-# define SOCKMAXCONN 10 //-> maximum number of connections to socket at a time
+# include "Macros.hpp"
 
 class Server
 {
@@ -38,10 +39,20 @@ class Server
         void createServSocket(char* port_num);
 
         void acceptNewClient();
-        void receiveNewData(int clientFD);
+
+        void receiveNewData(int& clientFD);
+
+        void handleCommand(Client& client, std::string& raw_cmd);
+        void handleInitCommands(Client& client, std::string& raw_cmd);
+        void handleNickname(Client& client, std::istringstream& args);
+        void handleUsername(Client& client, std::istringstream& args);
+        void handlePassword(Client& client, std::istringstream& args);
+        void sendUnknownCMDReply(Client& client, std::string& cmd);
 
         void closeFDs(); //-> close ALL fds
         void clearClient(int fd);
+
+        size_t findIndClient(int& fd) const;
 
     public:
         Server();
