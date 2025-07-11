@@ -2,7 +2,8 @@
 
 Client::Client() : 
         _fd(-1), _hasNickname(false), _hasUsername(false), 
-        _isPasswordChecked(false), _isAuth(false), _isOperator(false)
+        _isPasswordChecked(false), _isAuth(false), _isOperator(false),
+        _nickname("*")
 {
     return ;
 }
