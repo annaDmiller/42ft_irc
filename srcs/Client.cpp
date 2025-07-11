@@ -39,6 +39,33 @@ std::string Client::getBuffer() const
     return (this->_recvBuffer);
 }
 
+bool Client::isRegistered() const
+{
+    if (this->_isAuth)
+        return (true);
+    return (false);
+}
+
+std::string Client::getNick() const
+{
+    return (this->_nickname);
+}
+
+bool Client::isHaveNick() const
+{
+    return (this->_hasNickname);
+}
+
+std::string Client::getUsername() const
+{
+    return (this->_username);
+}
+
+bool Client::isHaveUsername() const
+{
+    return (this->_hasUsername);
+}
+
 void Client::setFD(int fd)
 {
     this->_fd = fd;
@@ -57,17 +84,23 @@ void Client::appendBuffer(std::string buff)
     return ;
 }
 
-void Client::setNickname(std::string& nick)
+void Client::setNickname(const std::string& nick)
 {
     this->_nickname = nick;
     this->_hasNickname = true;
     return ;
 }
 
-void Client::setUsername(std::string& username)
+void Client::setUsername(const std::string& username)
 {
     this->_username = username;
     this->_hasUsername = true;
+    return ;
+}
+
+void Client::setRealname(const std::string& realname)
+{
+    this->_realname = realname;
     return ;
 }
 
@@ -77,14 +110,16 @@ void Client::checkPassword()
     return ;
 }
 
-void Client::authenticationConfirmed()
-{
-    this->_isAuth = true;
-    return ;
-}
-
 void Client::splitBuffer(size_t start, size_t end)
 {
     this->_recvBuffer.erase(start, end);
     return ;
+}
+
+bool Client::tryAuthenticate()
+{
+    if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
+        this->_isAuth = true;
+    
+    return (this->_isAuth);
 }

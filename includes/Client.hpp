@@ -8,8 +8,9 @@ class Client
         int _fd; //-> client FD
         std::string _ipAddr; //-> client IP address
         std::string _recvBuffer; //-> to store the incoming message from client
-        std::string _nickname;
-        std::string _username;
+        std::string _nickname; //-> set with NICK command
+        std::string _username; //-> set with USER command
+        std::string _realname; //-> set with USER command
         bool _hasNickname;
         bool _isAuth;
         bool _isPasswordChecked;
@@ -26,14 +27,21 @@ class Client
         int getFD() const;
         std::string getIPAddr() const;
         std::string getBuffer() const;
+        bool isRegistered() const;
+        std::string getNick() const;
+        bool isHaveNick() const;
+        std::string getUsername() const;
+        bool isHaveUsername() const;
 
         void setFD(int fd);
         void setIPAddr(std::string addr);
         void appendBuffer(std::string buff);
-        void setNickname(std::string& nick);
-        void setUsername(std::string& username);
+        void setNickname(const std::string& nick);
+        void setUsername(const std::string& username);
+        void setRealname(const std::string& realname);
         void checkPassword();
-        void authenticationConfirmed();
 
         void splitBuffer(size_t start, size_t end);
+
+        bool tryAuthenticate();
 };

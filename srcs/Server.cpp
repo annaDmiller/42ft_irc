@@ -240,7 +240,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     if (raw_cmd.empty())
         return ;
 
-    this->handleInitCommands(client, raw_cmd);
+    if (!client.isRegistered())
+        this->handleInitCommands(client, raw_cmd);
 
     return ;
 }

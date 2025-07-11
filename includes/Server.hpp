@@ -8,6 +8,7 @@
 # include <cstring> //-> for using memset
 # include <vector> //-> for vector using
 # include <algorithm>
+# include <cctype>
 
 # include <unistd.h> //-> for using C-type close() function for socket fds
 //C++-type of closing can't be used as it requires non-raw FD
@@ -43,8 +44,11 @@ class Server
         void receiveNewData(int& clientFD);
 
         void handleCommand(Client& client, std::string& raw_cmd);
+
         void handleInitCommands(Client& client, std::string& raw_cmd);
         void handleNickname(Client& client, std::istringstream& args);
+        bool isValidNickname(const std::string& nick);
+        bool checkDupNicknamesOnServer(std::string& nick);
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
@@ -63,3 +67,5 @@ class Server
 
         static void signalHandler(int signum); //-> signal handler for any signals
 };
+
+bool isSpecial(char car);
