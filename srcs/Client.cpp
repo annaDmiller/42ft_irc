@@ -15,13 +15,40 @@ Client::~Client()
 
 Client::Client(const Client& other)
 {
-    (void)other;
+    this->_fd = other._fd;
+    this->_ipAddr = other._ipAddr;
+    this->_recvBuffer = other._recvBuffer;
+    this->_nickname = other._nickname;
+    this->_username = other._username;
+    this->_realname = other._realname;
+    this->_isPasswordChecked = other._isPasswordChecked;
+    this->_isAuth = other._isAuth;
+    this->_hasNickname = other._hasNickname;
+    this->_hasUsername = other._hasUsername;
+    this->_isOperator = other._isOperator;
+    this->_joinedChannels = other._joinedChannels;
     return ;
 }
 
 Client& Client::operator=(const Client& other)
 {
-    (void)other;
+    std::string temp_key;
+
+    if (this != &other)
+    {
+        this->_fd = other._fd;
+        this->_ipAddr = other._ipAddr;
+        this->_recvBuffer = other._recvBuffer;
+        this->_nickname = other._nickname;
+        this->_username = other._username;
+        this->_realname = other._realname;
+        this->_isPasswordChecked = other._isPasswordChecked;
+        this->_isAuth = other._isAuth;
+        this->_hasNickname = other._hasNickname;
+        this->_hasUsername = other._hasUsername;
+        this->_isOperator = other._isOperator;
+        this->_joinedChannels = other._joinedChannels;
+    }
     return (*this);
 }
 

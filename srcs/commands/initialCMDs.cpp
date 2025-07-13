@@ -1,30 +1,35 @@
 #include "Server.hpp"
 
-void Server::handleInitCommands(Client& client, std::string& raw_cmd)
+void Server::handleInitCommands(Client& client, std::string& cmd, std::istringstream& args)
 {
-    //NEED TO ADD LOGIC TO CHECK IF THERE IS PASSWORD IN NICK AND USER COMMANDS - SHALL WE SEND AN ERROR?
-    std::istringstream str(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
-    std::string command, welcome_mess;
-    str >> command; // it means that we put 1st word from str into command
-
+    //NEED: TO ADD LOGIC TO CHECK IF THERE IS PASSWORD IN NICK AND USER COMMANDS - SHALL WE SEND AN ERROR?
+    std::string welcome_mess, err_response;
     //as we have initial commands in uppercase, we need to transfrom our command
-    std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
-    if (command == NICK)
-        handleNickname(client, str);
-    else if (command == USER)
-        handleUsername(client, str);
-    else if (command == PASS)
-        handlePassword(client, str);
+    if (cmd == NICK)
+        handleNickname(client, args);
+    else if (cmd == USER)
+        handleUsername(client, args);
+    else if (cmd == PASS)
+        handlePassword(client, args);
     else
     {
-        // = send ERR_NOTREGISTERED
+        err_response = ERR_NOTREGISTERED(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
     
     if (client.tryAuthenticate())
     {
-        welcome_mess = ":irc_local 001 " + client.getNick() + " :Welcome to the IRC server" + TERMIN;
+        //NEED: to add the host name into the reply below - to define it
+        welcome_mess = RPL_WELCOME(client.getNick(), client.getUsername(), "TEST");
+        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
+        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        welcome_mess = RPL_CREATED(client.getNick(), CREATEDDATE);
+        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        welcome_mess = RPL_MYINFO(client.getNick(), SERVERNAME, VERSION, USERMODES, CHANNELMODES);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
     }
 
@@ -68,7 +73,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
     std::string nick, err_response;
     args >> nick;
 
-    //Add logic to check password presence before check of nickname - shall we send error?
+    //NEED: Add logic to check password presence before check of nickname - shall we send error?
 
     if (nick.empty())
     {
@@ -91,7 +96,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
         return ;
     }
 
-    //for the case when we use this function being registered, we need to add logic to inform other people in channel about it
+    //NEED: for the case when we use this function being registered, we need to add logic to inform other people in channel about it
 
     client.setNickname(nick);
 
@@ -132,7 +137,7 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     args >> username >> mode >> unused;
     std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
 
-    //Add logic to check password presence before check of username - shall we send error?
+    //NEED: Add logic to check password presence before check of username - shall we send error?
 
     if (username.empty() || realname.empty())
     {

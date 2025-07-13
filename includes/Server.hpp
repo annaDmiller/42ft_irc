@@ -7,6 +7,7 @@
 # include <csignal> //-> for signal handling
 # include <cstring> //-> for using memset
 # include <vector> //-> for vector using
+# include <map> //-> for map using
 # include <algorithm>
 # include <cctype>
 
@@ -23,6 +24,7 @@
 
 # include "Client.hpp"
 # include "Macros.hpp"
+# include "Channel.hpp"
 
 class Server
 {
@@ -30,9 +32,12 @@ class Server
         int _port; //-> server port
         int _sockfd; //-> server socket FD
         std::string _password;
-        std::vector<Client> _clients; //-> vector of clients to store their IPs and FDs
+        std::map<int, Client> _clients; //-> map of clients, key is fd
         std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
         static bool _signalReceived;
+        std::string host; //-> used for macros messages
+        std::string server_name; //-> used for macros messages
+        std::map<std::string, Channel> _availableChannels; //-> map of available channels, key is its name
 
         Server(const Server& other);
         Server& operator=(const Server&other);
@@ -45,18 +50,17 @@ class Server
 
         void handleCommand(Client& client, std::string& raw_cmd);
 
-        void handleInitCommands(Client& client, std::string& raw_cmd);
+        void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
         void handleNickname(Client& client, std::istringstream& args);
         bool isValidNickname(const std::string& nick);
         bool checkDupNicknamesOnServer(std::string& nick);
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
+        void handleJoin(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
 
         void closeFDs(); //-> close ALL fds
         void clearClient(int fd);
-
-        size_t findIndClient(int& fd) const;
 
     public:
         Server();

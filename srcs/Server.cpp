@@ -49,7 +49,7 @@ void Server::createServSocket(char* port_num)
 
     //First of all, we need to get the network address to connect it to socket
     memset(&temp, 0, sizeof(temp));
-    temp.ai_family = AF_INET6;
+    temp.ai_family = AF_INET;
     temp.ai_socktype = SOCK_STREAM;
     temp.ai_flags = AI_PASSIVE;
 
@@ -145,11 +145,11 @@ void Server::runServer()
 void Server::acceptNewClient()
 {
     Client new_client;
-    struct sockaddr_in6 client_addr;
+    struct sockaddr_in client_addr;
     struct pollfd new_poll;
     socklen_t len_addr = sizeof(client_addr);
     int client_fd = -1;
-    char client_ip[INET6_ADDRSTRLEN];
+    char client_ip[INET_ADDRSTRLEN];
     std::string init_mess = ":irc.local NOTICE AUTH :Welcome!\r\n";
 
     //we accept the new connection and save the address of client
@@ -176,8 +176,8 @@ void Server::acceptNewClient()
 
     //we set the values of fd and ID-address of the client to the Client var and then add it into vector of Clients
     new_client.setFD(client_fd);
-    new_client.setIPAddr(inet_ntop(AF_INET, &(client_addr.sin6_addr), client_ip, sizeof(client_ip)));
-    this->_clients.push_back(new_client);
+    new_client.setIPAddr(inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, sizeof(client_ip)));
+    this->_clients[client_fd] = new_client;
 
     std::cout << "[DEBUG]";
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
@@ -192,7 +192,7 @@ void Server::receiveNewData(int& clientFD)
 {
     char buffer[1024];
     ssize_t bytes;
-    size_t ind_client, pos_end;
+    size_t pos_end;
     std::string raw_cmd;
 
     //we need an empty buffer to store the receiving message
@@ -217,8 +217,7 @@ void Server::receiveNewData(int& clientFD)
         std::cout << "[DEBUG]";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
 
-        ind_client = this->findIndClient(clientFD);
-        Client& our_client = this->_clients[ind_client];
+        Client& our_client = this->_clients[clientFD];
         our_client.appendBuffer(buffer);
 
         //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
@@ -237,15 +236,23 @@ void Server::receiveNewData(int& clientFD)
 
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
+    std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
+    std::string cmd;
+
     if (raw_cmd.empty())
         return ;
 
+    line >> cmd; // it means that we put 1st word from str into command
+
     if (!client.isRegistered())
     {
-        this->handleInitCommands(client, raw_cmd);
+        this->handleInitCommands(client, cmd, line);
         return ;
     }
 
+    if (raw_cmd == JOIN)
+        handleJoin(client, line);
+    
     
 
     return ;
@@ -253,22 +260,12 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
 void Server::closeFDs()
 {
-    for (size_t ind = 0; ind < this->_clients.size(); ind++)
-        close(this->_clients[ind].getFD());
+    for (std::map<int, Client>::iterator it = this->_clients.begin();
+        it != this->_clients.end(); it++)
+        close(it->first);
     
     if (this->_sockfd != -1)
         close(this->_sockfd);
 
     return ;
-}
-
-size_t Server::findIndClient(int& fd) const
-{
-    for (size_t ind = 0; ind < this->_clients.size(); ind++)
-    {
-        if (this->_clients[ind].getFD() == fd)
-            return (ind);
-    }
-    throw (std::runtime_error("Impossible to find client with this fd"));
-    return (0);
 }

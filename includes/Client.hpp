@@ -1,6 +1,8 @@
 #pragma once
 
 # include <string>
+# include "Channel.hpp"
+# include <map>
 
 class Client
 {
@@ -16,14 +18,14 @@ class Client
         bool _isPasswordChecked;
         bool _hasUsername;
         bool _isOperator;
-
-        Client(const Client& other);
-        Client& operator=(const Client& other);
+        std::map<std::string, Channel*> _joinedChannels;
 
     public:
         Client();
         ~Client();
-
+        Client& operator=(const Client& other);
+        Client(const Client& other);
+        
         int getFD() const;
         std::string getIPAddr() const;
         std::string getBuffer() const;

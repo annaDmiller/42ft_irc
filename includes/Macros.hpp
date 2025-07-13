@@ -7,11 +7,21 @@
 # define CREATEDDATE ""
 # define USERMODES "-"
 # define CHANNELMODES "iklot"
+# define HOST 1
 
 //Command names
 # define USER "USER"
 # define PASS "PASS"
 # define NICK "NICK"
+# define JOIN "JOIN"
+# define QUIT "QUIT"
+# define PRIVMSG "PRIVMSG"
+# define NOTICE "NOTICE"
+# define KICK "KICK"
+# define INVITE "INVITE"
+# define TOPIC "TOPIC"
+# define MODE "MODE"
+# define OPER "OPER"
 
 //Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (": 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
