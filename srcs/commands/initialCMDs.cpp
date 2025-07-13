@@ -10,11 +10,11 @@ void Server::handleInitCommands(Client& client, std::string& raw_cmd)
     //as we have initial commands in uppercase, we need to transfrom our command
     std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
-    if (command == "NICK")
+    if (command == NICK)
         handleNickname(client, str);
-    else if (command == "USER")
+    else if (command == USER)
         handleUsername(client, str);
-    else if (command == "PASS")
+    else if (command == PASS)
         handlePassword(client, str);
     else
     {
@@ -33,20 +33,29 @@ void Server::handleInitCommands(Client& client, std::string& raw_cmd)
 
 void Server::handlePassword(Client& client, std::istringstream& args)
 {
-    std::string pass;
+    std::string pass, err_response;
     args >> pass;
 
     if (client.isRegistered())
-    // = send ERR_ALREADYREGISTERED
+    {
+        err_response = ERR_ALREADYREGISTERED(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
     
     if (pass.empty())
-    // = send ERR_NEEDMOREPARAMS
+    {
+        err_response = ERR_NEEDMOREPARAMS(client.getNick(), PASS);
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     if (this->_password != pass)
-    // = send ERR_PASSWDMISMATCH
+    {
+        err_response = ERR_PASSWDMISMATCH(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     //if we don't detect any errors above, then the user input correct password. We save it
     client.checkPassword();
@@ -56,22 +65,31 @@ void Server::handlePassword(Client& client, std::istringstream& args)
 
 void Server::handleNickname(Client& client, std::istringstream& args)
 {
-    std::string nick;
+    std::string nick, err_response;
     args >> nick;
 
     //Add logic to check password presence before check of nickname - shall we send error?
 
     if (nick.empty())
-    // = send ERR_NONICKNAMEGIVEN
+    {
+        err_response = ERR_NONICKNAMEGIVEN(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
     
     if (this->checkDupNicknamesOnServer(nick))
-    // = send ERR_NICKNAMEINUSE
+    {
+        err_response = ERR_NICKNAMEINUSE(client.getNick(), nick);
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     if (!this->isValidNickname(nick))
-    // = send ERR_ERRONEUSNICKNAME
+    {
+        err_response = ERR_ERRONEUSNICKNAME(client.getNick(), nick);
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     //for the case when we use this function being registered, we need to add logic to inform other people in channel about it
 
@@ -110,19 +128,25 @@ void Server::handleUsername(Client& client, std::istringstream& args)
 {
     //I named the below vars based on the params of command according to RFC 2812
     //However, mode and unused params are not used in our project
-    std::string username, mode, unused, realname;
+    std::string username, mode, unused, realname, err_response;
     args >> username >> mode >> unused;
     std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
 
     //Add logic to check password presence before check of username - shall we send error?
 
     if (username.empty() || realname.empty())
-    // = send ERR_NEEDMOREPARAMS
+    {
+        err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     if (client.isRegistered())
-    // = send ERR_ALREADYREGISTERED
+    {
+        err_response = ERR_ALREADYREGISTERED(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
+    }
 
     if (realname[0] == ':')
         realname = realname.substr(1);

@@ -241,7 +241,12 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         return ;
 
     if (!client.isRegistered())
+    {
         this->handleInitCommands(client, raw_cmd);
+        return ;
+    }
+
+    
 
     return ;
 }

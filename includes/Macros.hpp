@@ -5,10 +5,15 @@
 # define SERVERNAME "FT_IRC"
 # define VERSION "ver.1.0"
 # define CREATEDDATE ""
-# define USERMODES ""
+# define USERMODES "-"
 # define CHANNELMODES "iklot"
 
-//Numeric replies for errors
+//Command names
+# define USER "USER"
+# define PASS "PASS"
+# define NICK "NICK"
+
+//Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (": 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
 # define ERR_ALREADYREGISTERED(nick) (": 462 " + nick + " :Unauthorized command (already registered)" + TERMIN)
 # define ERR_NONICKNAMEGIVEN(nick) (": 431 " + nick + " :No nickname given" + TERMIN)
@@ -17,7 +22,7 @@
 # define ERR_PASSWDMISMATCH(nick) (": 464 " + nick + " :Password incorrect" + TERMIN)
 # define ERR_NOTREGISTERED(nick) (": 451 " + nick + " :You have not registered" + TERMIN)
 
-//Replies to the client
+//Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (": 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
 # define RPL_YOURHOST(nick, servername, version) (": 002 " + nick + " :Your host is " + servername + ", running version " + version + TERMIN)
 # define RPL_CREATED(nick, date) (": 003 " + nick + " :This server was created " + date + TERMIN)
