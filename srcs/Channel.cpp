@@ -1,7 +1,7 @@
 # include "Channel.hpp"
 # include "Server.hpp"
 
-Channel::Channel()
+Channel::Channel() : _membersLimit(0)
 {
     return ;
 }
@@ -17,6 +17,8 @@ Channel::Channel(const Channel& other)
     this->_topic = other._topic;
     this->_operators = other._operators;
     this->_members = other._members;
+    this->_modes = other._modes;
+    this->_membersLimit = other._membersLimit;
     return ;
 }
 
@@ -28,6 +30,8 @@ Channel& Channel::operator=(const Channel& other)
         this->_topic = other._topic;
         this->_operators = other._operators;
         this->_members = other._members;
+        this->_modes = other._modes;
+        this->_membersLimit = other._membersLimit;
     }
     return (*this);
 }
@@ -40,6 +44,11 @@ std::string Channel::getName() const
 std::string Channel::getTopic() const
 {
     return (this->_topic);
+}
+
+std::string Channel::getChannelModes() const
+{
+    return (this->_modes);
 }
 
 void Channel::setName(const std::string& name)

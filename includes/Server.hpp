@@ -6,6 +6,7 @@
 # include <cstdlib> //-> for using exit function
 # include <csignal> //-> for signal handling
 # include <cstring> //-> for using memset
+# include <string>
 # include <vector> //-> for vector using
 # include <map> //-> for map using
 # include <algorithm>
@@ -37,7 +38,7 @@ class Server
         static bool _signalReceived;
         std::string host; //-> used for macros messages
         std::string server_name; //-> used for macros messages
-        std::map<std::string, Channel> _availableChannels; //-> map of available channels, key is its name
+        std::map<std::string, Channel> _availableChannels; //-> map of available channels, key is its channel names
 
         Server(const Server& other);
         Server& operator=(const Server&other);
@@ -51,13 +52,20 @@ class Server
         void handleCommand(Client& client, std::string& raw_cmd);
 
         void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
+
         void handleNickname(Client& client, std::istringstream& args);
-        bool isValidNickname(const std::string& nick);
-        bool checkDupNicknamesOnServer(std::string& nick);
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
         void handleJoin(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
+
+        bool isValidNickname(const std::string& nick);
+        bool checkDupNicknamesOnServer(std::string& nick);
+        bool isValidChannelName(const std::string& chan_name);
+        void checkIfChannelAlreadyJoined(Client& client, std::vector<std::string> &channels, 
+            std::vector<std::string> &keys);
+        bool isChannelExist(std::string &channel_name);
+        //char inputChannelIdOrName(const std::string& str);
 
         void closeFDs(); //-> close ALL fds
         void clearClient(int fd);
@@ -73,3 +81,5 @@ class Server
 };
 
 bool isSpecial(char car);
+std::vector<std::string> ft_split(std::string str, char delim);
+bool isForbiddenForChannelName(char car);

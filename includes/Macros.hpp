@@ -8,6 +8,7 @@
 # define USERMODES "-"
 # define CHANNELMODES "iklot"
 # define HOST 1
+# define MAXJOINEDCHANNELS 10
 
 //Command names
 # define USER "USER"
@@ -22,6 +23,7 @@
 # define TOPIC "TOPIC"
 # define MODE "MODE"
 # define OPER "OPER"
+# define PART "PART"
 
 //Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (": 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
@@ -31,9 +33,18 @@
 # define ERR_ERRONEUSNICKNAME(nick, new_nick) (": 432 " + nick + " " + new_nick + " :Erroneous nickname" + TERMIN)
 # define ERR_PASSWDMISMATCH(nick) (": 464 " + nick + " :Password incorrect" + TERMIN)
 # define ERR_NOTREGISTERED(nick) (": 451 " + nick + " :You have not registered" + TERMIN)
+# define ERR_INVITEONLYCHAN 473
+# define ERR_CHANNELISFULL 471
+# define ERR_NOSUCHCHANNEL 403
+# define ERR_TOOMANYTARGETS 407
+# define ERR_BADCHANNELKEY 475
+# define ERR_BADCHANMASK 476
+# define ERR_TOOMANYCHANNELS 405
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (": 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
 # define RPL_YOURHOST(nick, servername, version) (": 002 " + nick + " :Your host is " + servername + ", running version " + version + TERMIN)
 # define RPL_CREATED(nick, date) (": 003 " + nick + " :This server was created " + date + TERMIN)
 # define RPL_MYINFO(nick, servername, version, user_modes, channel_modes) (": 004 " + nick + " " + servername + " " + version + " " + user_modes + " " + channel_modes + TERMIN)
+# define RPL_TOPIC 332
+# define RPL_NAMREPLY 353

@@ -94,6 +94,11 @@ bool Client::isHaveUsername() const
     return (this->_hasUsername);
 }
 
+size_t Client::joinedChannelQuantity() const
+{
+    return (this->_joinedChannels.size());    
+}
+
 void Client::setFD(int fd)
 {
     this->_fd = fd;
@@ -150,4 +155,18 @@ bool Client::tryAuthenticate()
         this->_isAuth = true;
     
     return (this->_isAuth);
+}
+
+bool Client::isAlreadyJoinedChannel(const std::string& channel_name)
+{
+    if (this->_joinedChannels.empty())
+        return (false);
+    
+    for (std::map<std::string, Channel *>::iterator it = this->_joinedChannels.begin();
+        it != this->_joinedChannels.end(); it++)
+    {
+        if (channel_name == it->first)
+            return (true);
+    }
+    return (false);
 }

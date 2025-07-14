@@ -34,6 +34,7 @@ class Client
         bool isHaveNick() const;
         std::string getUsername() const;
         bool isHaveUsername() const;
+        size_t joinedChannelQuantity() const;
 
         void setFD(int fd);
         void setIPAddr(std::string addr);
@@ -46,4 +47,5 @@ class Client
         void splitBuffer(size_t start, size_t end);
 
         bool tryAuthenticate();
+        bool isAlreadyJoinedChannel(const std::string& channel_name);
 };
