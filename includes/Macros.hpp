@@ -33,13 +33,11 @@
 # define ERR_ERRONEUSNICKNAME(nick, new_nick) (": 432 " + nick + " " + new_nick + " :Erroneous nickname" + TERMIN)
 # define ERR_PASSWDMISMATCH(nick) (": 464 " + nick + " :Password incorrect" + TERMIN)
 # define ERR_NOTREGISTERED(nick) (": 451 " + nick + " :You have not registered" + TERMIN)
-# define ERR_INVITEONLYCHAN 473
-# define ERR_CHANNELISFULL 471
-# define ERR_NOSUCHCHANNEL 403
-# define ERR_TOOMANYTARGETS 407
-# define ERR_BADCHANNELKEY 475
-# define ERR_BADCHANMASK 476
-# define ERR_TOOMANYCHANNELS 405
+# define ERR_INVITEONLYCHAN(nick, channel_name) (": 473 " + nick + " " + channel_name + " :Cannot join channel (+i)" + TERMIN)
+# define ERR_CHANNELISFULL(nick, channel_name) (": 471 " + nick + " " + channel_name + " :Cannot join channel (+l)" + TERMIN)
+# define ERR_BADCHANNELKEY(nick, channel_name) (": 475 " + nick + " " + channel_name + " :Cannot join channel (+k)" + TERMIN)
+# define ERR_BADCHANMASK(nick, channel_name) (": 476 " + nick + " " + channel_name + " :Bad Channel Mask" + TERMIN)
+# define ERR_TOOMANYCHANNELS(nick, channel_name) (": 405 " + nick + " " + channel_name + " :You have joined too many channels" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (": 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)

@@ -44,7 +44,8 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             it_channel++;
             continue ;
         }
-        // = send ERR_BADCHANMASK
+        err_response = ERR_BADCHANMASK(client.getNick(), *it_channel);
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         temp_ind =  it_channel - channel_list.begin();
         it_key = key_list.begin() + temp_ind;
         it_temp = it_channel + 1;
@@ -69,7 +70,8 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         //we check if the client reached the limit of maximum number of joined channels for user
         if (client.joinedChannelQuantity() >= MAXJOINEDCHANNELS)
         {
-            // = send ERR_TOOMANYCHANNELS
+            err_response = ERR_TOOMANYCHANNELS(client.getNick(), channel_list[ind]);
+            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
             continue ;
         }
 
@@ -88,21 +90,24 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         //is channel invite-only?
         if (channel_modes.find('i', 0) != std::string::npos)
         {
-            // = send ERR_INVITEONLYCHAN
+            err_response = ERR_INVITEONLYCHAN(client.getNick(), channel.getName());
+            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
             continue ;
         }
 
         //is there any limit for joined members for channel?
         if (channel_modes.find('l', 0) != std::string::npos && !channel.canBeJoined())
         {
-            // = send ERR_CHANNELISFULL
+            err_response = ERR_CHANNELISFULL(client.getNick(), channel.getName());
+            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
             continue ;
         }
 
         //does the channel have password? Is the key from command correct?
         if (channel_modes.find('k', 0) != std::string::npos && !channel.isKeyCorrect(key_list[ind]))
         {
-            // = send ERR_BADCHANNELKEY
+            err_response = ERR_BADCHANMASK(client.getNick(), channel.getName());
+            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
             continue ;
         }
         
