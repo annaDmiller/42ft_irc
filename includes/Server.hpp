@@ -36,8 +36,6 @@ class Server
         std::map<int, Client> _clients; //-> map of clients, key is fd
         std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
         static bool _signalReceived;
-        std::string host; //-> used for macros messages
-        std::string server_name; //-> used for macros messages
         std::map<std::string, Channel> _availableChannels; //-> map of available channels, key is its channel names
 
         Server(const Server& other);

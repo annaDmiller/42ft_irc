@@ -18,8 +18,8 @@ class Channel
         std::string _modes;
         size_t _membersLimit;
 
-        void sendInitReplies(Client& client);
-        void sendJoinNotificationToAll(Client& client);
+        void sendInitReplies(Client& client) const;
+        bool isOperator(const int& client_fd) const;
 
     public:
         Channel();
@@ -42,5 +42,6 @@ class Channel
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
 
-        void sendChannelMessages(Client& client);
+        void sendJoinMessages(Client& client) const;
+        void sendMessageToAdll(const std::string& message) const;
 };

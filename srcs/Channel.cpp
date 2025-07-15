@@ -53,6 +53,11 @@ std::string Channel::getChannelModes() const
     return (this->_modes);
 }
 
+std::string Channel::getKey() const
+{
+    return (this->_key);
+}
+
 void Channel::setName(const std::string& name)
 {
     this->_name = name;
@@ -62,6 +67,23 @@ void Channel::setName(const std::string& name)
 void Channel::setTopic(const std::string& topic)
 {
     this->_topic = topic;
+    return ;
+}
+
+void Channel::addModes(const std::string& adding_modes)
+{
+    for (size_t ind = 0; ind < adding_modes.size(); ind++)
+    {
+        if (this->_modes.find(adding_modes[ind], 0) != std::string::npos)
+            continue ;
+        this->_modes += adding_modes[ind];
+    }
+    return ;
+}
+
+void Channel::setKey(const std::string& key)
+{
+    this->_key = key;
     return ;
 }
 
@@ -93,4 +115,53 @@ bool Channel::isKeyCorrect(const std::string& key) const
     if (key == this->_key)
         return (true);
     return (false);
+}
+
+void Channel::sendJoinMessages(Client& client) const
+{
+    std::string message = ":" + client.getPrefix() + " JOIN #" + this->_name + TERMIN;
+
+    this->sendMessageToAdll(message);
+    this->sendInitReplies(client);
+    return ;
+}
+
+bool Channel::isOperator(const int& client_fd) const
+{
+    if (this->_operators.find(client_fd) != this->_operators.end())
+        return (true);
+    return (false);
+}
+
+void Channel::sendInitReplies(Client& client) const
+{
+    std::string message, users;
+
+    message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+
+    for (std::map<int, Client*>::const_iterator it = this->_members.cbegin();
+            it != this->_members.cend(); it++)
+    {
+        if (isOperator(it->first))
+            users += "@";
+        users += it->second->getNick() + " ";
+    }
+    users = users.substr(0, users.length() - 1);
+
+    message = RPL_NAMREPLY(client.getNick(), this->_name, users);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+
+    message = RPL_ENDOFNAMES(client.getNick(), this->_name);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+    return ;
+}
+
+void Channel::sendMessageToAdll(const std::string& message) const
+{
+    for (std::map<int, Client*>::const_iterator it = this->_members.cbegin();
+            it != this->_members.cend(); it++)
+        send(it->first, message.c_str(), message.size(), 0);
+
+    return ;
 }

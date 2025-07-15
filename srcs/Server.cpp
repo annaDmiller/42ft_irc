@@ -149,7 +149,6 @@ void Server::acceptNewClient()
     struct pollfd new_poll;
     socklen_t len_addr = sizeof(client_addr);
     int client_fd = -1;
-    char client_ip[INET_ADDRSTRLEN];
     std::string init_mess = ":irc.local NOTICE AUTH :Welcome!\r\n";
 
     //we accept the new connection and save the address of client
@@ -176,7 +175,8 @@ void Server::acceptNewClient()
 
     //we set the values of fd and ID-address of the client to the Client var and then add it into vector of Clients
     new_client.setFD(client_fd);
-    new_client.setIPAddr(inet_ntop(AF_INET, &(client_addr.sin_addr), client_ip, sizeof(client_ip)));
+    char *ip = inet_ntoa(client_addr.sin_addr);
+    new_client.setIPAddr(ip);
     this->_clients[client_fd] = new_client;
 
     std::cout << "[DEBUG]";

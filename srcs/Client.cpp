@@ -99,6 +99,11 @@ size_t Client::joinedChannelQuantity() const
     return (this->_joinedChannels.size());    
 }
 
+std::string Client::getPrefix() const
+{
+    return (this->_nickname + "!" + this->_username + "@" + this->_ipAddr);
+}
+
 void Client::setFD(int fd)
 {
     this->_fd = fd;

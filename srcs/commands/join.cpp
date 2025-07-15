@@ -20,7 +20,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     //The message '0' is handled by JOIN as PART command
     if (channel[0] == '0')
     {
-        // run PART command
+        //NEED: run PART command
         return ;
     }
 
@@ -115,7 +115,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         channel.addMember(client.getFD(), &client);
         client.addChannel(channel.getName(), &channel);
         //and lastly, we send Welcome messages to the client and notify the rest members about his joining
-        channel.sendChannelMessages(client);
+        channel.sendJoinMessages(client);
     }
     
     return ;

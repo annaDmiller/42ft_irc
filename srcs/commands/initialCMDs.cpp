@@ -22,8 +22,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     
     if (client.tryAuthenticate())
     {
-        //NEED: to add the host name into the reply below - to define it
-        welcome_mess = RPL_WELCOME(client.getNick(), client.getUsername(), "TEST");
+        welcome_mess = RPL_WELCOME(client.getNick(), client.getUsername(), HOST);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);

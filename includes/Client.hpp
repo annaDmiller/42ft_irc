@@ -35,6 +35,7 @@ class Client
         std::string getUsername() const;
         bool isHaveUsername() const;
         size_t joinedChannelQuantity() const;
+        std::string getPrefix() const;
 
         void setFD(int fd);
         void setIPAddr(std::string addr);
