@@ -33,7 +33,7 @@
 # define ERR_ERRONEUSNICKNAME(nick, new_nick) (": 432 " + nick + " " + new_nick + " :Erroneous nickname" + TERMIN)
 # define ERR_PASSWDMISMATCH(nick) (": 464 " + nick + " :Password incorrect" + TERMIN)
 # define ERR_NOTREGISTERED(nick) (": 451 " + nick + " :You have not registered" + TERMIN)
-# define ERR_INVITEONLYCHAN(nick, channel_name) (": 473 " + nick + " " + channel_name + " :Cannot join channel (+i)" + TERMIN)
+# define ERR_INVITEONLYCHAN(nick, channel_name) (": 473 " + nick + " " + channel_name + " : Cannot join channel (+i)" + TERMIN)
 # define ERR_CHANNELISFULL(nick, channel_name) (": 471 " + nick + " " + channel_name + " :Cannot join channel (+l)" + TERMIN)
 # define ERR_BADCHANNELKEY(nick, channel_name) (": 475 " + nick + " " + channel_name + " :Cannot join channel (+k)" + TERMIN)
 # define ERR_BADCHANMASK(nick, channel_name) (": 476 " + nick + " " + channel_name + " :Bad Channel Mask" + TERMIN)
