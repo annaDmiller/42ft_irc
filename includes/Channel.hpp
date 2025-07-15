@@ -39,5 +39,8 @@ class Channel
         void addOperator(const int& client_fd);
         void addMember(const int& client_fd, Client* client);
 
+        bool canBeJoined() const;
+        bool isKeyCorrect(const std::string& key) const;
+
         void sendChannelMessages(Client& client);
 };

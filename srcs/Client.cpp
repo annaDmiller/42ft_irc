@@ -143,6 +143,12 @@ void Client::checkPassword()
     return ;
 }
 
+void Client::addChannel(const std::string& channel_name, Channel* channel)
+{
+    this->_joinedChannels[channel_name] = channel;
+    return ;
+}
+
 void Client::splitBuffer(size_t start, size_t end)
 {
     this->_recvBuffer.erase(start, end);

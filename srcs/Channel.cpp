@@ -19,6 +19,7 @@ Channel::Channel(const Channel& other)
     this->_members = other._members;
     this->_modes = other._modes;
     this->_membersLimit = other._membersLimit;
+    this->_key = other._key;
     return ;
 }
 
@@ -32,6 +33,7 @@ Channel& Channel::operator=(const Channel& other)
         this->_members = other._members;
         this->_modes = other._modes;
         this->_membersLimit = other._membersLimit;
+        this->_key = other._key;
     }
     return (*this);
 }
@@ -61,4 +63,34 @@ void Channel::setTopic(const std::string& topic)
 {
     this->_topic = topic;
     return ;
+}
+
+void Channel::addOperator(const int& client_fd)
+{
+    this->_operators.insert(client_fd);
+    return ;
+}
+
+void Channel::addMember(const int& client_fd, Client* client)
+{
+    this->_members[client_fd] = client;
+    return ;
+}
+
+bool Channel::canBeJoined() const
+{
+    size_t num_members = _members.size();
+    if (num_members + 1 <= this->_membersLimit)
+        return (true);
+    return (false);
+}
+
+bool Channel::isKeyCorrect(const std::string& key) const
+{
+    if (key.empty())
+        return (false);
+
+    if (key == this->_key)
+        return (true);
+    return (false);
 }
