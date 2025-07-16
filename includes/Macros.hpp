@@ -9,6 +9,7 @@
 # define CHANNELMODES "iklot"
 # define HOST "irc.local"
 # define MAXJOINEDCHANNELS 10
+# define MAXLINELENGTH (512 - 2)
 
 //Command names
 # define USER "USER" //DONE - ALMOST
@@ -38,12 +39,18 @@
 # define ERR_BADCHANNELKEY(nick, channel_name) (std::string(":") + HOST + " 475 " + nick + " " + channel_name + " :Cannot join channel (+k)" + TERMIN)
 # define ERR_BADCHANMASK(nick, channel_name) (std::string(":") + HOST + " 476 " + nick + " " + channel_name + " :Bad Channel Mask" + TERMIN)
 # define ERR_TOOMANYCHANNELS(nick, channel_name) (std::string(":") + HOST + " 405 " + nick + " " + channel_name + " :You have joined too many channels" + TERMIN)
+# define ERR_NORECIPIENT 411
+# define ERR_NOTEXTTOSEND 412
+# define ERR_NOTOPLEVEL 413
+# define ERR_WILDTOPLEVEL 414
+# define ERR_NOSUCHNICK 401
+# define ERR_CANNOTSENDTOCHAN 404
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
 # define RPL_YOURHOST(nick, servername, version) (std::string(":") + HOST + " 002 " + nick + " :Your host is " + servername + ", running version " + version + TERMIN)
 # define RPL_CREATED(nick, date) (std::string(":") + HOST + " 003 " + nick + " :This server was created " + date + TERMIN)
 # define RPL_MYINFO(nick, servername, version, user_modes, channel_modes) (std::string(":") + HOST + " 004 " + nick + " " + servername + " " + version + " " + user_modes + " " + channel_modes + TERMIN)
-# define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " #" + channel_name + " :" + topic + TERMIN)
-# define RPL_NAMREPLY(nick, channel_name, users) (std::string(":") + HOST + " 353 " + nick + " #" + channel_name + " :" + users + TERMIN)
-# define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " #" + channel_name + " :End of NAMES list" + TERMIN)
+# define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " " + channel_name + " :" + topic + TERMIN)
+# define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " " + channel_name + " :")
+# define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of NAMES list" + TERMIN)

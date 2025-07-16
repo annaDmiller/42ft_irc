@@ -252,7 +252,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
     if (raw_cmd == JOIN)
         handleJoin(client, line);
-    
+    if (raw_cmd == PRIVMSG)
+        handlePrivateMessage(client, line);
     
 
     return ;

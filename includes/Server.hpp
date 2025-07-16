@@ -55,6 +55,7 @@ class Server
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
         void handleJoin(Client& client, std::istringstream& args);
+        void handlePrivateMessage(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
 
         bool isValidNickname(const std::string& nick);

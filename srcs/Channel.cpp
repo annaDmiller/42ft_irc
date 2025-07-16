@@ -136,21 +136,35 @@ bool Channel::isOperator(const int& client_fd) const
 void Channel::sendInitReplies(Client& client) const
 {
     std::string message, users;
+    size_t prefix_length;
 
     message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
     send(client.getFD(), message.c_str(), message.size(), 0);
 
+    message = RPL_NAMREPLY(client.getNick(), this->_name);
+    prefix_length = message.length();
     for (std::map<int, Client*>::const_iterator it = this->_members.cbegin();
             it != this->_members.cend(); it++)
     {
         if (isOperator(it->first))
             users += "@";
-        users += it->second->getNick() + " ";
-    }
-    users = users.substr(0, users.length() - 1);
+        users += it->second->getNick();
 
-    message = RPL_NAMREPLY(client.getNick(), this->_name, users);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+        if (users.size() + message.length() + 1 > MAXLINELENGTH)
+        {
+            message += TERMIN;
+            send(client.getFD(), message.c_str(), message.size(), 0);
+            message = RPL_NAMREPLY(client.getNick(), this->_name);
+        }
+        if (message.length() != prefix_length)
+            message += " ";
+        message += users;
+    }
+    if (message.length() != prefix_length)
+    {
+        message += TERMIN;
+        send(client.getFD(), message.c_str(), message.size(), 0);
+    }
 
     message = RPL_ENDOFNAMES(client.getNick(), this->_name);
     send(client.getFD(), message.c_str(), message.size(), 0);

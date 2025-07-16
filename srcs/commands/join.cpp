@@ -60,8 +60,6 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     //now, we iterater channels one by one from the vector
     for (size_t ind = 0; ind < channel_list.size(); ind++)
     {
-        channel_list[ind] = channel_list[ind].substr(1);
-
         //if client has already joined it, we just silently skip this channel
         if (client.isAlreadyJoinedChannel(channel_list[ind]))
             continue ;
