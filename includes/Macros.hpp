@@ -9,7 +9,7 @@
 # define CHANNELMODES "iklot"
 # define HOST "irc.local"
 # define MAXJOINEDCHANNELS 10
-# define MAXLINELENGTH (512 - 2)
+# define MAXLINELENGTH 512
 
 //Command names
 # define USER "USER" //DONE - ALMOST
@@ -39,12 +39,11 @@
 # define ERR_BADCHANNELKEY(nick, channel_name) (std::string(":") + HOST + " 475 " + nick + " " + channel_name + " :Cannot join channel (+k)" + TERMIN)
 # define ERR_BADCHANMASK(nick, channel_name) (std::string(":") + HOST + " 476 " + nick + " " + channel_name + " :Bad Channel Mask" + TERMIN)
 # define ERR_TOOMANYCHANNELS(nick, channel_name) (std::string(":") + HOST + " 405 " + nick + " " + channel_name + " :You have joined too many channels" + TERMIN)
-# define ERR_NORECIPIENT 411
-# define ERR_NOTEXTTOSEND 412
-# define ERR_NOTOPLEVEL 413
-# define ERR_WILDTOPLEVEL 414
-# define ERR_NOSUCHNICK 401
-# define ERR_CANNOTSENDTOCHAN 404
+# define ERR_NORECIPIENT(nick, cmd) (std::string(":") + HOST + " 411 " + nick + " :No recepient given (" + cmd + ")" + TERMIN)
+# define ERR_NOTEXTTOSEND(nick) (std::string(":") + HOST + " 412 " + nick + " :No text to send" + TERMIN)
+# define ERR_NOSUCHNICK(nick, target) (std::string(":") + HOST + " 401 " + nick + " " + target + " :No such nick/channel" + TERMIN)
+# define ERR_CANNOTSENDTOCHAN(nick, channel_name) (std::string(":") + HOST + " 404 " + nick + " " + channel_name + " :Cannot send to channel" + TERMIN)
+# define ERR_UNKNOWNCOMMAND(nick, cmd) (std::string(":") + HOST + " 421 " + nick + " " + cmd + " :Unknown command" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)

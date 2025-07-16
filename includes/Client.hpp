@@ -4,6 +4,8 @@
 # include "Channel.hpp"
 # include <map>
 
+class Channel;
+
 class Client
 {
     private:
@@ -49,5 +51,5 @@ class Client
         void splitBuffer(size_t start, size_t end);
 
         bool tryAuthenticate();
-        bool isAlreadyJoinedChannel(const std::string& channel_name);
+        bool isAlreadyJoinedChannel(const std::string& channel_name) const;
 };

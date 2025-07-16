@@ -2,10 +2,12 @@
 
 # include <string>
 # include "Client.hpp"
+# include "Server.hpp"
 # include <set>
 # include <map>
 
 class Client;
+class Server;
 
 class Channel
 {
@@ -18,7 +20,7 @@ class Channel
         std::string _modes;
         size_t _membersLimit;
 
-        void sendInitReplies(Client& client) const;
+        void sendInitReplies(const Client& client) const;
         bool isOperator(const int& client_fd) const;
 
     public:
@@ -41,7 +43,11 @@ class Channel
 
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
+        bool userIsMember(const int& client_fd) const;
 
-        void sendJoinMessages(Client& client) const;
-        void sendMessageToAdll(const std::string& message) const;
+        void sendJoinMessages(const Client& client) const;
+        void sendMessageToAll(const std::string& message) const;
+        void sendMessageToAll(const Client &client, const Server& server, 
+                const std::string& target, const std::string& message,
+                const int& except_fd) const;
 };

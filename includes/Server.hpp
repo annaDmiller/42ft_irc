@@ -27,6 +27,9 @@
 # include "Macros.hpp"
 # include "Channel.hpp"
 
+class Client;
+class Channel;
+
 class Server
 {
     private:
@@ -44,13 +47,10 @@ class Server
         void createServSocket(char* port_num);
 
         void acceptNewClient();
-
         void receiveNewData(int& clientFD);
 
         void handleCommand(Client& client, std::string& raw_cmd);
-
         void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
-
         void handleNickname(Client& client, std::istringstream& args);
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
@@ -58,13 +58,12 @@ class Server
         void handlePrivateMessage(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
 
-        bool isValidNickname(const std::string& nick);
+        bool isValidNickname(const std::string& nick) const;
         bool checkDupNicknamesOnServer(std::string& nick);
-        bool isValidChannelName(const std::string& chan_name);
-        void checkIfChannelAlreadyJoined(Client& client, std::vector<std::string> &channels, 
-            std::vector<std::string> &keys);
-        bool isChannelExist(std::string &channel_name);
-        //char inputChannelIdOrName(const std::string& str);
+        bool isValidChannelName(const std::string& chan_name) const;
+        bool isChannelExist(std::string &channel_name) const;
+        bool isChannelTarget(const std::string& target) const;
+        int findUserbyNickname(const std::string& nick) const;
 
         void closeFDs(); //-> close ALL fds
         void clearClient(int fd);
@@ -75,6 +74,8 @@ class Server
 
         void initServer(char* port_num, char* password);
         void runServer();
+        void sendMessageToUser(const Client& sender, const int& target_fd, 
+                const std::string& target_name, const std::string& message) const;
 
         static void signalHandler(int signum); //-> signal handler for any signals
 };

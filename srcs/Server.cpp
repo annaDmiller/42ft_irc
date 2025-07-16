@@ -9,7 +9,7 @@ void Server::signalHandler(int signum)
     return ;
 }
 
-Server::Server() : _sockfd(-1), _port(0)
+Server::Server() : _port(0), _sockfd(-1)
 {
     return ;
 }
@@ -259,6 +259,34 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     return ;
 }
 
+int Server::findUserbyNickname(const std::string& nick) const
+{
+    for (std::map<int, Client>::const_iterator it = this->_clients.begin();
+            it != this->_clients.end(); it++)
+    {
+        if (it->second.getNick() == nick)
+            return (it->first);
+    }
+    return (-1);
+}
+
+void Server::sendMessageToUser(const Client& client, const int& target_fd,
+        const std::string& target_name, const std::string& message) const
+{
+    std::string full_message = client.getPrefix() + " " + PRIVMSG + " " + target_name + " ";
+    std::string body;
+    const size_t symb_left = MAXLINELENGTH - full_message.length() - 2;
+    
+    if (!message.empty() || message.length() > symb_left)
+        body = message.substr(0, symb_left) + TERMIN;
+    else
+        body = message;
+    
+    full_message += body;
+    send(target_fd, full_message.c_str(), full_message.size(), 0);
+    return ;
+}
+
 void Server::closeFDs()
 {
     for (std::map<int, Client>::iterator it = this->_clients.begin();
@@ -268,5 +296,12 @@ void Server::closeFDs()
     if (this->_sockfd != -1)
         close(this->_sockfd);
 
+    return ;
+}
+
+void Server::clearClient(int fd)
+{
+    //NEED: to develop the function
+    (void) fd;
     return ;
 }

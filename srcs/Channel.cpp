@@ -117,11 +117,10 @@ bool Channel::isKeyCorrect(const std::string& key) const
     return (false);
 }
 
-void Channel::sendJoinMessages(Client& client) const
+void Channel::sendJoinMessages(const Client& client) const
 {
-    std::string message = ":" + client.getPrefix() + " JOIN #" + this->_name + TERMIN;
-
-    this->sendMessageToAdll(message);
+    std::string message = client.getPrefix() + " " + JOIN + " " + this->_name;
+    this->sendMessageToAll(message);
     this->sendInitReplies(client);
     return ;
 }
@@ -133,7 +132,18 @@ bool Channel::isOperator(const int& client_fd) const
     return (false);
 }
 
-void Channel::sendInitReplies(Client& client) const
+bool Channel::userIsMember(const int& client_fd) const
+{
+    for (std::map<int, Client*>::const_iterator it = this->_members.begin();
+            it != this->_members.end(); it++)
+    {
+        if (it->first == client_fd)
+            return (true);
+    }
+    return (false);
+}
+
+void Channel::sendInitReplies(const Client& client) const
 {
     std::string message, users;
     size_t prefix_length;
@@ -143,14 +153,14 @@ void Channel::sendInitReplies(Client& client) const
 
     message = RPL_NAMREPLY(client.getNick(), this->_name);
     prefix_length = message.length();
-    for (std::map<int, Client*>::const_iterator it = this->_members.cbegin();
-            it != this->_members.cend(); it++)
+    for (std::map<int, Client*>::const_iterator it = this->_members.begin();
+            it != this->_members.end(); it++)
     {
         if (isOperator(it->first))
             users += "@";
         users += it->second->getNick();
 
-        if (users.size() + message.length() + 1 > MAXLINELENGTH)
+        if (users.size() + message.length() + 1 > MAXLINELENGTH - 2)
         {
             message += TERMIN;
             send(client.getFD(), message.c_str(), message.size(), 0);
@@ -171,11 +181,22 @@ void Channel::sendInitReplies(Client& client) const
     return ;
 }
 
-void Channel::sendMessageToAdll(const std::string& message) const
+void Channel::sendMessageToAll(const std::string& message) const
 {
-    for (std::map<int, Client*>::const_iterator it = this->_members.cbegin();
-            it != this->_members.cend(); it++)
+    for (std::map<int, Client*>::const_iterator it = this->_members.begin();
+            it != this->_members.end(); it++)
         send(it->first, message.c_str(), message.size(), 0);
+
+    return ;
+}
+
+void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
+        const std::string& message, const int& except_fd) const
+{
+    for (std::map<int, Client*>::const_iterator it = this->_members.begin();
+            it != this->_members.end(); it++)
+        if (it->first != except_fd)
+            server.sendMessageToUser(client, it->first, target, message);
 
     return ;
 }

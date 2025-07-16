@@ -4,7 +4,14 @@ CC_FLAGS = -Wall -Werror -Wextra -std=c++98 -g3 -I./includes
 
 NAME = ircserv
 
-SOURCES =
+SOURCES =	./srcs/main.cpp \
+			./srcs/Channel.cpp \
+			./srcs/Client.cpp \
+			./srcs/Server.cpp \
+			./srcs/utils.cpp \
+			./srcs/commands/initialCMDs.cpp \
+			./srcs/commands/join.cpp \
+			./srcs/commands/privmsg.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

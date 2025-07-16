@@ -119,7 +119,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     return ;
 }
 
-bool Server::isValidChannelName(const std::string& chan_name)
+bool Server::isValidChannelName(const std::string& chan_name) const
 {
     if (chan_name[0] != '#' && chan_name[0] != '&'
             && chan_name[0] != '+')
@@ -136,9 +136,9 @@ bool Server::isValidChannelName(const std::string& chan_name)
     return (true);
 }
 
-bool Server::isChannelExist(std::string &channel_name)
+bool Server::isChannelExist(std::string &channel_name) const
 {
-    for (std::map<std::string, Channel>::iterator it_map = this->_availableChannels.begin();
+    for (std::map<std::string, Channel>::const_iterator it_map = this->_availableChannels.begin();
         it_map != this->_availableChannels.end(); it_map++)
     {
         if (channel_name == it_map->first)

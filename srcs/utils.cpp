@@ -24,7 +24,7 @@ std::vector<std::string> ft_split(std::string str, char delim)
     std::stringstream line(str);
     std::string word;
 
-    while (getline(line, word, ','))
+    while (getline(line, word, delim))
         words.push_back(word);
     
     return (words);

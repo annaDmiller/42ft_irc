@@ -1,9 +1,9 @@
 #include "Client.hpp"
 
 Client::Client() : 
-        _fd(-1), _hasNickname(false), _hasUsername(false), 
-        _isPasswordChecked(false), _isAuth(false), _isOperator(false),
-        _nickname("*")
+        _fd(-1), _nickname("*"), _hasNickname(false),
+        _isAuth(false), _isPasswordChecked(false),
+        _hasUsername(false), _isOperator(false)
 {
     return ;
 }
@@ -168,12 +168,12 @@ bool Client::tryAuthenticate()
     return (this->_isAuth);
 }
 
-bool Client::isAlreadyJoinedChannel(const std::string& channel_name)
+bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
 {
     if (this->_joinedChannels.empty())
         return (false);
     
-    for (std::map<std::string, Channel *>::iterator it = this->_joinedChannels.begin();
+    for (std::map<std::string, Channel *>::const_iterator it = this->_joinedChannels.begin();
         it != this->_joinedChannels.end(); it++)
     {
         if (channel_name == it->first)
