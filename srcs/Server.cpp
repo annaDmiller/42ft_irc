@@ -268,6 +268,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     }
     if (raw_cmd == PING)
         handlePing(client, line);
+    if (raw_cmd == NICK)
+        handleNickname(client, line);
 
     return ;
 }
