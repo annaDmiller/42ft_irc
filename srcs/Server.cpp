@@ -266,6 +266,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         handleQuit(client, line);
         return ;
     }
+    if (raw_cmd == PING)
+        handlePing(client, line);
 
     return ;
 }

@@ -16,8 +16,10 @@
 # define PASS "PASS" //DONE
 # define NICK "NICK" //DONE - ALMOST
 # define JOIN "JOIN" //DONE - ALMOST
-# define QUIT "QUIT"
+# define QUIT "QUIT" //DONE
 # define PRIVMSG "PRIVMSG" //DONE
+# define PING "PING"
+# define PONG "PONG"
 # define NOTICE "NOTICE"
 # define KICK "KICK"
 # define INVITE "INVITE"
@@ -44,6 +46,7 @@
 # define ERR_NOSUCHNICK(nick, target) (std::string(":") + HOST + " 401 " + nick + " " + target + " :No such nick/channel" + TERMIN)
 # define ERR_CANNOTSENDTOCHAN(nick, channel_name) (std::string(":") + HOST + " 404 " + nick + " " + channel_name + " :Cannot send to channel" + TERMIN)
 # define ERR_UNKNOWNCOMMAND(nick, cmd) (std::string(":") + HOST + " 421 " + nick + " " + cmd + " :Unknown command" + TERMIN)
+# define ERR_NOORIGIN(nick, cmd) (std::string(":") + HOST + " 409 " + nick + " " + cmd + " :No origin specified" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
