@@ -203,12 +203,28 @@ void Channel::sendMessageToAll(const std::string& message) const
 }
 
 void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
-        const std::string& message, const int& except_fd) const
+        const std::string& message, const int& except_fd, const std::string& cmd) const
 {
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
         if (it->first != except_fd)
-            server.sendMessageToUser(client, it->first, target, message);
+            server.sendMessageToUser(client, it->first, target, message, cmd);
 
     return ;
+}
+
+void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
+        const std::string& message, std::set<int>& except_fds, const std::string& cmd) const
+{
+    for (std::map<int, Client*>::const_iterator it = this->_members.begin();
+            it != this->_members.end(); it++)
+    {
+        if (except_fds.find(it->first) != except_fds.end())
+            continue ;
+        
+        except_fds.insert(it->first);
+        server.sendMessageToUser(client, it->first, target, message, cmd);
+    }
+    
+    return;
 }

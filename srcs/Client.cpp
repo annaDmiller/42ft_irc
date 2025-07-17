@@ -182,6 +182,18 @@ bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
     return (false);
 }
 
+void Client::sendToAllJoinedChannels(const Server& server, const std::string& message,
+        const std::string& cmd) const
+{
+    std::set<int> already_sent_fds;
+
+    for (std::map<std::string, Channel*>::const_iterator it = this->_joinedChannels.begin();
+            it != this->_joinedChannels.end(); it++)
+        it->second->sendMessageToAll(*this, server, "", message, already_sent_fds, cmd);
+    
+    return ;
+}
+
 void Client::leaveAllChannels()
 {
     if (this->_joinedChannels.empty())

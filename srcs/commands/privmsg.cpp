@@ -24,7 +24,9 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
         return ;
     }
 
-    //The message must start with semicolon char to be processed correctly
+    //We strip our message line from semicolon and space chars in the beginning
+    if (message[0] == ' ')
+        message = message.substr(1);
     if (message[0] == ':')
         message = message.substr(1);
 
@@ -53,7 +55,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
             }
             
             //send the message to all members of the channel except for the user itself
-            channel.sendMessageToAll(client, *this, rec_list[ind], message, client.getFD());
+            channel.sendMessageToAll(client, *this, rec_list[ind], message, client.getFD(), PRIVMSG);
         }
         else
         {
@@ -66,7 +68,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
             }
             
             //send the message to the target-user
-            sendMessageToUser(client, fd_target, rec_list[ind], message);
+            sendMessageToUser(client, fd_target, rec_list[ind], message, PRIVMSG);
         }
     }
     return ;

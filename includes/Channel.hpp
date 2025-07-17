@@ -51,5 +51,8 @@ class Channel
         void sendMessageToAll(const std::string& message) const;
         void sendMessageToAll(const Client &client, const Server& server, 
                 const std::string& target, const std::string& message,
-                const int& except_fd) const;
+                const int& except_fd, const std::string& cmd) const;
+        void sendMessageToAll(const Client &client, const Server& server, 
+                const std::string& target, const std::string& message,
+                std::set<int>& except_fds, const std::string& cmd) const;
 };

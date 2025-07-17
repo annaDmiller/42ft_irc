@@ -54,5 +54,5 @@
 # define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " " + channel_name + " :")
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of NAMES list" + TERMIN)
 
-# define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (Client Quit)" + TERMIN)
+# define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)
 # define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")

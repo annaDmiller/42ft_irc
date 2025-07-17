@@ -77,7 +77,8 @@ class Server
         void initServer(char* port_num, char* password);
         void runServer();
         void sendMessageToUser(const Client& sender, const int& target_fd, 
-                const std::string& target_name, const std::string& message) const;
+                const std::string& target_name, const std::string& message,
+                const std::string& cmd) const;
 
         static void signalHandler(int signum); //-> signal handler for any signals
 };

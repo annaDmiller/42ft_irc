@@ -6,24 +6,26 @@ void Server::handleQuit(Client& client, std::istringstream& args)
 
     std::getline(args, message);
 
+    //If there is no message indicated for the QUIT command, then we will use default message
     if (message.empty())
         message = "Client Quit";
     else
-        message = message.substr(1);
-
-    if (!client.isRegistered())
     {
-        rpl_message = QUIT_MESS(client.getIPAddr(), message);
-        send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
-        rpl_message = DISCONNECTION_MESS;
-        send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
-        this->clearClient(client.getFD());
-        return ;
+        if (message[0] == ' ')
+            message = message.substr(1);
+        if (message[0] == ':')
+            message = message.substr(1);
     }
 
-    //NEED: to handle quit of user while sending message to the members of joined channels
-    //NEED: important - the message must be sent only once to the client
-    //NEED: send exit messages to the client
-    //NEED: to clear the client
+    //we need to send the message to other users only if the client is registered
+    if (client.isRegistered())
+        client.sendToAllJoinedChannels(*this, message, QUIT);
+
+    //otherwise, we just send a quit and disconnection messages to himself and clean it from server
+    rpl_message = QUIT_MESS(client.getIPAddr(), message);
+    send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
+    rpl_message = DISCONNECTION_MESS;
+    send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
+    this->clearClient(client.getFD());
     return ;       
 }

@@ -11,7 +11,8 @@ SOURCES =	./srcs/main.cpp \
 			./srcs/utils.cpp \
 			./srcs/commands/initialCMDs.cpp \
 			./srcs/commands/join.cpp \
-			./srcs/commands/privmsg.cpp
+			./srcs/commands/privmsg.cpp \
+			./srcs/commands/quit.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
