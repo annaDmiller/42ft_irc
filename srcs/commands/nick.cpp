@@ -28,7 +28,8 @@ void Server::handleNickname(Client& client, std::istringstream& args)
         return ;
     }
 
-    //NEED: for the case when we use this function being registered, we need to add logic to inform other people in channel about it
+    if (client.isRegistered())
+        client.sendToAllJoinedChannels(*this, nick, NICK);
 
     client.setNickname(nick);
 
