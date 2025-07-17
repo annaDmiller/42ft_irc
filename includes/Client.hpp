@@ -52,4 +52,8 @@ class Client
 
         bool tryAuthenticate();
         bool isAlreadyJoinedChannel(const std::string& channel_name) const;
+
+        void sendToAllJoinedChannels(const Server& server, const std::string& message) const;
+
+        void leaveAllChannels();
 };

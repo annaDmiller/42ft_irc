@@ -181,3 +181,16 @@ bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
     }
     return (false);
 }
+
+void Client::leaveAllChannels()
+{
+    if (this->_joinedChannels.empty())
+        return ;
+        
+    for (std::map<std::string, Channel*>::iterator it = this->_joinedChannels.begin();
+            it != this->_joinedChannels.end(); it++)
+        it->second->removeMember(this->_fd);
+    
+    this->_joinedChannels.clear();
+    return ;
+}

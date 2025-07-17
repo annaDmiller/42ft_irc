@@ -234,6 +234,13 @@ void Server::receiveNewData(int& clientFD)
     return ;
 }
 
+void Server::disconnectClient(const int& client_fd)
+{
+    this->clearClient(client_fd);
+    close(client_fd);
+    
+}
+
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
     std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
@@ -254,7 +261,11 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         handleJoin(client, line);
     if (raw_cmd == PRIVMSG)
         handlePrivateMessage(client, line);
-    
+    if (raw_cmd == QUIT)
+    {
+        handleQuit(client, line);
+        return ;
+    }
 
     return ;
 }
@@ -273,7 +284,7 @@ int Server::findUserbyNickname(const std::string& nick) const
 void Server::sendMessageToUser(const Client& client, const int& target_fd,
         const std::string& target_name, const std::string& message) const
 {
-    std::string full_message = client.getPrefix() + " " + PRIVMSG + " " + target_name + " ";
+    std::string full_message = client.getPrefix() + " " + PRIVMSG + " " + target_name + " :";
     std::string body;
     const size_t symb_left = MAXLINELENGTH - full_message.length() - 2;
     
@@ -299,9 +310,24 @@ void Server::closeFDs()
     return ;
 }
 
-void Server::clearClient(int fd)
+void Server::clearClient(const int& client_fd)
 {
-    //NEED: to develop the function
-    (void) fd;
+    //make the client leave all the channels if it is registered
+    if (this->_clients[client_fd].isRegistered())
+        this->_clients[client_fd].leaveAllChannels();
+       
+    //remove client from the list of clients of server
+    this->_clients.erase(client_fd);
+
+    //remove client from pollfd vector
+    for (std::vector<struct pollfd>::iterator it = this->_pollfds.begin();
+            it != this->_pollfds.end(); it++)
+    {
+        if (it->fd == client_fd)
+        {
+            this->_pollfds.erase(it);
+            break ;
+        }
+    }
     return ;
 }

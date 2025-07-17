@@ -99,6 +99,18 @@ void Channel::addMember(const int& client_fd, Client* client)
     return ;
 }
 
+void Channel::removeMember(const int& client_fd)
+{
+    std::set<int>::iterator oper_it;
+
+    oper_it = this->_operators.find(client_fd);
+    if (oper_it != this->_operators.end())
+        this->_operators.erase(client_fd);
+
+    this->_members.erase(client_fd);
+    return ;
+}
+
 bool Channel::canBeJoined() const
 {
     size_t num_members = _members.size();

@@ -13,7 +13,11 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
         handleUsername(client, args);
     else if (cmd == PASS)
         handlePassword(client, args);
-    //NEED: add the possibility to run QUIT command at this stage too
+    else if (cmd == QUIT)
+    {
+        handleQuit(client, args);
+        return ;
+    }
     else
     {
         err_response = ERR_NOTREGISTERED(client.getNick());

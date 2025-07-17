@@ -48,6 +48,7 @@ class Server
 
         void acceptNewClient();
         void receiveNewData(int& clientFD);
+        void disconnectClient(const int& client_fd);
 
         void handleCommand(Client& client, std::string& raw_cmd);
         void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
@@ -56,6 +57,7 @@ class Server
         void handlePassword(Client& client, std::istringstream& args);
         void handleJoin(Client& client, std::istringstream& args);
         void handlePrivateMessage(Client& client, std::istringstream& args);
+        void handleQuit(Client& client, std::istringstream& args);
         void sendUnknownCMDReply(Client& client, std::string& cmd);
 
         bool isValidNickname(const std::string& nick) const;
@@ -66,7 +68,7 @@ class Server
         int findUserbyNickname(const std::string& nick) const;
 
         void closeFDs(); //-> close ALL fds
-        void clearClient(int fd);
+        void clearClient(const int& client_fd);
 
     public:
         Server();

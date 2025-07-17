@@ -41,6 +41,8 @@ class Channel
         void addOperator(const int& client_fd);
         void addMember(const int& client_fd, Client* client);
 
+        void removeMember(const int& client_fd);
+
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
         bool userIsMember(const int& client_fd) const;

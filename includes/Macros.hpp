@@ -17,7 +17,7 @@
 # define NICK "NICK" //DONE - ALMOST
 # define JOIN "JOIN" //DONE - ALMOST
 # define QUIT "QUIT"
-# define PRIVMSG "PRIVMSG"
+# define PRIVMSG "PRIVMSG" //DONE
 # define NOTICE "NOTICE"
 # define KICK "KICK"
 # define INVITE "INVITE"
@@ -53,3 +53,6 @@
 # define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " " + channel_name + " :" + topic + TERMIN)
 # define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " " + channel_name + " :")
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of NAMES list" + TERMIN)
+
+# define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (Client Quit)" + TERMIN)
+# define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")

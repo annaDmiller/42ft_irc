@@ -25,8 +25,8 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
     }
 
     //The message must start with semicolon char to be processed correctly
-    if (message[0] != ':')
-        message = std::string(":") + message;
+    if (message[0] == ':')
+        message = message.substr(1);
 
     //As there can be multiple receivers, create a list of them
     rec_list = ft_split(receivers, ',');
