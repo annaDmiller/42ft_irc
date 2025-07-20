@@ -15,18 +15,19 @@
 # define USER "USER" //DONE - ALMOST
 # define PASS "PASS" //DONE
 # define NICK "NICK" //DONE - ALMOST
-# define JOIN "JOIN" //DONE - ALMOST
+# define JOIN "JOIN" //DONE
 # define QUIT "QUIT" //DONE
 # define PRIVMSG "PRIVMSG" //DONE
 # define PING "PING" //DONE (Client -> Server)
 # define PONG "PONG" //DONE (Server -> Client)
 # define NOTICE "NOTICE"
+# define PART "PART" //DONE
+# define NAMES "NAMES" //DONE
 # define KICK "KICK"
 # define INVITE "INVITE"
 # define TOPIC "TOPIC"
 # define MODE "MODE"
 # define OPER "OPER"
-# define PART "PART"
 
 //Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (std::string(":") + HOST + " 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
@@ -47,6 +48,8 @@
 # define ERR_CANNOTSENDTOCHAN(nick, channel_name) (std::string(":") + HOST + " 404 " + nick + " " + channel_name + " :Cannot send to channel" + TERMIN)
 # define ERR_UNKNOWNCOMMAND(nick, cmd) (std::string(":") + HOST + " 421 " + nick + " " + cmd + " :Unknown command" + TERMIN)
 # define ERR_NOORIGIN(nick, cmd) (std::string(":") + HOST + " 409 " + nick + " " + cmd + " :No origin specified" + TERMIN)
+# define ERR_NOTONCHANNEL(nick, channel_name) (std::string(":") + HOST + " 442 " + nick + " " + channel_name + " :You're not on thata channel" + TERMIN)
+# define ERR_NOSUCHCHANNEL(nick, channel_name) (std::string(":") + HOST + " 403 " + nick + " " + channel_name + " :No such channel" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)

@@ -20,7 +20,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     //The message '0' is handled by JOIN as PART command
     if (channel[0] == '0')
     {
-        //NEED: run PART command
+        this->handlePart(client);
         return ;
     }
 

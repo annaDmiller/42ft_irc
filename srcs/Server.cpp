@@ -251,6 +251,9 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
     line >> cmd; // it means that we put 1st word from str into command
 
+    //as we have initial commands in uppercase, we need to transfrom our command
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+
     if (!client.isRegistered())
     {
         this->handleInitCommands(client, cmd, line);
@@ -270,6 +273,10 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         handlePing(client, line);
     if (raw_cmd == NICK)
         handleNickname(client, line);
+    if (raw_cmd == NAMES)
+        handleNames(client, line);
+    if (raw_cmd == PART)
+        handlePart(client, line);
 
     return ;
 }

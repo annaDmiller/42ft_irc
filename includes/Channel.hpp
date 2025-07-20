@@ -46,6 +46,7 @@ class Channel
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
         bool userIsMember(const int& client_fd) const;
+        bool isEmpty() const;
 
         void sendJoinMessages(const Client& client) const;
         void sendMessageToAll(const std::string& message) const;
@@ -55,4 +56,6 @@ class Channel
         void sendMessageToAll(const Client &client, const Server& server, 
                 const std::string& target, const std::string& message,
                 std::set<int>& except_fds, const std::string& cmd) const;
+
+        void sendMemberList(const Client& client) const;
 };

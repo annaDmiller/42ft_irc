@@ -4,8 +4,6 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 {
     //NEED: TO ADD LOGIC TO CHECK IF THERE IS PASSWORD IN NICK AND USER COMMANDS - SHALL WE SEND AN ERROR?
     std::string welcome_mess, err_response;
-    //as we have initial commands in uppercase, we need to transfrom our command
-    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
     if (cmd == NICK)
         handleNickname(client, args);

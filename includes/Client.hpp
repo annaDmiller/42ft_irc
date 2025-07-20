@@ -54,7 +54,8 @@ class Client
         bool isAlreadyJoinedChannel(const std::string& channel_name) const;
 
         void sendToAllJoinedChannels(const Server& server, const std::string& message,
-                const std::string& cmd) const;
+                const std::string& cmd, bool isOnce, bool includeChannelName) const;
 
         void leaveAllChannels();
+        void leaveChannel(const std::string& channel_name);
 };

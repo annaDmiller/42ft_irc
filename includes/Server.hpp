@@ -59,6 +59,9 @@ class Server
         void handlePrivateMessage(Client& client, std::istringstream& args);
         void handleQuit(Client& client, std::istringstream& args);
         void handlePing(Client& client, std::istringstream& args);
+        void handleNames(Client& client, std::istringstream& args);
+        void handlePart(Client& client, std::istringstream& args);
+        void handlePart(Client& client); // -> for PART from all the channels
         void sendUnknownCMDReply(Client& client, std::string& cmd);
 
         bool isValidNickname(const std::string& nick) const;

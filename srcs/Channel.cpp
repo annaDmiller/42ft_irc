@@ -155,13 +155,27 @@ bool Channel::userIsMember(const int& client_fd) const
     return (false);
 }
 
+bool Channel::isEmpty() const
+{
+    if (this->_members.empty())
+        return (true);
+    return (false);
+}
+
 void Channel::sendInitReplies(const Client& client) const
 {
-    std::string message, users;
-    size_t prefix_length;
+    std::string message;
 
     message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
     send(client.getFD(), message.c_str(), message.size(), 0);
+    this->sendMemberList(client);
+    return ;
+}
+
+void Channel::sendMemberList(const Client& client) const
+{
+    std::string message, users;
+    size_t prefix_length;
 
     message = RPL_NAMREPLY(client.getNick(), this->_name);
     prefix_length = message.length();

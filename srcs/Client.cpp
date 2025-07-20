@@ -183,13 +183,22 @@ bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
 }
 
 void Client::sendToAllJoinedChannels(const Server& server, const std::string& message,
-        const std::string& cmd) const
+        const std::string& cmd, bool isOnce, bool includeChannelName) const
 {
     std::set<int> already_sent_fds;
 
     for (std::map<std::string, Channel*>::const_iterator it = this->_joinedChannels.begin();
             it != this->_joinedChannels.end(); it++)
-        it->second->sendMessageToAll(*this, server, "", message, already_sent_fds, cmd);
+        if (isOnce)
+            it->second->sendMessageToAll(*this, server, "", message, already_sent_fds, cmd);
+        else
+        {
+            if (includeChannelName)
+                it->second->sendMessageToAll(*this, server, it->first, message, -1, cmd);
+            else
+                it->second->sendMessageToAll(*this, server, "", message, -1, cmd);
+
+        }
     
     return ;
 }
@@ -204,5 +213,11 @@ void Client::leaveAllChannels()
         it->second->removeMember(this->_fd);
     
     this->_joinedChannels.clear();
+    return ;
+}
+
+void Client::leaveChannel(const std::string& channel_name)
+{
+    this->_joinedChannels.erase(channel_name);
     return ;
 }
