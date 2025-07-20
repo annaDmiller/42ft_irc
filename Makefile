@@ -12,7 +12,12 @@ SOURCES =	./srcs/main.cpp \
 			./srcs/commands/initialCMDs.cpp \
 			./srcs/commands/join.cpp \
 			./srcs/commands/privmsg.cpp \
-			./srcs/commands/quit.cpp
+			./srcs/commands/quit.cpp \
+			./srcs/commands/names.cpp \
+			./srcs/commands/part.cpp \
+			./srcs/commands/pingPong.cpp \
+			./srcs/commands/notice.cpp \
+			./srcs/commands/nick.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

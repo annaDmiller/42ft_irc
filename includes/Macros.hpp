@@ -20,7 +20,7 @@
 # define PRIVMSG "PRIVMSG" //DONE
 # define PING "PING" //DONE (Client -> Server)
 # define PONG "PONG" //DONE (Server -> Client)
-# define NOTICE "NOTICE"
+# define NOTICE "NOTICE" //DONE
 # define PART "PART" //DONE
 # define NAMES "NAMES" //DONE
 # define KICK "KICK"

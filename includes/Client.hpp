@@ -5,6 +5,7 @@
 # include <map>
 
 class Channel;
+class Server;
 
 class Client
 {

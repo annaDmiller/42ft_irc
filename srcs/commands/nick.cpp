@@ -29,7 +29,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
     }
 
     if (client.isRegistered())
-        client.sendToAllJoinedChannels(*this, nick, NICK);
+        client.sendToAllJoinedChannels(*this, nick, NICK, true, false);
 
     client.setNickname(nick);
 

@@ -19,7 +19,7 @@ void Server::handleQuit(Client& client, std::istringstream& args)
 
     //we need to send the message to other users only if the client is registered
     if (client.isRegistered())
-        client.sendToAllJoinedChannels(*this, message, QUIT);
+        client.sendToAllJoinedChannels(*this, message, QUIT, true, false);
 
     //otherwise, we just send a quit and disconnection messages to himself and clean it from server
     rpl_message = QUIT_MESS(client.getIPAddr(), message);

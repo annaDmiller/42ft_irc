@@ -277,6 +277,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         handleNames(client, line);
     if (raw_cmd == PART)
         handlePart(client, line);
+    if (raw_cmd == NOTICE)
+        handleNotice(client, line);
 
     return ;
 }

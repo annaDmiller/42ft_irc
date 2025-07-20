@@ -62,7 +62,7 @@ class Server
         void handleNames(Client& client, std::istringstream& args);
         void handlePart(Client& client, std::istringstream& args);
         void handlePart(Client& client); // -> for PART from all the channels
-        void sendUnknownCMDReply(Client& client, std::string& cmd);
+        void handleNotice(Client& client, std::istringstream& args);
 
         bool isValidNickname(const std::string& nick) const;
         bool checkDupNicknamesOnServer(std::string& nick);
