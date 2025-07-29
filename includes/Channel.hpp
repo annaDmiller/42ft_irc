@@ -15,13 +15,13 @@ class Channel
         std::string _name;
         std::string _topic;
         std::set<int> _operators;
+        std::set<int> _invited_members;
         std::map<int, Client*> _members;
         std::string _key; // = password
         std::string _modes;
-        size_t _membersLimit;
+        int _membersLimit;
 
         void sendInitReplies(const Client& client) const;
-        bool isOperator(const int& client_fd) const;
 
     public:
         Channel();
@@ -36,7 +36,8 @@ class Channel
 
         void setName(const std::string& name);
         void setTopic(const std::string& topic);
-        void addModes(const std::string& adding_modes);
+        void addMode(char new_mode);
+        void removeMode(char mode_to_remove);
         void setKey(const std::string& key);
         void addOperator(const int& client_fd);
         void addMember(const int& client_fd, Client* client);
@@ -47,6 +48,11 @@ class Channel
         bool isKeyCorrect(const std::string& key) const;
         bool userIsMember(const int& client_fd) const;
         bool isEmpty() const;
+        bool isOperator(int client_fd) const;
+
+        void handleMemberLimit(const bool& isAdding, int& limit);
+        void handleKey(const bool& isAdding, std::string& password, Client& client);
+        void handleOperators(const bool& isAdding, int& client_fd);
 
         void sendJoinMessages(const Client& client) const;
         void sendMessageToAll(const std::string& message) const;

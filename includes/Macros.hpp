@@ -50,6 +50,10 @@
 # define ERR_NOORIGIN(nick, cmd) (std::string(":") + HOST + " 409 " + nick + " " + cmd + " :No origin specified" + TERMIN)
 # define ERR_NOTONCHANNEL(nick, channel_name) (std::string(":") + HOST + " 442 " + nick + " " + channel_name + " :You're not on thata channel" + TERMIN)
 # define ERR_NOSUCHCHANNEL(nick, channel_name) (std::string(":") + HOST + " 403 " + nick + " " + channel_name + " :No such channel" + TERMIN)
+# define ERR_USERNOTINCHANNEL 441
+# define ERR_KEYSET 467
+# define ERR_CHANOPRIVSNEEDED 482
+# define ERR_UNKNOWNMODE 472
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
@@ -59,6 +63,9 @@
 # define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " " + channel_name + " :" + topic + TERMIN)
 # define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " " + channel_name + " :")
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of NAMES list" + TERMIN)
+# define RPL_INVITELIST 346
+# define RPL_ENDOFINVITELIST 347
+# define RPL_UNIQOPIS 325
 
 # define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)
 # define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")

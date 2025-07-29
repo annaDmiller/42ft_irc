@@ -1,7 +1,7 @@
 # include "Channel.hpp"
 # include "Server.hpp"
 
-Channel::Channel() : _membersLimit(0)
+Channel::Channel() : _membersLimit(-1)
 {
     return ;
 }
@@ -70,14 +70,19 @@ void Channel::setTopic(const std::string& topic)
     return ;
 }
 
-void Channel::addModes(const std::string& adding_modes)
+void Channel::addMode(char new_mode)
 {
-    for (size_t ind = 0; ind < adding_modes.size(); ind++)
-    {
-        if (this->_modes.find(adding_modes[ind], 0) != std::string::npos)
-            continue ;
-        this->_modes += adding_modes[ind];
-    }
+    if (this->_modes.find(new_mode, 0) == std::string::npos)
+        this->_modes += new_mode;
+    return ;
+}
+
+void Channel::removeMode(char mode_to_remove)
+{
+    size_t ind = this->_modes.find(mode_to_remove, 0);
+
+    if (ind != std::string::npos)
+        this->_modes.erase(mode_to_remove);
     return ;
 }
 
@@ -137,13 +142,6 @@ void Channel::sendJoinMessages(const Client& client) const
     return ;
 }
 
-bool Channel::isOperator(const int& client_fd) const
-{
-    if (this->_operators.find(client_fd) != this->_operators.end())
-        return (true);
-    return (false);
-}
-
 bool Channel::userIsMember(const int& client_fd) const
 {
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
@@ -158,6 +156,14 @@ bool Channel::userIsMember(const int& client_fd) const
 bool Channel::isEmpty() const
 {
     if (this->_members.empty())
+        return (true);
+    return (false);
+}
+
+bool Channel::isOperator(int client_fd) const
+{
+    if (std::lower_bound(this->_operators.begin(), this->_operators.end(), client_fd)
+        != this->_operators.end())
         return (true);
     return (false);
 }
@@ -241,4 +247,73 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
     }
     
     return;
+}
+
+void Channel::handleMemberLimit(const bool& isAdding, int& limit)
+{
+    //NEED: to check what will be if we indicate negative value
+    if (limit <= 0)
+        return ;
+    
+    if (isAdding)
+    {
+        this->addMode('l');
+        this->_membersLimit = limit;
+    }
+    else
+    {
+        this->removeMode('l');
+        this->_membersLimit = -1;
+    }
+
+    return ;
+}
+
+void Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
+{
+    //NEED: to check how it will work - will the message be sent to the client?
+    if (password.empty())
+        return ;
+    
+    if (isAdding)
+    {
+        if (!this->_key.empty())
+        {
+            //NEED: ERR_KEYSET error
+            return ;
+        }
+        this->addMode('k');
+        this->_key = password;
+    }
+    else
+    {
+        this->removeMode('k');
+        this->_key.clear();
+    }
+
+    return  ;
+}
+
+void Channel::handleOperators(const bool& isAdding, int& client_fd)
+{
+    //NEED: what behavior if we try to add non-existing user to operator?
+    if (client_fd == -1)
+        return ;
+
+    //NEED: to check if there is any message sending in this case
+    if (this->_members.find(client_fd) == this->_members.end())
+        return ;
+    
+    if (isAdding)
+    {
+        if (this->_operators.find(client_fd) == this->_operators.end())
+            this->_operators.insert(client_fd);
+    }
+    else
+    {
+        if (this->_operators.find(client_fd) != this->_operators.end())
+            this->_operators.erase(client_fd);
+    }
+
+    return ;
 }
