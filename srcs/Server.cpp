@@ -279,6 +279,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         handlePart(client, line);
     if (raw_cmd == NOTICE)
         handleNotice(client, line);
+    if (raw_cmd == MODE)
+        handleMode(client, line);
 
     return ;
 }
