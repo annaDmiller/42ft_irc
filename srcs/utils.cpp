@@ -29,3 +29,22 @@ std::vector<std::string> ft_split(std::string str, char delim)
     
     return (words);
 }
+
+std::string ft_itos(int number)
+{
+    std::string str_number;
+    char car;
+    
+    if (number > 0)
+    {
+        str_number += std::string("-");
+        number *= -1;
+    }
+
+    if (number > 10)
+        str_number += ft_itos(number / 10);
+    
+    car = '0' + number % 10;
+    str_number += car;
+    return (str_number);
+}

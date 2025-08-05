@@ -90,6 +90,7 @@ class Server
         void sendMessageToUser(const Client& sender, const int& target_fd, 
                 const std::string& target_name, const std::string& message,
                 const std::string& cmd) const;
+        void deleteChannel(const std::string& channel_name);
 
         static void signalHandler(int signum); //-> signal handler for any signals
 };
@@ -97,3 +98,4 @@ class Server
 bool isSpecial(char car);
 std::vector<std::string> ft_split(std::string str, char delim);
 bool isForbiddenForChannelName(char car);
+std::string ft_itos(int number);

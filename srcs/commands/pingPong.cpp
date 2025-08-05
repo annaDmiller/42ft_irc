@@ -1,5 +1,8 @@
 #include "Server.hpp"
 
+//PING-PONG paired commands normally are used by server to verify that the client is still joined
+//However, client can send PING to the server as well and receive the response to see if the connection is still active
+//For ft_irs, I decided to implement PING logic for client to verify that the connection is performed
 void Server::handlePing(Client& client, std::istringstream& args)
 {
     std::string token, err_message, pong_response;

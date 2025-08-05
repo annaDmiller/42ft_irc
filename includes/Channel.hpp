@@ -42,7 +42,7 @@ class Channel
         void addOperator(const int& client_fd);
         void addMember(const int& client_fd, Client* client);
 
-        void removeMember(const int& client_fd);
+        void removeMember(const int& client_fd, Server& server);
 
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
@@ -52,7 +52,7 @@ class Channel
 
         bool handleMemberLimit(const bool& isAdding, int& limit);
         bool handleKey(const bool& isAdding, std::string& password, Client& client);
-        bool handleOperators(const bool& isAdding, int& client_fd);
+        bool handleOperators(const bool& isAdding, int& client_fd, Client& client, std::string& target);
 
         void sendJoinMessages(const Client& client) const;
         void sendMessageToAll(const std::string& message) const;
@@ -64,4 +64,5 @@ class Channel
                 std::set<int>& except_fds, const std::string& cmd) const;
 
         void sendMemberList(const Client& client) const;
+        void printModes(Client& client) const;
 };

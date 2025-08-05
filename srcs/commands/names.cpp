@@ -1,5 +1,7 @@
 # include "Server.hpp"
 
+//NAMES command outputs the names of all joined members for one or multiple channels
+//If no channels are specified, then NAMES command outputs joined members for ALL existing channels
 void Server::handleNames(Client& client, std::istringstream& args)
 {
     std::string channels;

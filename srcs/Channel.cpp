@@ -104,15 +104,27 @@ void Channel::addMember(const int& client_fd, Client* client)
     return ;
 }
 
-void Channel::removeMember(const int& client_fd)
+void Channel::removeMember(const int& client_fd, Server& server)
 {
     std::set<int>::iterator oper_it;
 
+    this->_members.erase(client_fd);
+
     oper_it = this->_operators.find(client_fd);
     if (oper_it != this->_operators.end())
+    {
         this->_operators.erase(client_fd);
+        if (this->_operators.empty() && !this->_members.empty())
+        {
+            std::map<int, Client*>::iterator it = this->_members.begin();
+            if (it != this->_members.end())
+                this->_operators.insert(it->first);
+        }
+    }
 
-    this->_members.erase(client_fd);
+    if (this->_members.empty())
+        server.deleteChannel(this->getName());
+
     return ;
 }
 
@@ -273,16 +285,16 @@ bool Channel::handleMemberLimit(const bool& isAdding, int& limit)
 
 bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
-    //NEED: to check when ERR_KEYSET is sent
-    
+    std::string err_message;
+
     if (isAdding)
     {
         if (password.empty())
             return (false);
         if (!this->_key.empty())
         {
-            (void) client;
-            //NEED: ERR_KEYSET error
+            err_message = ERR_KEYSET(client.getNick(), this->_name);
+            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
             return (false);
         }
         this->addMode('k');
@@ -299,24 +311,56 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
     return (true);
 }
 
-bool Channel::handleOperators(const bool& isAdding, int& client_fd)
+bool Channel::handleOperators(const bool& isAdding, int& target_fd, Client& client, std::string& target)
 {
-    if (this->_members.find(client_fd) == this->_members.end())
+    std::string err_message;
+
+    if (this->_members.find(target_fd) == this->_members.end())
     {
-        //NEED: error 441
+        err_message = ERR_USERNOTINCHANNEL(client.getNick(), this->_name, target);
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return (false);
     }
     
     if (isAdding)
     {
-        if (this->_operators.find(client_fd) == this->_operators.end())
-            this->_operators.insert(client_fd);
+        if (this->_operators.find(target_fd) == this->_operators.end())
+            this->_operators.insert(target_fd);
     }
     else
     {
-        if (this->_operators.find(client_fd) != this->_operators.end())
-        this->_operators.erase(client_fd);
+        if (this->_operators.find(target_fd) != this->_operators.end())
+            this->_operators.erase(target_fd);
     }
 
     return (true);
+}
+
+void Channel::printModes(Client& client) const
+{
+    std::string modes, mode_params, message;
+    size_t ind_k, ind_l;
+
+    modes = std::string("+") + this->_modes;
+    ind_k = this->_modes.find('k', 0);
+    ind_l = this->_modes.find('l', 0);
+
+    if (ind_k != std::string::npos && ind_l != std::string::npos)
+    {
+        if (ind_k > ind_l)
+            mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
+        else 
+            mode_params = this->_key + " " + ft_itos(this->_membersLimit);
+    }
+    else
+    {
+        if (ind_l != std::string::npos)
+            mode_params = ft_itos(this->_membersLimit);
+        if (ind_k != std::string::npos)
+            mode_params = this->_key;
+    }
+
+    message = RPL_CHANNELMODEIS(client.getNick(), this->_name, modes, mode_params);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+    return ;
 }

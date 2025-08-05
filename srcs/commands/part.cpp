@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+//this function handles PART command if we use it as a separate command (where we input the cmd name and arguments)
 void Server::handlePart(Client& client, std::istringstream& args)
 {
     std::string channels, message, err_message;
@@ -45,7 +46,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
         }
 
         channel.sendMessageToAll(client, *this, channel.getName(), message, -1, PART);
-        channel.removeMember(client.getFD());
+        channel.removeMember(client.getFD(), *this);
         client.leaveChannel(channel.getName());
 
         if (channel.isEmpty())
@@ -53,12 +54,13 @@ void Server::handlePart(Client& client, std::istringstream& args)
     }
 }
 
+//this function is used only out of JOIN function with '0' argument which means PART from ALL joined channels
 void Server::handlePart(Client& client)
 {
     std::string message;
 
     message = client.getNick();
     client.sendToAllJoinedChannels(*this, message, PART, false, true);
-    client.leaveAllChannels();
+    client.leaveAllChannels(*this);
     return ;
 }

@@ -332,7 +332,7 @@ void Server::clearClient(const int& client_fd)
 {
     //make the client leave all the channels if it is registered
     if (this->_clients[client_fd].isRegistered())
-        this->_clients[client_fd].leaveAllChannels();
+        this->_clients[client_fd].leaveAllChannels(*this);
        
     //remove client from the list of clients of server
     this->_clients.erase(client_fd);
@@ -347,5 +347,11 @@ void Server::clearClient(const int& client_fd)
             break ;
         }
     }
+    return ;
+}
+
+void Server::deleteChannel(const std::string& channel_name)
+{
+    this->_availableChannels.erase(channel_name);
     return ;
 }

@@ -1,8 +1,5 @@
 #include "Server.hpp"
 
-//NEED: to handle the message sending to the users about mode change
-//NEED: to test more cases with modes adding/removing with one/multiple modes and check messages and effect
-
 void Server::handleMode(Client& client, std::istringstream& args)
 {
     std::string channel_name, params, err_message, message;
@@ -18,30 +15,39 @@ void Server::handleMode(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (params.empty())
-    {
-        //NEED: print already applied modes for the channel - reply 324, 329
-        return ;
-    }
-
     if (!client.isAlreadyJoinedChannel(channel_name))
     {
-        //NEED: ERR_USERNOTINCHANNEL error
+        err_message = ERR_USERNOTINCHANNEL(client.getNick(), channel_name, client.getNick());
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
     }
 
     Channel& channel = this->_availableChannels[channel_name];
     if (!channel.isOperator(client.getFD()))
     {
-        //NEED: ERR_CHANOPRIVSNEEDED error
+        err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
     }
 
+    //for command MODE #channel_name, server outputs the list of channel's modes
+    if (params.empty())
+    {
+        channel.printModes(client);
+        return ;
+    }
+
+    //if the params are not empty, it means, that we are handling channel's modes somehow
     if (params[0] == ' ')
         params = params.substr(1);
 
+    //here we split arguments of parametres and then handle them to add/remove modes
     params_mode = ft_split(params, ' ');
     message = modeHandlingChannel(client, channel, params_mode);
+
+    //after handling is done, we need to output message for the client itself and all member of the channel
+    message = client.getPrefix() + MODE + channel_name + message;
+    channel.sendMessageToAll(message);
 
     return ;
 }
@@ -57,12 +63,17 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     char incorrect_mode;
     int member_limit, target_fd;
 
+    //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param
+    //That's why we check valid modes only in the first iterator of params vector
+
     if (!isValidModes(modes, incorrect_mode))
     {
-        //NEED: ERR_UNKNOWNMODE error
+        err_message = ERR_UNKNOWNMODE(client.getNick(), incorrect_mode);
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return (std::string());
     }
 
+    //We check whether we need to remove or add some modes to the channel
     if (modes[0] == '-')
         isAdding = false;
         
@@ -71,6 +82,12 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         
     modes_for_message.push_back(modes[0]);
 
+    //then we handle modes one after one
+    //i - to make the channel invite-only; it doesn't need any additional parametres
+    //l - to set the limit for members; it requires additional parameter as limit number
+    //t - to make topic editable only for operators; no additional parameters required
+    //k - to set a key(password) for the channel; required a parameter equal to the new key
+    //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (++ind_mode < modes.size())
     {
         if (num_modes > 3)
@@ -84,7 +101,10 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 else
                     channel.removeMode('i');
 
+                //for this and next modes' handling:
+                //after each successful mode handling we increment the number of already handled modes
                 num_modes++;
+                //and add the handled mode and its parameters to the special vectors which will participate in message composing later
                 modes_for_message.push_back('i');
 
                 break;
@@ -92,7 +112,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             case 'l':
                 if (ind_param >= params.size())
                 {
-                    //NEED: error 461
+                    err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                     return (std::string());
                 }
 
@@ -122,7 +143,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             case 'k':
                 if (ind_param >= params.size())
                 {
-                    //NEED: error 461
+                    err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                     return (std::string());
                 }
 
@@ -140,18 +162,20 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             case 'o':
                 if (ind_param >= params.size())
                 {
-                    //NEED: error 461
+                    err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                     return (std::string());
                 }
 
                 target_fd = findUserbyNickname(params[ind_param++]);
                 if (target_fd == -1)
                 {
-                    //NEED: error 401
+                    err_message = ERR_NOSUCHNICK(client.getNick(), params[ind_param - 1]);
+                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                     break ;
                 }
 
-                if (channel.handleOperators(isAdding, target_fd))
+                if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
                 {
                     num_modes++;
                     modes_for_message.push_back('o');
@@ -192,6 +216,7 @@ bool Server::isValidModes(const std::string& modes, char& incorrect_mode)
     return (true);
 }
 
+//here we compose the message for channel's members out of 2 vectors: modes and its parameters
 std::string Server::composeMessage(std::vector<char>& modes, std::vector<std::string>& params) const
 {
     std::string message;

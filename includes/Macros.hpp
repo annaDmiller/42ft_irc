@@ -50,10 +50,10 @@
 # define ERR_NOORIGIN(nick, cmd) (std::string(":") + HOST + " 409 " + nick + " " + cmd + " :No origin specified" + TERMIN)
 # define ERR_NOTONCHANNEL(nick, channel_name) (std::string(":") + HOST + " 442 " + nick + " " + channel_name + " :You're not on thata channel" + TERMIN)
 # define ERR_NOSUCHCHANNEL(nick, channel_name) (std::string(":") + HOST + " 403 " + nick + " " + channel_name + " :No such channel" + TERMIN)
-# define ERR_USERNOTINCHANNEL 441
-# define ERR_KEYSET 467
-# define ERR_CHANOPRIVSNEEDED 482
-# define ERR_UNKNOWNMODE 472
+# define ERR_USERNOTINCHANNEL(nick, channel_name, target) (std::string(":") + HOST + " 441 " + nick + " " + channel_name + " " + target + " :No such channel" + TERMIN)
+# define ERR_KEYSET(nick, channel_name) (std::string(":") + HOST + " 467 " + nick + " " + channel_name + " :Channel key already set" + TERMIN)
+# define ERR_CHANOPRIVSNEEDED(nick, channel_name) (std::string(":") + HOST + " 482 " + nick + " " + channel_name + " :You're not channel operator" + TERMIN)
+# define ERR_UNKNOWNMODE(nick, mode_char) (std::string(":") + HOST + " 472 " + nick + " " + mode_char + " :No such channel" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
@@ -66,6 +66,8 @@
 # define RPL_INVITELIST 346
 # define RPL_ENDOFINVITELIST 347
 # define RPL_UNIQOPIS 325
+# define RPL_CHANNELMODEIS(nick, channel_name, mode, mode_params) (std::string(":") + HOST + " 324 " + nick + " " + channel_name + " " + mode + " " + mode_params + TERMIN)
 
+//Macros: Additional messages
 # define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)
 # define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")

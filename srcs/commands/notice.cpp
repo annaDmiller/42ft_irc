@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+//Normanlly, NOTICE command do the same logic as PRIVMSG but it doesn't send any error message to the client if there are any problems
 void Server::handleNotice(Client& client, std::istringstream& args)
 {
     std::string receivers, message;

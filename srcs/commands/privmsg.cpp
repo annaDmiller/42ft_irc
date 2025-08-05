@@ -1,5 +1,6 @@
 #include "Server.hpp"
 
+//This command allows the clients' to send private messages to each other or to the channels
 void Server::handlePrivateMessage(Client& client, std::istringstream& args)
 {
     std::string receivers, message, err_message;

@@ -203,14 +203,14 @@ void Client::sendToAllJoinedChannels(const Server& server, const std::string& me
     return ;
 }
 
-void Client::leaveAllChannels()
+void Client::leaveAllChannels(Server& server)
 {
     if (this->_joinedChannels.empty())
         return ;
         
     for (std::map<std::string, Channel*>::iterator it = this->_joinedChannels.begin();
             it != this->_joinedChannels.end(); it++)
-        it->second->removeMember(this->_fd);
+        it->second->removeMember(this->_fd, server);
     
     this->_joinedChannels.clear();
     return ;

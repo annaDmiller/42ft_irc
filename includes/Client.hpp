@@ -57,6 +57,6 @@ class Client
         void sendToAllJoinedChannels(const Server& server, const std::string& message,
                 const std::string& cmd, bool isOnce, bool includeChannelName) const;
 
-        void leaveAllChannels();
+        void leaveAllChannels(Server& server);
         void leaveChannel(const std::string& channel_name);
 };
