@@ -118,8 +118,10 @@ void Channel::removeMember(const int& client_fd)
 
 bool Channel::canBeJoined() const
 {
+    if (this->_membersLimit == -1)
+        return (true);
     size_t num_members = _members.size();
-    if (num_members + 1 <= this->_membersLimit)
+    if (num_members + 1 <= static_cast<size_t>(this->_membersLimit))
         return (true);
     return (false);
 }
@@ -249,60 +251,61 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
     return;
 }
 
-void Channel::handleMemberLimit(const bool& isAdding, int& limit)
+bool Channel::handleMemberLimit(const bool& isAdding, int& limit)
 {
-    //NEED: to check what will be if we indicate negative value
-    if (limit <= 0)
-        return ;
-    
     if (isAdding)
     {
+        if (limit <= 0)
+            return (false);
         this->addMode('l');
         this->_membersLimit = limit;
     }
     else
     {
+        if (this->_modes.find('l', 0) == std::string::npos)
+            return (false);
         this->removeMode('l');
         this->_membersLimit = -1;
     }
 
-    return ;
+    return (true);
 }
 
-void Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
+bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
-    //NEED: to check how it will work - will the message be sent to the client?
-    if (password.empty())
-        return ;
+    //NEED: to check when ERR_KEYSET is sent
     
     if (isAdding)
     {
+        if (password.empty())
+            return (false);
         if (!this->_key.empty())
         {
+            (void) client;
             //NEED: ERR_KEYSET error
-            return ;
+            return (false);
         }
         this->addMode('k');
         this->_key = password;
     }
     else
     {
+        if (this->_modes.find('k', 0) == std::string::npos)
+            return (false);
         this->removeMode('k');
         this->_key.clear();
     }
 
-    return  ;
+    return (true);
 }
 
-void Channel::handleOperators(const bool& isAdding, int& client_fd)
+bool Channel::handleOperators(const bool& isAdding, int& client_fd)
 {
-    //NEED: what behavior if we try to add non-existing user to operator?
-    if (client_fd == -1)
-        return ;
-
-    //NEED: to check if there is any message sending in this case
     if (this->_members.find(client_fd) == this->_members.end())
-        return ;
+    {
+        //NEED: error 441
+        return (false);
+    }
     
     if (isAdding)
     {
@@ -312,8 +315,8 @@ void Channel::handleOperators(const bool& isAdding, int& client_fd)
     else
     {
         if (this->_operators.find(client_fd) != this->_operators.end())
-            this->_operators.erase(client_fd);
+        this->_operators.erase(client_fd);
     }
 
-    return ;
+    return (true);
 }

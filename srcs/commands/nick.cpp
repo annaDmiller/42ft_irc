@@ -28,6 +28,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
         return ;
     }
 
+    //If the already registered user changes the nick, the proper message is sent to all joined channels
     if (client.isRegistered())
         client.sendToAllJoinedChannels(*this, nick, NICK, true, false);
 

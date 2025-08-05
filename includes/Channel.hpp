@@ -50,9 +50,9 @@ class Channel
         bool isEmpty() const;
         bool isOperator(int client_fd) const;
 
-        void handleMemberLimit(const bool& isAdding, int& limit);
-        void handleKey(const bool& isAdding, std::string& password, Client& client);
-        void handleOperators(const bool& isAdding, int& client_fd);
+        bool handleMemberLimit(const bool& isAdding, int& limit);
+        bool handleKey(const bool& isAdding, std::string& password, Client& client);
+        bool handleOperators(const bool& isAdding, int& client_fd);
 
         void sendJoinMessages(const Client& client) const;
         void sendMessageToAll(const std::string& message) const;

@@ -73,9 +73,10 @@ class Server
         bool isChannelExist(std::string &channel_name) const;
         bool isChannelTarget(const std::string& target) const;
 
-        size_t modeHandlingChannel(Client& client, Channel& channel,
+        std::string modeHandlingChannel(Client& client, Channel& channel,
                 std::vector<std::string>& params);
         bool isValidModes(const std::string& modes, char& incorrect_mode);
+        std::string composeMessage(std::vector<char>& modes, std::vector<std::string>& params) const;
 
         void closeFDs(); //-> close ALL fds
         void clearClient(const int& client_fd);

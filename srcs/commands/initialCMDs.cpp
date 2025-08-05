@@ -43,13 +43,14 @@ void Server::handlePassword(Client& client, std::istringstream& args)
     std::string pass, err_response;
     args >> pass;
 
+    //Registered user can't use PASS again
     if (client.isRegistered())
     {
         err_response = ERR_ALREADYREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
-    
+
     if (pass.empty())
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), PASS);

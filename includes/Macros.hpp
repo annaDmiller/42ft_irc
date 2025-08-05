@@ -26,7 +26,7 @@
 # define KICK "KICK"
 # define INVITE "INVITE"
 # define TOPIC "TOPIC"
-# define MODE "MODE"
+# define MODE "MODE" //DONE - ALMOST
 # define OPER "OPER"
 
 //Macros: Numeric replies for errors
