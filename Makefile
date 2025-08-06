@@ -18,7 +18,11 @@ SOURCES =	./srcs/main.cpp \
 			./srcs/commands/pingPong.cpp \
 			./srcs/commands/notice.cpp \
 			./srcs/commands/nick.cpp \
-			./srcs/commands/mode.cpp
+			./srcs/commands/mode.cpp \
+			./srcs/commands/topic.cpp \
+			./srcs/commands/kick.cpp \
+			./srcs/commands/invite.cpp \
+			./srcs/commands/oper.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

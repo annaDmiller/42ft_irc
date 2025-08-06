@@ -353,21 +353,21 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
     static std::map<std::string, FuncType> func_map;
     if (func_map.empty())
     {
-        func_map[USER] = &handleUsername;
-        func_map[PASS] = &handlePassword;
-        func_map[NICK] = &handleNickname;
-        func_map[INVITE] = &handleInvite;
-        func_map[JOIN] = &handleJoin;
-        func_map[KICK] = &handleKick;
-        func_map[MODE] = &handleMode;
-        func_map[NAMES] = &handleNames;
-        func_map[NOTICE] = &handleNotice;
-        func_map[OPER] = &handleOper;
-        func_map[PART] = &handlePart;
-        func_map[PING] = &handlePing;
-        func_map[PRIVMSG] = &handlePrivateMessage;
-        func_map[QUIT] = &handleQuit;
-        func_map[TOPIC] = &handleTopic;
+        func_map[USER] = &Server::handleUsername;
+        func_map[PASS] = &Server::handlePassword;
+        func_map[NICK] = &Server::handleNickname;
+        func_map[INVITE] = &Server::handleInvite;
+        func_map[JOIN] = &Server::handleJoin;
+        func_map[KICK] = &Server::handleKick;
+        func_map[MODE] = &Server::handleMode;
+        func_map[NAMES] = &Server::handleNames;
+        func_map[NOTICE] = &Server::handleNotice;
+        func_map[OPER] = &Server::handleOper;
+        func_map[PART] = &Server::handlePart;
+        func_map[PING] = &Server::handlePing;
+        func_map[PRIVMSG] = &Server::handlePrivateMessage;
+        func_map[QUIT] = &Server::handleQuit;
+        func_map[TOPIC] = &Server::handleTopic;
     }
     return (func_map);
 }
