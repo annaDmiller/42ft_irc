@@ -80,17 +80,16 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
 
     //NEED: Add logic to check password presence before check of username - shall we send error?
-
-    if (username.empty() || realname.empty())
+    if (client.isRegistered())
     {
-        err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
+        err_response = ERR_ALREADYREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
 
-    if (client.isRegistered())
+    if (username.empty() || realname.empty())
     {
-        err_response = ERR_ALREADYREGISTERED(client.getNick());
+        err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }

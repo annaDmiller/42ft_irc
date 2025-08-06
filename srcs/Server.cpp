@@ -260,6 +260,10 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         return ;
     }
 
+    if (raw_cmd == PASS)
+        handlePassword(client, line);
+    if (raw_cmd == USER)
+        handleUsername(client, line);
     if (raw_cmd == JOIN)
         handleJoin(client, line);
     if (raw_cmd == PRIVMSG)
