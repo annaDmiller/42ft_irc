@@ -5,7 +5,12 @@ void Server::handleNickname(Client& client, std::istringstream& args)
     std::string nick, err_response;
     args >> nick;
 
-    //NEED: Add logic to check password presence before check of nickname - shall we send error?
+    if (!client.isPassChecked())
+    {
+        err_response = "ERROR :Password required";
+        send(client.getFD(), err_response.c_str(), err_response.size(), 0);
+        return ;
+    }
 
     if (nick.empty())
     {

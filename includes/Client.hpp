@@ -33,6 +33,7 @@ class Client
         std::string getIPAddr() const;
         std::string getBuffer() const;
         bool isRegistered() const;
+        bool isPassChecked() const;
         std::string getNick() const;
         bool isHaveNick() const;
         std::string getUsername() const;

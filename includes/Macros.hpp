@@ -12,9 +12,9 @@
 # define MAXLINELENGTH 512
 
 //Command names
-# define USER "USER" //DONE - ALMOST
+# define USER "USER" //DONE
 # define PASS "PASS" //DONE
-# define NICK "NICK" //DONE - ALMOST
+# define NICK "NICK" //DONE
 # define JOIN "JOIN" //DONE
 # define QUIT "QUIT" //DONE
 # define PRIVMSG "PRIVMSG" //DONE
@@ -26,7 +26,7 @@
 # define KICK "KICK"
 # define INVITE "INVITE"
 # define TOPIC "TOPIC"
-# define MODE "MODE" //DONE - ALMOST
+# define MODE "MODE" //DONE
 # define OPER "OPER"
 
 //Macros: Numeric replies for errors

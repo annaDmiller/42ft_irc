@@ -74,6 +74,11 @@ bool Client::isRegistered() const
     return (false);
 }
 
+bool Client::isPassChecked() const
+{
+    return (this->_isPasswordChecked);
+}
+
 std::string Client::getNick() const
 {
     return (this->_nickname);

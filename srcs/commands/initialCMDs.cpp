@@ -2,7 +2,6 @@
 
 void Server::handleInitCommands(Client& client, std::string& cmd, std::istringstream& args)
 {
-    //NEED: TO ADD LOGIC TO CHECK IF THERE IS PASSWORD IN NICK AND USER COMMANDS - SHALL WE SEND AN ERROR?
     std::string welcome_mess, err_response;
 
     if (cmd == NICK)
@@ -51,6 +50,9 @@ void Server::handlePassword(Client& client, std::istringstream& args)
         return ;
     }
 
+    if (client.isPassChecked())
+        return ;
+
     if (pass.empty())
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), PASS);
@@ -79,11 +81,17 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     args >> username >> mode >> unused;
     std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
 
-    //NEED: Add logic to check password presence before check of username - shall we send error?
     if (client.isRegistered())
     {
         err_response = ERR_ALREADYREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        return ;
+    }
+
+    if (!client.isPassChecked())
+    {
+        err_response = "ERROR :Password required";
+        send(client.getFD(), err_response.c_str(), err_response.size(), 0);
         return ;
     }
 
