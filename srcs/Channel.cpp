@@ -364,3 +364,19 @@ void Channel::printModes(Client& client) const
     send(client.getFD(), message.c_str(), message.size(), 0);
     return ;
 }
+
+void Channel::printTopic(Client& client) const
+{
+    std::string message;
+
+    if (this->_topic.empty())
+        message = RPL_NOTOPIC(client.getNick(), this->_name);
+    else
+        message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
+
+    if (message.length() > MAXLINELENGTH)
+        message = message.substr(0, MAXLINELENGTH - 2) + TERMIN;
+    
+    send(client.getFD(), message.c_str(), message.size(), 0);
+    return ;
+}

@@ -1,4 +1,5 @@
 #include "Server.hpp"
+typedef void (Server::*FuncType)(Client&, std::istringstream&);
 
 bool Server::_signalReceived = false;
 
@@ -244,7 +245,8 @@ void Server::disconnectClient(const int& client_fd)
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
     std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
-    std::string cmd;
+    std::string cmd, err_message;
+    const std::map<std::string, FuncType> allowed_cmds = this->getMapCmdFunc();
 
     if (raw_cmd.empty())
         return ;
@@ -260,31 +262,15 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         return ;
     }
 
-    if (raw_cmd == PASS)
-        handlePassword(client, line);
-    if (raw_cmd == USER)
-        handleUsername(client, line);
-    if (raw_cmd == JOIN)
-        handleJoin(client, line);
-    if (raw_cmd == PRIVMSG)
-        handlePrivateMessage(client, line);
-    if (raw_cmd == QUIT)
+    //here we launch the command handlers depending on what we receive in CMD (check getMapCmdFunc method)
+    std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);
+    if (it != allowed_cmds.end())
+        (this->*it->second)(client, line);
+    else
     {
-        handleQuit(client, line);
-        return ;
+        err_message = ERR_UNKNOWNCOMMAND(client.getNick(), cmd);
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
     }
-    if (raw_cmd == PING)
-        handlePing(client, line);
-    if (raw_cmd == NICK)
-        handleNickname(client, line);
-    if (raw_cmd == NAMES)
-        handleNames(client, line);
-    if (raw_cmd == PART)
-        handlePart(client, line);
-    if (raw_cmd == NOTICE)
-        handleNotice(client, line);
-    if (raw_cmd == MODE)
-        handleMode(client, line);
 
     return ;
 }
@@ -360,4 +346,28 @@ void Server::deleteChannel(const std::string& channel_name)
 {
     this->_availableChannels.erase(channel_name);
     return ;
+}
+
+const std::map<std::string, FuncType>& Server::getMapCmdFunc()
+{
+    static std::map<std::string, FuncType> func_map;
+    if (func_map.empty())
+    {
+        func_map[USER] = &handleUsername;
+        func_map[PASS] = &handlePassword;
+        func_map[NICK] = &handleNickname;
+        func_map[INVITE] = &handleInvite;
+        func_map[JOIN] = &handleJoin;
+        func_map[KICK] = &handleKick;
+        func_map[MODE] = &handleMode;
+        func_map[NAMES] = &handleNames;
+        func_map[NOTICE] = &handleNotice;
+        func_map[OPER] = &handleOper;
+        func_map[PART] = &handlePart;
+        func_map[PING] = &handlePing;
+        func_map[PRIVMSG] = &handlePrivateMessage;
+        func_map[QUIT] = &handleQuit;
+        func_map[TOPIC] = &handleTopic;
+    }
+    return (func_map);
 }

@@ -61,6 +61,7 @@
 # define RPL_CREATED(nick, date) (std::string(":") + HOST + " 003 " + nick + " :This server was created " + date + TERMIN)
 # define RPL_MYINFO(nick, servername, version, user_modes, channel_modes) (std::string(":") + HOST + " 004 " + nick + " " + servername + " " + version + " " + user_modes + " " + channel_modes + TERMIN)
 # define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " " + channel_name + " :" + topic + TERMIN)
+# define RPL_NOTOPIC(nick, channel_name) (std::string(":") + HOST + " 333 " + nick + " " + channel_name + " :No topic is set" + TERMIN)
 # define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " " + channel_name + " :")
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of NAMES list" + TERMIN)
 # define RPL_INVITELIST 346

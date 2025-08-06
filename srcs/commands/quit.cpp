@@ -4,7 +4,12 @@ void Server::handleQuit(Client& client, std::istringstream& args)
 {
     std::string message, rpl_message;
 
-    std::getline(args, message);
+    if (args.peek() == ' ')
+        args.get();
+    if (args.peek() == ':')
+        std::getline(args, message);
+    else
+        args >> message;
 
     //If there is no message indicated for the QUIT command, then we will use default message
     if (message.empty())

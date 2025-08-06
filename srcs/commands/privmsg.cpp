@@ -8,7 +8,12 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
     int fd_target;
     
     args >> receivers;
-    std::getline(args, message);
+    if (args.peek() == ' ')
+        args.get();
+    if (args.peek() == ':')
+        std::getline(args, message);
+    else
+        args >> message;
 
     //Firstly, we check whether we have empty arguments for the command
     if (receivers.empty())

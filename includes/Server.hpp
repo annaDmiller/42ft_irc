@@ -30,6 +30,8 @@
 class Client;
 class Channel;
 
+
+
 class Server
 {
     private:
@@ -64,6 +66,10 @@ class Server
         void handlePart(Client& client); // -> for PART from all the channels
         void handleNotice(Client& client, std::istringstream& args);
         void handleMode(Client& client, std::istringstream& args);
+        void handleTopic(Client& client, std::istringstream& args);
+        void handleInvite(Client& client, std::istringstream& args);
+        void handleOper(Client& client, std::istringstream& args);
+        void handleKick(Client& client, std::istringstream& args);
 
         bool isValidNickname(const std::string& nick) const;
         bool checkDupNicknamesOnServer(std::string& nick);
@@ -80,6 +86,9 @@ class Server
 
         void closeFDs(); //-> close ALL fds
         void clearClient(const int& client_fd);
+
+        typedef void (Server::*FuncType)(Client&, std::istringstream&);
+        static const std::map<std::string, FuncType>& getMapCmdFunc();
 
     public:
         Server();

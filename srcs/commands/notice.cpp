@@ -8,7 +8,12 @@ void Server::handleNotice(Client& client, std::istringstream& args)
     int client_fd;
 
     args >> receivers;
-    std::getline(args, message);
+    if (args.peek() == ' ')
+        args.get();
+    if (args.peek() == ':')
+        std::getline(args, message);
+    else
+        args >> message;
 
     if (receivers.empty() || message.empty())
         return ;

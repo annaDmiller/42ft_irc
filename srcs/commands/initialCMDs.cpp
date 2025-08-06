@@ -50,6 +50,7 @@ void Server::handlePassword(Client& client, std::istringstream& args)
         return ;
     }
 
+    //if user tries to use PASS command multiple times, for ft_irc I decided just to skip this command
     if (client.isPassChecked())
         return ;
 

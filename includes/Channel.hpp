@@ -65,4 +65,5 @@ class Channel
 
         void sendMemberList(const Client& client) const;
         void printModes(Client& client) const;
+        void printTopic(Client& client) const;
 };

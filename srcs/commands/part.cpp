@@ -7,7 +7,12 @@ void Server::handlePart(Client& client, std::istringstream& args)
     std::vector<std::string> channel_list;
 
     args >> channels;
-    std::getline(args, message);
+    if (args.peek() == ' ')
+        args.get();
+    if (args.peek() == ':')
+        std::getline(args, message);
+    else
+        args >> message;
 
     if (channels.empty())
     {
