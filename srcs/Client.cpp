@@ -141,6 +141,12 @@ void Client::setUsername(const std::string& username)
     return ;
 }
 
+void Client::setOperator(bool value)
+{
+    this->_isOperator = value;
+    return ;
+}
+
 void Client::setRealname(const std::string& realname)
 {
     this->_realname = realname;

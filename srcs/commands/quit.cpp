@@ -28,9 +28,13 @@ void Server::handleQuit(Client& client, std::istringstream& args)
 
     //otherwise, we just send a quit and disconnection messages to himself and clean it from server
     rpl_message = QUIT_MESS(client.getIPAddr(), message);
+    if (rpl_message.length() > MAXLINELENGTH)
+        rpl_message = rpl_message.substr(0, MAXLINELENGTH - 3) + ")" + TERMIN;
     send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
+
     rpl_message = DISCONNECTION_MESS;
     send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
     this->clearClient(client.getFD());
+    
     return ;       
 }

@@ -49,6 +49,7 @@ class Client
         void setRealname(const std::string& realname);
         void checkPassword();
         void addChannel(const std::string& channel_name, Channel* channel);
+        void setOperator(bool value);
 
         void splitBuffer(size_t start, size_t end);
 

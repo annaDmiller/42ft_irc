@@ -10,6 +10,8 @@
 # define HOST "irc.local"
 # define MAXJOINEDCHANNELS 10
 # define MAXLINELENGTH 512
+# define OPER_NAME "ADMIN"
+# define OPER_PASSWORD "ADMIN"
 
 //Command names
 # define USER "USER" //DONE
@@ -23,11 +25,11 @@
 # define NOTICE "NOTICE" //DONE
 # define PART "PART" //DONE
 # define NAMES "NAMES" //DONE
-# define KICK "KICK"
+# define KICK "KICK" //DONE
 # define INVITE "INVITE"
-# define TOPIC "TOPIC"
+# define TOPIC "TOPIC" //DONE
 # define MODE "MODE" //DONE
-# define OPER "OPER"
+# define OPER "OPER" //DONE
 
 //Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (std::string(":") + HOST + " 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
@@ -54,6 +56,8 @@
 # define ERR_KEYSET(nick, channel_name) (std::string(":") + HOST + " 467 " + nick + " " + channel_name + " :Channel key already set" + TERMIN)
 # define ERR_CHANOPRIVSNEEDED(nick, channel_name) (std::string(":") + HOST + " 482 " + nick + " " + channel_name + " :You're not channel operator" + TERMIN)
 # define ERR_UNKNOWNMODE(nick, mode_char) (std::string(":") + HOST + " 472 " + nick + " " + mode_char + " :No such channel" + TERMIN)
+# define ERR_USERONCHANNEL 443
+# define ERR_NOOPERHOST 491
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick, user, host) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + "!" + user + "@" + host + TERMIN)
@@ -68,7 +72,9 @@
 # define RPL_ENDOFINVITELIST 347
 # define RPL_UNIQOPIS 325
 # define RPL_CHANNELMODEIS(nick, channel_name, mode, mode_params) (std::string(":") + HOST + " 324 " + nick + " " + channel_name + " " + mode + " " + mode_params + TERMIN)
+# define RPL_YOUREOPER(nick) (std::string(":") + HOST + " 381 " + nick + " :You are now an IRC operator" + TERMIN)
 
 //Macros: Additional messages
 # define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)
 # define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")
+# define DISCONNECTION_SERVER_MESS ("Connection closed by the server.\r\n")
