@@ -89,11 +89,6 @@ bool Client::isHaveNick() const
     return (this->_hasNickname);
 }
 
-std::string Client::getUsername() const
-{
-    return (this->_username);
-}
-
 bool Client::isHaveUsername() const
 {
     return (this->_hasUsername);
@@ -134,13 +129,6 @@ void Client::setNickname(const std::string& nick)
     return ;
 }
 
-void Client::setUsername(const std::string& username)
-{
-    this->_username = username;
-    this->_hasUsername = true;
-    return ;
-}
-
 void Client::setOperator(bool value)
 {
     this->_isOperator = value;
@@ -150,6 +138,12 @@ void Client::setOperator(bool value)
 void Client::setRealname(const std::string& realname)
 {
     this->_realname = realname;
+    return ;
+}
+
+void Client::setUsername(const std::string& username)
+{
+    this->_username = username;
     return ;
 }
 

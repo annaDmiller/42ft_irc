@@ -256,14 +256,17 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     //as we have initial commands in uppercase, we need to transfrom our command
     std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
+    //here we launch the command handlers depending on what we receive in CMD (check getMapCmdFunc method)
+    std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);
+
     if (!client.isRegistered())
     {
+        if (it == allowed_cmds.end())
+            return ;
         this->handleInitCommands(client, cmd, line);
         return ;
     }
 
-    //here we launch the command handlers depending on what we receive in CMD (check getMapCmdFunc method)
-    std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);
     if (it != allowed_cmds.end())
         (this->*it->second)(client, line);
     else

@@ -51,7 +51,7 @@ void Server::handleTopic(Client& client, std::istringstream& args)
         return ;
     }
 
-    channel.setTopic(topic);
+    channel.setTopic(topic, client.getNick());
     channel.sendMessageToAll(client, *this, channel_name, topic, -1, TOPIC);
     return ;
 }

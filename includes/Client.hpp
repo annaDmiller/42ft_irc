@@ -4,6 +4,7 @@
 # include "Channel.hpp"
 # include <map>
 
+//NEED: maybe to get rid of _hasNickname and _hasUsername? Why do we need them?
 class Channel;
 class Server;
 
@@ -36,7 +37,6 @@ class Client
         bool isPassChecked() const;
         std::string getNick() const;
         bool isHaveNick() const;
-        std::string getUsername() const;
         bool isHaveUsername() const;
         size_t joinedChannelQuantity() const;
         std::string getPrefix() const;

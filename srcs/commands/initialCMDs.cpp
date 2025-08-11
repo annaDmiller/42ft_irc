@@ -24,7 +24,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     
     if (client.tryAuthenticate())
     {
-        welcome_mess = RPL_WELCOME(client.getNick(), client.getUsername(), HOST);
+        welcome_mess = RPL_WELCOME(client.getNick());
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);

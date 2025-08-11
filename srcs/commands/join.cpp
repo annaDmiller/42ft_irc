@@ -79,6 +79,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             Channel new_channel;
             new_channel.setName(channel_list[ind]);
             new_channel.addOperator(client.getFD());
+            new_channel.checkJustCreated();
             this->_availableChannels[channel_list[ind]] = new_channel;
         }
         Channel& channel = this->_availableChannels[channel_list[ind]];
@@ -86,7 +87,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         //then we check the modes of the channel and whether our client follows all the restrictions to join it
         channel_modes = channel.getChannelModes();
         //is channel invite-only?
-        if (channel_modes.find('i', 0) != std::string::npos)
+        if (channel_modes.find('i', 0) != std::string::npos && !channel.isUserInvited(client.getFD()))
         {
             err_response = ERR_INVITEONLYCHAN(client.getNick(), channel.getName());
             send(client.getFD(), err_response.c_str(), err_response.length(), 0);
@@ -104,7 +105,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         //does the channel have password? Is the key from command correct?
         if (channel_modes.find('k', 0) != std::string::npos && !channel.isKeyCorrect(key_list[ind]))
         {
-            err_response = ERR_BADCHANMASK(client.getNick(), channel.getName());
+            err_response = ERR_BADCHANNELKEY(client.getNick(), channel.getName());
             send(client.getFD(), err_response.c_str(), err_response.length(), 0);
             continue ;
         }

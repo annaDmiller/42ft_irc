@@ -43,19 +43,9 @@ std::string Channel::getName() const
     return (this->_name);
 }
 
-std::string Channel::getTopic() const
-{
-    return (this->_topic);
-}
-
 std::string Channel::getChannelModes() const
 {
     return (this->_modes);
-}
-
-std::string Channel::getKey() const
-{
-    return (this->_key);
 }
 
 void Channel::setName(const std::string& name)
@@ -64,9 +54,14 @@ void Channel::setName(const std::string& name)
     return ;
 }
 
-void Channel::setTopic(const std::string& topic)
+void Channel::setTopic(const std::string& topic, const std::string &nick)
 {
     this->_topic = topic;
+    this->_whoSetTopic = nick;
+
+    time_t setTime = time(NULL);
+    this->_whenSetTopic = std::to_string(setTime);
+
     return ;
 }
 
@@ -86,12 +81,6 @@ void Channel::removeMode(char mode_to_remove)
     return ;
 }
 
-void Channel::setKey(const std::string& key)
-{
-    this->_key = key;
-    return ;
-}
-
 void Channel::addOperator(const int& client_fd)
 {
     this->_operators.insert(client_fd);
@@ -101,6 +90,10 @@ void Channel::addOperator(const int& client_fd)
 void Channel::addMember(const int& client_fd, Client* client)
 {
     this->_members[client_fd] = client;
+    if (this->_modes.find('i') != std::string::npos
+            && this->_invited_members.find(client_fd) != this->_invited_members.end())
+        this->_invited_members.erase(client_fd);
+
     return ;
 }
 
@@ -128,6 +121,23 @@ void Channel::removeMember(const int& client_fd, Server& server)
     return ;
 }
 
+void Channel::addUserToInviteList(int& client_fd)
+{
+    if (client_fd == -1)
+        return ;
+    
+    if (this->_invited_members.find(client_fd) == this->_invited_members.end())
+        this->_invited_members.insert(client_fd);
+    
+    return ;
+}
+
+void Channel::checkJustCreated()
+{
+    this->_isJustCreated = true;
+    return ;
+}
+
 bool Channel::canBeJoined() const
 {
     if (this->_membersLimit == -1)
@@ -150,8 +160,15 @@ bool Channel::isKeyCorrect(const std::string& key) const
 
 void Channel::sendJoinMessages(const Client& client) const
 {
-    std::string message = client.getPrefix() + " " + JOIN + " " + this->_name;
+    std::string message;
+    
+    message = client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
     this->sendMessageToAll(message);
+    if (this->_isJustCreated)
+    {
+        message = std::string(":") + HOST + " " + MODE + " " + this->_name + TERMIN;
+        send(client.getFD(), message.c_str(), message.size(), 0);
+    }
     this->sendInitReplies(client);
     return ;
 }
@@ -182,12 +199,17 @@ bool Channel::isOperator(int client_fd) const
     return (false);
 }
 
+bool Channel::isUserInvited(int client_fd) const
+{
+    if (this->_invited_members.find(client_fd) != this->_invited_members.end())
+        return (true);
+    return (false);
+}
+
 void Channel::sendInitReplies(const Client& client) const
 {
-    std::string message;
-
-    message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    if (!this->_topic.empty())
+        this->printTopic(client);
     this->sendMemberList(client);
     return ;
 }
@@ -287,10 +309,11 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
 {
     std::string err_message;
 
+    if (password.empty())
+        return (false);
+
     if (isAdding)
     {
-        if (password.empty())
-            return (false);
         if (!this->_key.empty())
         {
             err_message = ERR_KEYSET(client.getNick(), this->_name);
@@ -365,18 +388,24 @@ void Channel::printModes(Client& client) const
     return ;
 }
 
-void Channel::printTopic(Client& client) const
+void Channel::printTopic(const Client& client) const
 {
     std::string message;
 
     if (this->_topic.empty())
+    {
         message = RPL_NOTOPIC(client.getNick(), this->_name);
-    else
-        message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
-
+        send(client.getFD(), message.c_str(), message.size(), 0);
+        return ;
+    }
+    
+    message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
     if (message.length() > MAXLINELENGTH)
         message = message.substr(0, MAXLINELENGTH - 2) + TERMIN;
-    
     send(client.getFD(), message.c_str(), message.size(), 0);
+
+    message = RPL_TOPICWHOWHEN(client.getNick(), this->_name, this->_whoSetTopic, this->_whenSetTopic);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+    
     return ;
 }

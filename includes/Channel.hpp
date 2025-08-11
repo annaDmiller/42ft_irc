@@ -14,12 +14,15 @@ class Channel
     private:
         std::string _name;
         std::string _topic;
+        std::string _whoSetTopic;
+        std::string _whenSetTopic;
         std::set<int> _operators;
         std::set<int> _invited_members;
         std::map<int, Client*> _members;
         std::string _key; // = password
         std::string _modes;
         int _membersLimit;
+        bool _isJustCreated;
 
         void sendInitReplies(const Client& client) const;
 
@@ -30,25 +33,24 @@ class Channel
         Channel& operator=(const Channel& other);
 
         std::string getName() const;
-        std::string getTopic() const;
         std::string getChannelModes() const;
-        std::string getKey() const;
 
         void setName(const std::string& name);
-        void setTopic(const std::string& topic);
+        void setTopic(const std::string& topic, const std::string& nick);
         void addMode(char new_mode);
         void removeMode(char mode_to_remove);
-        void setKey(const std::string& key);
         void addOperator(const int& client_fd);
         void addMember(const int& client_fd, Client* client);
-
+        void addUserToInviteList(int& client_fd);
         void removeMember(const int& client_fd, Server& server);
+        void checkJustCreated();
 
         bool canBeJoined() const;
         bool isKeyCorrect(const std::string& key) const;
         bool userIsMember(const int& client_fd) const;
         bool isEmpty() const;
         bool isOperator(int client_fd) const;
+        bool isUserInvited(int client_fd) const;
 
         bool handleMemberLimit(const bool& isAdding, int& limit);
         bool handleKey(const bool& isAdding, std::string& password, Client& client);
@@ -65,5 +67,5 @@ class Channel
 
         void sendMemberList(const Client& client) const;
         void printModes(Client& client) const;
-        void printTopic(Client& client) const;
+        void printTopic(const Client& client) const;
 };
