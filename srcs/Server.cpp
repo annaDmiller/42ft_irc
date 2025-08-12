@@ -123,6 +123,9 @@ void Server::runServer()
         if (poll(&(this->_pollfds[0]), this->_pollfds.size(), -1) == -1 && Server::_signalReceived == false)
             throw (std::runtime_error("Failed to use poll() function"));
         
+        if (Server::_signalReceived)
+            break ;
+
         //We loop through the pollfds to find which fd got event
         for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
         {
@@ -180,7 +183,7 @@ void Server::acceptNewClient()
     new_client.setIPAddr(ip);
     this->_clients[client_fd] = new_client;
 
-    std::cout << "[DEBUG]";
+    std::cout << "[DEBUG] ";
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
 
     //here we send a welcome message to the connected client
@@ -204,18 +207,17 @@ void Server::receiveNewData(int& clientFD)
     if (bytes <= 0)
     {
         //if the return value of recv equals or less than 0, it means that the client disconnected
-        std::cout << "[DEBUG]";
+        std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " disconnected." << std::endl;
 
         this->clearClient(clientFD);
-        close(clientFD);
     }
     else
     {
         //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
 
-        std::cout << "[DEBUG]";
+        std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
 
         Client& our_client = this->_clients[clientFD];
@@ -342,6 +344,7 @@ void Server::clearClient(const int& client_fd)
             break ;
         }
     }
+    close(client_fd);
     return ;
 }
 

@@ -7,7 +7,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
 
     if (!client.isPassChecked())
     {
-        err_response = "ERROR :Password required";
+        err_response = "ERROR :Password required\r\n";
         send(client.getFD(), err_response.c_str(), err_response.size(), 0);
         return ;
     }

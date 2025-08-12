@@ -32,8 +32,10 @@ int main(int argc, char** argv)
     Server serv;
     try
     {
-        
+        std::signal(SIGTERM, Server::signalHandler);
+        std::signal(SIGINT, Server::signalHandler);
         serv.initServer(argv[1], argv[2]);
+        std::cout << "[DEBUG] Server is launched" << std::endl;
         serv.runServer();
     }
     catch(const std::exception& e)

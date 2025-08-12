@@ -77,5 +77,3 @@
 
 //Macros: Additional messages
 # define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)
-# define DISCONNECTION_MESS ("Connection closed by foreign host.\r\n")
-# define DISCONNECTION_SERVER_MESS ("Connection closed by the server.\r\n")
