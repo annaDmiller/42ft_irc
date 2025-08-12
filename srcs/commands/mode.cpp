@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+//NEED: to update the logic of handleMode based on test cases described in the sheet
+
 void Server::handleMode(Client& client, std::istringstream& args)
 {
     std::string channel_name, params, err_message, message;

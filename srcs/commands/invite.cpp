@@ -2,7 +2,6 @@
 
 void Server::handleInvite(Client& client, std::istringstream& args)
 {
-    //RPL_INVITING
     std::string channel_name, nick, err_message, message, channel_modes;
     int target_fd;
 

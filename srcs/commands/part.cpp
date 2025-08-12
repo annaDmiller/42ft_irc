@@ -21,9 +21,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (message.empty())
-        message = client.getNick();
-    else
+    if (!message.empty())
     {
         if (message[0] == ' ')
             message = message.substr(1);

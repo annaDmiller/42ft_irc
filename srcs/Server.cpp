@@ -1,4 +1,12 @@
 #include "Server.hpp"
+//NEED: to add poll() check before sending data back to the client
+//NEED: what is network interface?
+//NEED: to check with nc tool
+//NEED: to test with telnet and IRSSI
+//NEED: to test when we kill the client
+//NEED: to test when kill nc with half of command sent
+//NEED: to test when stop temporarily the client (ctrl+Z)
+
 typedef void (Server::*FuncType)(Client&, std::istringstream&);
 
 bool Server::_signalReceived = false;
@@ -296,17 +304,19 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
         const std::string& cmd) const
 {
     std::string body, full_message = client.getPrefix() + " " + cmd + " ";
-    if (target_name.empty())
-        full_message += std::string(":");
-    else
-        full_message += target_name + " :";
+    if (!target_name.empty())
+        full_message += target_name;
     
-    const size_t symb_left = MAXLINELENGTH - full_message.length() - 2;
+    const size_t symb_left = MAXLINELENGTH - full_message.length() - 3;
     
-    if (!message.empty() || message.length() > symb_left)
-        body = message.substr(0, symb_left) + TERMIN;
-    else
-        body = message;
+    if (!message.empty())
+    {
+        body = std::string(":");
+        if (message.length() > symb_left)
+            body += message.substr(0, symb_left) + TERMIN;
+        else
+            body += message;
+    }
     
     full_message += body;
     send(target_fd, full_message.c_str(), full_message.size(), 0);
