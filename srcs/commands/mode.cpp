@@ -50,7 +50,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
 std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
-    size_t ind_param = 0, ind_mode = 0, num_modes = 0;
+    size_t ind_param = 0, ind_mode = 0;
     std::string &modes = params[0], err_message, pass, message;
     std::vector<std::string> params_for_message;
     std::vector<char> modes_for_message;
@@ -85,9 +85,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (++ind_mode < modes.size())
     {
-        if (num_modes > 3)
-            return (message);
-
         switch (modes[ind_mode])
         {
             //for this and next modes' handling:
@@ -97,7 +94,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     //and add the handled mode and its parameters to the special vectors which will participate in message composing later
                     modes_for_message.push_back('i');
 
-                num_modes++;
                 break;
             
             case 'l':
@@ -112,7 +108,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
-                    num_modes++;
                     modes_for_message.push_back('l');
                     if (member_limit != -1 && !isAdding)
                         params_for_message.push_back(params[ind_param - 1]);
@@ -124,7 +119,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 if (channel.handleTopicOper(isAdding))
                     modes_for_message.push_back('t');
 
-                num_modes++;
                 break ;
             
             case 'k':
@@ -133,7 +127,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
                 if (channel.handleKey(isAdding, pass, client))
                 {
-                    num_modes++;
                     modes_for_message.push_back('k');
                     if (isAdding)
                         params_for_message.push_back(params[ind_param - 1]);
@@ -164,7 +157,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
                 if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
                 {
-                    num_modes++;
                     modes_for_message.push_back('o');
                     if (target_fd != -1)
                         params_for_message.push_back(params[ind_param - 1]);
