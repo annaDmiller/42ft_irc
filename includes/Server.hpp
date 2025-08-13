@@ -30,8 +30,6 @@
 class Client;
 class Channel;
 
-
-
 class Server
 {
     private:

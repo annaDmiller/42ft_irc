@@ -1,11 +1,9 @@
 #include "Server.hpp"
-//NEED: to add poll() check before sending data back to the client
-//NEED: what is network interface?
+//NEED: to adapt the code so send() function is used only after check of poll() - create a sending buffer for the client?
+//NEED: what is network interface? - it's written in the evaluation sheet
 //NEED: to check with nc tool
 //NEED: to test with telnet and IRSSI
-//NEED: to test when we kill the client
-//NEED: to test when kill nc with half of command sent
-//NEED: to test when stop temporarily the client (ctrl+Z)
+//NEED: to test when kill nc with half of command sent (how to manage this? And what does it mean?)
 
 typedef void (Server::*FuncType)(Client&, std::istringstream&);
 
