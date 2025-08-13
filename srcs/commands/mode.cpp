@@ -159,7 +159,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     break ;
                 }
 
-                if (target_fd == client.getFD())
+                if (target_fd == client.getFD() && isAdding)
                     break ;
 
                 if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
