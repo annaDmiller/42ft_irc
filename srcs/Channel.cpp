@@ -285,6 +285,23 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
     return;
 }
 
+bool Channel::handleInviteOnly(const bool& isAdding)
+{
+    if (isAdding)
+    {
+        if (this->_modes.find('i') != std::string::npos)
+            return (false);
+        this->addMode('i';)
+    }
+    else
+    {
+        if (this->_modes.find('i') == std::string::npos)
+            return (false);
+        this->removeMode('i');
+    }
+    return (true);
+}
+
 bool Channel::handleMemberLimit(const bool& isAdding, int& limit)
 {
     if (isAdding)

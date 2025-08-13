@@ -17,15 +17,8 @@ void Server::handleMode(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (!client.isAlreadyJoinedChannel(channel_name))
-    {
-        err_message = ERR_USERNOTINCHANNEL(client.getNick(), channel_name, client.getNick());
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-        return ;
-    }
-
     Channel& channel = this->_availableChannels[channel_name];
-    if (!channel.isOperator(client.getFD()))
+    if (!client.isAlreadyJoinedChannel(channel_name) || !channel.isOperator(client.getFD()))
     {
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
@@ -97,18 +90,14 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
         switch (modes[ind_mode])
         {
+            //for this and next modes' handling:
+            //after each successful mode handling we increment the number of already handled modes
             case 'i':
-                if (isAdding)
-                    channel.addMode('i');
-                else
-                    channel.removeMode('i');
+                if (channel.handleInviteOnly(isAdding))
+                    //and add the handled mode and its parameters to the special vectors which will participate in message composing later
+                    modes_for_message.push_back('i');
 
-                //for this and next modes' handling:
-                //after each successful mode handling we increment the number of already handled modes
                 num_modes++;
-                //and add the handled mode and its parameters to the special vectors which will participate in message composing later
-                modes_for_message.push_back('i');
-
                 break;
             
             case 'l':
