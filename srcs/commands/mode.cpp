@@ -1,7 +1,5 @@
 #include "Server.hpp"
 
-//NEED: to update the logic of handleMode based on test cases described in the sheet
-
 void Server::handleMode(Client& client, std::istringstream& args)
 {
     std::string channel_name, params, err_message, message;
@@ -68,14 +66,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         return (std::string());
     }
 
-    //We check whether we need to remove or add some modes to the channel
-    if (modes[0] == '-')
-        isAdding = false;
-        
     if (modes[0] != '-' && modes[0] != '+')
         modes = std::string("+") + modes;
-        
-    modes_for_message.push_back(modes[0]);
 
     //then we handle modes one after one
     //i - to make the channel invite-only; it doesn't need any additional parametres
@@ -83,8 +75,22 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //t - to make topic editable only for operators; no additional parameters required
     //k - to set a key(password) for the channel; required a parameter equal to the new key
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
-    while (++ind_mode < modes.size())
+    while (ind_mode < modes.size())
     {
+        if (modes[ind_mode] == '-')
+        {
+            isAdding = false;
+            modes_for_message.push_back(modes[ind_mode]);
+            ind_mode++;
+        }
+
+        if (modes[ind_mode] == '+')
+        {
+            isAdding = true;
+            modes_for_message.push_back(modes[ind_mode]);
+            ind_mode++;
+        }
+
         switch (modes[ind_mode])
         {
             //for this and next modes' handling:
@@ -167,6 +173,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             default:
                 break ;
         }
+        ind_mode++;
     }
 
     message = composeMessage(modes_for_message, params_for_message);
