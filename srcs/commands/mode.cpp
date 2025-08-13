@@ -121,14 +121,10 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 break ;
             
             case 't':
-                if (isAdding)
-                    channel.addMode('t');
-                else
-                    channel.removeMode('t');
+                if (channel.handleTopicOper(isAdding))
+                    modes_for_message.push_back('t');
 
                 num_modes++;
-                modes_for_message.push_back('t');
-
                 break ;
             
             case 'k':

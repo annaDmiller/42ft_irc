@@ -322,6 +322,23 @@ bool Channel::handleMemberLimit(const bool& isAdding, int& limit)
     return (true);
 }
 
+bool Channel::handleTopicOper(const bool& isAdding)
+{
+    if (isAdding)
+    {
+        if (this->_modes.find('t') != std::string::npos)
+            return (false);
+        this->addMode('t';)
+    }
+    else
+    {
+        if (this->_modes.find('t') == std::string::npos)
+            return (false);
+        this->removeMode('t');
+    }
+    return (true);
+}
+
 bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
     std::string err_message;
