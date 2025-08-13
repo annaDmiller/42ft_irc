@@ -3,10 +3,10 @@
 # define SOCKMAXCONN 10 //-> maximum number of connections to socket at a time
 # define TERMIN "\r\n" //-> line termination in IRC (based on RFC 2812)
 # define SERVERNAME "FT_IRC"
-# define VERSION "ver.1.0"
-# define CREATEDDATE "" //NEED: to add created date value
+# define VERSION "1.0"
+# define CREATEDDATE "13.08.2025"
 # define USERMODES "-"
-# define CHANNELMODES "iklot"
+# define CHANNELMODES "iklt"
 # define HOST "irc.local"
 # define MAXJOINEDCHANNELS 10
 # define MAXLINELENGTH 512
@@ -68,10 +68,7 @@
 # define RPL_NOTOPIC(nick, channel_name) (std::string(":") + HOST + " 333 " + nick + " " + channel_name + " :No topic is set" + TERMIN)
 # define RPL_NAMREPLY(nick, channel_name) (std::string(":") + HOST + " 353 " + nick + " = " + channel_name + " :")
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of /NAMES list" + TERMIN)
-# define RPL_INVITELIST 346 //NEED
-# define RPL_ENDOFINVITELIST 347 //NEED
 # define RPL_INVITING(nick, channel_name, target_nick) (std::string(":") + HOST + " 341 " + nick + " " + target_nick + " " + channel_name + TERMIN)
-# define RPL_UNIQOPIS 325 //NEED
 # define RPL_CHANNELMODEIS(nick, channel_name, mode, mode_params) (std::string(":") + HOST + " 324 " + nick + " " + channel_name + " " + mode + " " + mode_params + TERMIN)
 # define RPL_YOUREOPER(nick) (std::string(":") + HOST + " 381 " + nick + " :You are now an IRC operator" + TERMIN)
 
