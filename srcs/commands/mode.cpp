@@ -159,6 +159,9 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     break ;
                 }
 
+                if (target_fd == client.getFD())
+                    break ;
+
                 if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
                 {
                     num_modes++;
