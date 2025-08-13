@@ -135,8 +135,10 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 {
                     num_modes++;
                     modes_for_message.push_back('k');
-                    if (!pass.empty() && !isAdding)
+                    if (isAdding)
                         params_for_message.push_back(params[ind_param - 1]);
+                    else
+                        params_for_message.push_back(std::string("*"));
                 }
 
                 break ;

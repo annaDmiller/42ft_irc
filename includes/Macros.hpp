@@ -53,7 +53,6 @@
 # define ERR_NOTONCHANNEL(nick, channel_name) (std::string(":") + HOST + " 442 " + nick + " " + channel_name + " :You're not on that channel" + TERMIN)
 # define ERR_NOSUCHCHANNEL(nick, channel_name) (std::string(":") + HOST + " 403 " + nick + " " + channel_name + " :No such channel" + TERMIN)
 # define ERR_USERNOTINCHANNEL(nick, channel_name, target) (std::string(":") + HOST + " 441 " + nick + " " + channel_name + " " + target + " :They aren't on that channel" + TERMIN)
-# define ERR_KEYSET(nick, channel_name) (std::string(":") + HOST + " 467 " + nick + " " + channel_name + " :Channel key already set" + TERMIN)
 # define ERR_CHANOPRIVSNEEDED(nick, channel_name) (std::string(":") + HOST + " 482 " + nick + " " + channel_name + " :You're not channel operator" + TERMIN)
 # define ERR_UNKNOWNMODE(nick, mode_char) (std::string(":") + HOST + " 472 " + nick + " " + mode_char + " :No such channel" + TERMIN)
 # define ERR_USERONCHANNEL(nick, target_nick, channel_name) (std::string(":") + HOST + " 443 " + nick + " " + target_nick + " " + channel_name + " :is already on channel" + TERMIN)

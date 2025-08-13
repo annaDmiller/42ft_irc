@@ -348,12 +348,6 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
 
     if (isAdding)
     {
-        if (!this->_key.empty())
-        {
-            err_message = ERR_KEYSET(client.getNick(), this->_name);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-            return (false);
-        }
         this->addMode('k');
         this->_key = password;
     }
