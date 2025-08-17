@@ -4,6 +4,9 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 {
     std::string welcome_mess, err_response;
 
+    std::cout << "handleInitCommands" << std::endl;
+    std::cout << "cmd: " << cmd << std::endl;
+
     if (cmd == NICK)
         handleNickname(client, args);
     else if (cmd == USER)
@@ -17,6 +20,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     }
     else
     {
+        std::cout << "ERR_NOTREGISTERED " << std::endl;
         err_response = ERR_NOTREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
@@ -24,6 +28,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     
     if (client.tryAuthenticate())
     {
+        std::cout << "tryAuthenticate " << std::endl;
         welcome_mess = RPL_WELCOME(client.getNick());
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
@@ -76,6 +81,7 @@ void Server::handlePassword(Client& client, std::istringstream& args)
 
 void Server::handleUsername(Client& client, std::istringstream& args)
 {
+    std::cout << "handleUsername" << std::endl;//test
     //I named the below vars based on the params of command according to RFC 2812
     //However, mode and unused params are not used in our project
     std::string username, mode, unused, realname, err_response;
@@ -83,7 +89,8 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
 
     if (client.isRegistered())
-    {
+    { 
+        std::cout << "handleUsername 1" << std::endl;//test
         err_response = ERR_ALREADYREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
@@ -91,6 +98,7 @@ void Server::handleUsername(Client& client, std::istringstream& args)
 
     if (!client.isPassChecked())
     {
+         std::cout << "handleUsername 2" << std::endl;//test
         err_response = "ERROR :Password required\r\n";
         send(client.getFD(), err_response.c_str(), err_response.size(), 0);
         return ;
@@ -98,13 +106,16 @@ void Server::handleUsername(Client& client, std::istringstream& args)
 
     if (username.empty() || realname.empty())
     {
+         std::cout << "handleUsername 3" << std::endl;//test
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
-
+    std::cout << "handleUsername 4" << std::endl;//test
     if (realname[0] == ':')
         realname = realname.substr(1);
+     std::cout << "username " << username << std::endl;//test
+      std::cout << "realname " << realname << std::endl;//test
 
     client.setUsername(username);
     client.setRealname(realname);

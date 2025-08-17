@@ -138,6 +138,10 @@ void Server::runServer()
             if (this->_pollfds[ind].revents & POLLIN)
             {
                 //if its the socket fd, then it means that the new client is trying to connect
+
+                std::cout << "this->_pollfds[ind].fd: " << this->_pollfds[ind].fd << std::endl;
+                std::cout << "this->_sockfd: " << this->_sockfd << std::endl;
+
                 if (this->_pollfds[ind].fd == this->_sockfd)
                     this->acceptNewClient();
                 else
@@ -189,6 +193,8 @@ void Server::acceptNewClient()
     new_client.setIPAddr(ip);
     this->_clients[client_fd] = new_client;
 
+    send(client_fd, init_mess.c_str(), init_mess.length(), 0);
+
     std::cout << "[DEBUG] ";
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
 
@@ -200,6 +206,7 @@ void Server::acceptNewClient()
 
 void Server::receiveNewData(int& clientFD)
 {
+    std::cout << "receiveNewData" << std::endl;//test
     char buffer[1024];
     ssize_t bytes;
     size_t pos_end;
@@ -222,22 +229,38 @@ void Server::receiveNewData(int& clientFD)
     {
         //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
-
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
+
+
+        std::string str(buffer);
 
         Client& our_client = this->_clients[clientFD];
         our_client.appendBuffer(buffer);
 
+        std::cout << "str:\n" << str << "!" << std::endl;//test
+        std::cout << "our_client.getBuffer():\n" << our_client.getBuffer() << "!" << std::endl;//test
         //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
-        if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
+        if ((pos_end = str.find_first_of(TERMIN)) == std::string::npos)
+        //if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
+        {
+            std::cout << "1" << std::endl;//test
             return ;
-        
+        }
+        std::cout << "2" << std::endl;//test
         //if there is a TERMIN in buffor, we must take a substring, remove it from Client's buffer and process it as a command
-        raw_cmd = our_client.getBuffer().substr(0, pos_end);
+        // raw_cmd = our_client.getBuffer().substr(0, pos_end);
+        //raw_cmd = our_client.getBuffer().substr(0, pos_end + 1); //test
+        raw_cmd = str.substr(0, pos_end); //test
         our_client.splitBuffer(0, pos_end + 2);
 
+        std::cout << "-------------------" << std::endl;//test
+
+        std::cout << "raw_cmd: " << raw_cmd << "!" << std::endl;//test
         this->handleCommand(our_client, raw_cmd);
+
+        std::cout << "-------------------" << std::endl;//test
+        std::cout << "-------------------" << std::endl;//test
     }
 
     return ;
@@ -252,6 +275,7 @@ void Server::disconnectClient(const int& client_fd)
 
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
+    std::cout << "handleCommand" << std::endl;//test
     std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
     std::string cmd, err_message;
     const std::map<std::string, FuncType> allowed_cmds = this->getMapCmdFunc();
@@ -269,6 +293,7 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
     if (!client.isRegistered())
     {
+        std::cout << "not isRegistered" << std::endl;//test
         if (it == allowed_cmds.end())
             return ;
         this->handleInitCommands(client, cmd, line);
@@ -316,7 +341,8 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
             body += message;
     }
     
-    full_message += body;
+    // full_message += body;
+    full_message += body + TERMIN; //test
     send(target_fd, full_message.c_str(), full_message.size(), 0);
     return ;
 }
@@ -382,6 +408,7 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
         func_map[PRIVMSG] = &Server::handlePrivateMessage;
         func_map[QUIT] = &Server::handleQuit;
         func_map[TOPIC] = &Server::handleTopic;
+        func_map["CAP"] = &Server::handleTopic;//test
     }
     return (func_map);
 }

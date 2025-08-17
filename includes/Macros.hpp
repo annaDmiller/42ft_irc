@@ -44,7 +44,7 @@
 # define ERR_BADCHANNELKEY(nick, channel_name) (std::string(":") + HOST + " 475 " + nick + " " + channel_name + " :Cannot join channel (+k) - bad key" + TERMIN)
 # define ERR_BADCHANMASK(nick, channel_name) (std::string(":") + HOST + " 476 " + nick + " " + channel_name + " :Bad Channel Mask" + TERMIN)
 # define ERR_TOOMANYCHANNELS(nick, channel_name) (std::string(":") + HOST + " 405 " + nick + " " + channel_name + " :You have joined too many channels" + TERMIN)
-# define ERR_NORECIPIENT(nick, cmd) (std::string(":") + HOST + " 411 " + nick + " :No recepient given (" + cmd + ")" + TERMIN)
+# define ERR_NORECIPIENT(nick, cmd) (std::string(":") + HOST + " 411 " + nick + " :No recipient given (" + cmd + ")" + TERMIN)
 # define ERR_NOTEXTTOSEND(nick) (std::string(":") + HOST + " 412 " + nick + " :No text to send" + TERMIN)
 # define ERR_NOSUCHNICK(nick, target) (std::string(":") + HOST + " 401 " + nick + " " + target + " :No such nick/channel" + TERMIN)
 # define ERR_CANNOTSENDTOCHAN(nick, channel_name) (std::string(":") + HOST + " 404 " + nick + " " + channel_name + " :Cannot send to channel" + TERMIN)

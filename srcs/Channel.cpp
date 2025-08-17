@@ -60,7 +60,10 @@ void Channel::setTopic(const std::string& topic, const std::string &nick)
     this->_whoSetTopic = nick;
 
     time_t setTime = time(NULL);
-    this->_whenSetTopic = std::to_string(setTime);
+    std::ostringstream os_time;
+    os_time << setTime;
+    this->_whenSetTopic = std::string(os_time.str());
+    // this->_whenSetTopic = std::to_string(setTime);
 
     return ;
 }
@@ -193,9 +196,24 @@ bool Channel::isEmpty() const
 
 bool Channel::isOperator(int client_fd) const
 {
-    if (std::lower_bound(this->_operators.begin(), this->_operators.end(), client_fd)
-        != this->_operators.end())
-        return (true);
+    //test
+    std::cout << "isOperator" << std::endl;
+    std::cout << "client_fd: " << client_fd << std::endl;
+    std::cout << "operators fd: ";
+    //test
+    for (std::set<int>::const_iterator it = this->_operators.begin();
+        it != this->_operators.end(); it++)  
+        std::cout << *it << " ";
+    std::cout << std::endl;
+
+    if (this->_operators.find(client_fd) != this->_operators.end())
+    {
+        std::cout << client_fd << " is an operator" << std::endl;//test
+        return (true);  
+    }
+    // if (std::lower_bound(this->_operators.begin(), this->_operators.end(), client_fd)
+    //     != this->_operators.end())
+    //     return (true);
     return (false);
 }
 
@@ -291,7 +309,7 @@ bool Channel::handleInviteOnly(const bool& isAdding)
     {
         if (this->_modes.find('i') != std::string::npos)
             return (false);
-        this->addMode('i';)
+        this->addMode('i');
     }
     else
     {
@@ -328,7 +346,7 @@ bool Channel::handleTopicOper(const bool& isAdding)
     {
         if (this->_modes.find('t') != std::string::npos)
             return (false);
-        this->addMode('t';)
+        this->addMode('t');
     }
     else
     {
@@ -342,6 +360,7 @@ bool Channel::handleTopicOper(const bool& isAdding)
 bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
     std::string err_message;
+    (void)client;
 
     if (password.empty())
         return (false);

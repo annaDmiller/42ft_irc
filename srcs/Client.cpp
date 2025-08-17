@@ -144,6 +144,7 @@ void Client::setRealname(const std::string& realname)
 void Client::setUsername(const std::string& username)
 {
     this->_username = username;
+    this->_hasUsername = true;//test
     return ;
 }
 
@@ -167,6 +168,11 @@ void Client::splitBuffer(size_t start, size_t end)
 
 bool Client::tryAuthenticate()
 {
+    std::cout << "_isAuth " << _isAuth << std::endl; 
+    std::cout << "_hasNickname " << _hasNickname << std::endl; 
+    std::cout << "_hasUsername " << _hasUsername << std::endl; 
+    std::cout << "_isPasswordChecked " << _isPasswordChecked << std::endl; 
+
     if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
         this->_isAuth = true;
     
@@ -175,12 +181,17 @@ bool Client::tryAuthenticate()
 
 bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
 {
+    //test
+    std::cout << "isAlreadyJoinedChannel() " << std::endl; 
+    std::cout << "channel_name: " << channel_name << std::endl; 
+
     if (this->_joinedChannels.empty())
         return (false);
     
     for (std::map<std::string, Channel *>::const_iterator it = this->_joinedChannels.begin();
         it != this->_joinedChannels.end(); it++)
     {
+         std::cout << "it->first: " << it->first << std::endl; 
         if (channel_name == it->first)
             return (true);
     }

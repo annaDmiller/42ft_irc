@@ -6,11 +6,22 @@ void Server::handleMode(Client& client, std::istringstream& args)
     std::vector<std::string> params_mode;
 
     args >> channel_name;
+
+    std::cout << "channel_name: " << channel_name << "!" << std::endl; //test
+
     std::getline(args, params);
 
     if (channel_name.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        return ;
+    }
+
+    //test
+    if (this->_availableChannels.find(channel_name) == this->_availableChannels.end())
+    {
+        err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
     }
@@ -39,7 +50,8 @@ void Server::handleMode(Client& client, std::istringstream& args)
     message = modeHandlingChannel(client, channel, params_mode);
 
     //after handling is done, we need to output message for the client itself and all member of the channel
-    message = client.getPrefix() + MODE + channel_name + message;
+    // message = client.getPrefix() + MODE + channel_name + message;
+    message = client.getPrefix() + MODE + " " + channel_name + " " + message + TERMIN;//test
     channel.sendMessageToAll(message);
 
     return ;
@@ -48,7 +60,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
 std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
-    size_t ind_param = 0, ind_mode = 0;
+    size_t ind_param = 1, ind_mode = 0;//test ind_param = 0
     std::string &modes = params[0], err_message, pass, message;
     std::vector<std::string> params_for_message;
     std::vector<char> modes_for_message;
