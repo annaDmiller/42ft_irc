@@ -51,7 +51,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
                 send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                 continue ;
             }
-            
+
             Channel& channel = this->_availableChannels[rec_list[ind]];
             if (!channel.userIsMember(client.getFD()))
             {

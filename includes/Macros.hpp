@@ -56,6 +56,7 @@
 # define ERR_CHANOPRIVSNEEDED(nick, channel_name) (std::string(":") + HOST + " 482 " + nick + " " + channel_name + " :You're not channel operator" + TERMIN)
 # define ERR_UNKNOWNMODE(nick, mode_char) (std::string(":") + HOST + " 472 " + nick + " " + mode_char + " :No such channel" + TERMIN)
 # define ERR_USERONCHANNEL(nick, target_nick, channel_name) (std::string(":") + HOST + " 443 " + nick + " " + target_nick + " " + channel_name + " :is already on channel" + TERMIN)
+# define ERR_INVALIDMODEPARAM(nick, channel_name, mode_char, parameter) (std::string(":") + HOST + " 696 " + nick + " " + channel_name + " " + mode_char + " " + parameter + " :invalid limit" + TERMIN)
 
 //Macros: Replies to the client
 # define RPL_WELCOME(nick) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + TERMIN)

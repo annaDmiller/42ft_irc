@@ -22,6 +22,7 @@ class Client
         bool _isPasswordChecked;
         bool _hasUsername;
         bool _isOperator;
+        bool _capNegotiation; //test
         std::map<std::string, Channel*> _joinedChannels;
 
     public:
@@ -50,6 +51,8 @@ class Client
         void checkPassword();
         void addChannel(const std::string& channel_name, Channel* channel);
         void setOperator(bool value);
+        void setCapNegotiation(bool value);//test
+        bool getCapNegotiation() const;
 
         void splitBuffer(size_t start, size_t end);
 

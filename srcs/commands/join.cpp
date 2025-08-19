@@ -68,7 +68,6 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         if (client.isAlreadyJoinedChannel(channel_list[ind]))
             continue ;
 
-            
         //we check if the client reached the limit of maximum number of joined channels for user
         if (client.joinedChannelQuantity() >= MAXJOINEDCHANNELS)
         {
@@ -86,6 +85,9 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             new_channel.checkJustCreated();
             this->_availableChannels[channel_list[ind]] = new_channel;
         }
+        else
+           channel_list[ind] = getChannelName(channel_list[ind]);
+
         Channel& channel = this->_availableChannels[channel_list[ind]];
 
         //then we check the modes of the channel and whether our client follows all the restrictions to join it
@@ -141,13 +143,41 @@ bool Server::isValidChannelName(const std::string& chan_name) const
     return (true);
 }
 
-bool Server::isChannelExist(std::string &channel_name) const
+std::string Server::getChannelName(std::string &channel_name)
 {
+    std::string upper_name, tmp_name;
+
+    upper_name = toUpperString(channel_name);
     for (std::map<std::string, Channel>::const_iterator it_map = this->_availableChannels.begin();
         it_map != this->_availableChannels.end(); it_map++)
     {
-        if (channel_name == it_map->first)
+        tmp_name = toUpperString(it_map->first);
+        if (upper_name == tmp_name)
+            return (it_map->first);
+    }
+    return ("");
+}
+
+bool Server::isChannelExist(std::string &channel_name)
+{
+    std::string upper_name, tmp_name;
+
+    upper_name = toUpperString(channel_name);
+
+    //test
+    std::cout << "upper_name: " << upper_name << std::endl;
+
+    for (std::map<std::string, Channel>::const_iterator it_map = this->_availableChannels.begin();
+        it_map != this->_availableChannels.end(); it_map++)
+    {
+        tmp_name = toUpperString(it_map->first);
+        std::cout << "tmp_name: " << tmp_name << std::endl;
+        if (upper_name == tmp_name)
+        {
+            std::cout << "Channel found" << std::endl;//test
+            // channel_name = it_map->first; //test
             return (true);
+        }
     }
     return (false);
 }

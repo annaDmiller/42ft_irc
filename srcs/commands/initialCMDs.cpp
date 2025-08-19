@@ -18,6 +18,34 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
         handleQuit(client, args);
         return ;
     }
+    else if (cmd == "CAP")
+    {
+        std::string arg;
+        args >> arg;
+        std::cout << "arg: " << arg << "!" << std::endl;//test
+        if (arg == "LS")
+        {
+            client.setCapNegotiation(true);
+            std::cout << "LS " << arg << std::endl; 
+            // std::string cap = "CAP * LS :multi-prefix\r\n";
+            std::string cap = "CAP * LS :\r\n";
+            send(client.getFD(), cap.c_str(), cap.length(), 0);//test
+            return ;
+        }
+        else if (arg == "END")
+        {
+            client.setCapNegotiation(false);
+            std::cout << "END " << arg << std::endl; 
+        }
+        else
+        {
+            std::cout << "ERR_NOTREGISTERED " << std::endl;
+            err_response = ERR_NOTREGISTERED(client.getNick());
+            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+            return ;  
+        }
+       std::cout << "CAP " << std::endl;
+    }
     else
     {
         std::cout << "ERR_NOTREGISTERED " << std::endl;
@@ -26,7 +54,8 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
         return ;
     }
     
-    if (client.tryAuthenticate())
+    if (client.getCapNegotiation() == false && client.tryAuthenticate()) //test
+    // if (client.tryAuthenticate())
     {
         std::cout << "tryAuthenticate " << std::endl;
         welcome_mess = RPL_WELCOME(client.getNick());

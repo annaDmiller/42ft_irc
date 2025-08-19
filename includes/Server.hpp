@@ -11,6 +11,8 @@
 # include <map> //-> for map using
 # include <algorithm>
 # include <cctype>
+# include <cerrno>
+# include <limits>
 
 # include <unistd.h> //-> for using C-type close() function for socket fds
 //C++-type of closing can't be used as it requires non-raw FD
@@ -69,12 +71,14 @@ class Server
         void handleOper(Client& client, std::istringstream& args);
         void handleKick(Client& client, std::istringstream& args);
 
+        std::string toUpperString(std::string str);
+        std::string getChannelName(std::string &channel_name);
         bool isValidNickname(const std::string& nick) const;
         bool checkDupNicknamesOnServer(std::string& nick);
         int findUserbyNickname(const std::string& nick) const;
 
         bool isValidChannelName(const std::string& chan_name) const;
-        bool isChannelExist(std::string &channel_name) const;
+        bool isChannelExist(std::string &channel_name);
         bool isChannelTarget(const std::string& target) const;
 
         std::string modeHandlingChannel(Client& client, Channel& channel,

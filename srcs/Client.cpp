@@ -3,7 +3,8 @@
 Client::Client() : 
         _fd(-1), _nickname("*"), _hasNickname(false),
         _isAuth(false), _isPasswordChecked(false),
-        _hasUsername(false), _isOperator(false)
+        _hasUsername(false), _isOperator(false),
+        _capNegotiation(false)//test
 {
     return ;
 }
@@ -133,6 +134,17 @@ void Client::setOperator(bool value)
 {
     this->_isOperator = value;
     return ;
+}
+
+void Client::setCapNegotiation(bool value)
+{
+    this->_capNegotiation = value;
+    return ;
+}
+
+bool Client::getCapNegotiation() const
+{
+    return (this->_capNegotiation);
 }
 
 void Client::setRealname(const std::string& realname)

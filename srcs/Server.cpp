@@ -227,40 +227,48 @@ void Server::receiveNewData(int& clientFD)
     }
     else
     {
+        std::cout << "buffer1:\n" << buffer << "!" << std::endl;//test
+
         //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
 
-
         std::string str(buffer);
 
         Client& our_client = this->_clients[clientFD];
         our_client.appendBuffer(buffer);
-
-        std::cout << "str:\n" << str << "!" << std::endl;//test
-        std::cout << "our_client.getBuffer():\n" << our_client.getBuffer() << "!" << std::endl;//test
-        //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
-        if ((pos_end = str.find_first_of(TERMIN)) == std::string::npos)
-        //if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
+        // std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
+        // for (size_t i = 0; i < str.size(); i++)
+        // {
+        //     std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
+        // }
+        size_t counter = 0;//test
+        while (our_client.getBuffer().find(TERMIN) != std::string::npos)//test
         {
-            std::cout << "1" << std::endl;//test
-            return ;
+            std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
+            //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
+            if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
+            {
+                std::cout << "No TERMIN" << std::endl;//test
+                return ;
+            }
+            std::cout << "TERMIN" << std::endl;//test
+            std::cout << "pos_end:" << pos_end << std::endl;//test
+            //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
+            raw_cmd = our_client.getBuffer().substr(0, pos_end);
+            our_client.splitBuffer(0, pos_end + 2);// == this->_recvBuffer.erase(start, end);
+            std::cout << "-------------------" << std::endl;//test
+            std::cout << "our_client.getBuffer(): " << counter << "\n" << our_client.getBuffer() << std::endl;//test
+            std::cout << "-------------------" << std::endl;//test
+
+            std::cout << "raw_cmd: " << raw_cmd << "!" << std::endl;//test
+            this->handleCommand(our_client, raw_cmd);
+
+            std::cout << "-------------------" << std::endl;//test
+            std::cout << "-------------------" << std::endl;//test
+            counter++;//test
         }
-        std::cout << "2" << std::endl;//test
-        //if there is a TERMIN in buffor, we must take a substring, remove it from Client's buffer and process it as a command
-        // raw_cmd = our_client.getBuffer().substr(0, pos_end);
-        //raw_cmd = our_client.getBuffer().substr(0, pos_end + 1); //test
-        raw_cmd = str.substr(0, pos_end); //test
-        our_client.splitBuffer(0, pos_end + 2);
-
-        std::cout << "-------------------" << std::endl;//test
-
-        std::cout << "raw_cmd: " << raw_cmd << "!" << std::endl;//test
-        this->handleCommand(our_client, raw_cmd);
-
-        std::cout << "-------------------" << std::endl;//test
-        std::cout << "-------------------" << std::endl;//test
     }
 
     return ;
@@ -285,8 +293,8 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
     line >> cmd; // it means that we put 1st word from str into command
 
-    //as we have initial commands in uppercase, we need to transfrom our command
-    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+    //as we have initial commands in uppercase, we need to transform our command
+    cmd = toUpperString(cmd);
 
     //here we launch the command handlers depending on what we receive in CMD (check getMapCmdFunc method)
     std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);

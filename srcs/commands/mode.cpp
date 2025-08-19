@@ -18,9 +18,10 @@ void Server::handleMode(Client& client, std::istringstream& args)
         return ;
     }
 
-    //test
+    //test a modifier : mode #channel +iu
     if (this->_availableChannels.find(channel_name) == this->_availableChannels.end())
     {
+        std::cout << "handleMode 1: " << std::endl; //test
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
@@ -29,6 +30,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
     Channel& channel = this->_availableChannels[channel_name];
     if (!client.isAlreadyJoinedChannel(channel_name) || !channel.isOperator(client.getFD()))
     {
+        std::cout << "handleMode 2: " << std::endl; //test
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
@@ -61,16 +63,19 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
     size_t ind_param = 1, ind_mode = 0;//test ind_param = 0
-    std::string &modes = params[0], err_message, pass, message;
+    std::string &modes = params[0], err_message, pass, message, tmp_param;
     std::vector<std::string> params_for_message;
     std::vector<char> modes_for_message;
     bool isAdding = true;
     char incorrect_mode;
-    int member_limit, target_fd;
+    int member_limit = -1, target_fd;
+    long limit;
+    char *pscalar_end;
 
     //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param
     //That's why we check valid modes only in the first iterator of params vector
 
+    //test a modifier et executer les modes valides precedant le mauvais mode
     if (!isValidModes(modes, incorrect_mode))
     {
         err_message = ERR_UNKNOWNMODE(client.getNick(), incorrect_mode);
@@ -121,9 +126,17 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     send(client.getFD(), err_message.c_str(), err_message.size(), 0);
                     return (std::string());
                 }
-
-                member_limit = atoi(params[ind_param++].c_str());
-
+                tmp_param = params[ind_param];
+                // member_limit = atoi(params[ind_param++].c_str());//test a modifier avec strol
+                limit = std::strtol(params[ind_param++].c_str(), &pscalar_end, 10);
+                if (*pscalar_end != '\0' || errno == ERANGE
+                    || limit < std::numeric_limits<int>::min() || limit > std::numeric_limits<int>::max())
+                {
+                    err_message = ERR_INVALIDMODEPARAM(client.getNick(), channel.getName(), "l", tmp_param);
+                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                    return (std::string());
+                }
+                member_limit = static_cast<int>(limit);
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
                     modes_for_message.push_back('l');
