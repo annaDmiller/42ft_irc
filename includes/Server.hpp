@@ -11,8 +11,8 @@
 # include <map> //-> for map using
 # include <algorithm>
 # include <cctype>
-# include <cerrno>
 # include <limits>
+# include <climits>
 
 # include <unistd.h> //-> for using C-type close() function for socket fds
 //C++-type of closing can't be used as it requires non-raw FD
@@ -57,6 +57,7 @@ class Server
         void handleNickname(Client& client, std::istringstream& args);
         void handleUsername(Client& client, std::istringstream& args);
         void handlePassword(Client& client, std::istringstream& args);
+        void handleCap(Client& client, std::istringstream& args);
         void handleJoin(Client& client, std::istringstream& args);
         void handlePrivateMessage(Client& client, std::istringstream& args);
         void handleQuit(Client& client, std::istringstream& args);
@@ -84,6 +85,8 @@ class Server
         std::string modeHandlingChannel(Client& client, Channel& channel,
                 std::vector<std::string>& params);
         bool isValidModes(const std::string& modes, char& incorrect_mode);
+        bool isValidMode(char mode);//test
+        void removeOperMode(std::vector<char>& modes);
         std::string composeMessage(std::vector<char>& modes, std::vector<std::string>& params) const;
 
         void closeFDs(); //-> close ALL fds

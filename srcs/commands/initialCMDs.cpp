@@ -4,8 +4,8 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 {
     std::string welcome_mess, err_response;
 
-    std::cout << "handleInitCommands" << std::endl;
-    std::cout << "cmd: " << cmd << std::endl;
+    std::cout << "handleInitCommands" << std::endl;//test
+    std::cout << "cmd: " << cmd << std::endl;//test
 
     if (cmd == NICK)
         handleNickname(client, args);
@@ -13,51 +13,24 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
         handleUsername(client, args);
     else if (cmd == PASS)
         handlePassword(client, args);
+    else if (cmd == CAP)
+        handleCap(client, args);
     else if (cmd == QUIT)
     {
         handleQuit(client, args);
         return ;
     }
-    else if (cmd == "CAP")
-    {
-        std::string arg;
-        args >> arg;
-        std::cout << "arg: " << arg << "!" << std::endl;//test
-        if (arg == "LS")
-        {
-            client.setCapNegotiation(true);
-            std::cout << "LS " << arg << std::endl; 
-            // std::string cap = "CAP * LS :multi-prefix\r\n";
-            std::string cap = "CAP * LS :\r\n";
-            send(client.getFD(), cap.c_str(), cap.length(), 0);//test
-            return ;
-        }
-        else if (arg == "END")
-        {
-            client.setCapNegotiation(false);
-            std::cout << "END " << arg << std::endl; 
-        }
-        else
-        {
-            std::cout << "ERR_NOTREGISTERED " << std::endl;
-            err_response = ERR_NOTREGISTERED(client.getNick());
-            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
-            return ;  
-        }
-       std::cout << "CAP " << std::endl;
-    }
     else
     {
-        std::cout << "ERR_NOTREGISTERED " << std::endl;
+        std::cout << "ERR_NOTREGISTERED " << std::endl;//test
         err_response = ERR_NOTREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
     
-    if (client.getCapNegotiation() == false && client.tryAuthenticate()) //test
-    // if (client.tryAuthenticate())
+    if (client.getCapNegotiation() == false && client.tryAuthenticate())
     {
-        std::cout << "tryAuthenticate " << std::endl;
+        std::cout << "tryAuthenticate " << std::endl;//test
         welcome_mess = RPL_WELCOME(client.getNick());
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
@@ -69,6 +42,32 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     }
 
     return ;
+}
+
+void Server::handleCap(Client& client, std::istringstream& args)
+{
+    std::string arg, err_response;
+    args >> arg;
+    std::cout << "arg: " << arg << "!" << std::endl;//test
+
+    if (arg == "LS")
+    {
+        client.setCapNegotiation(true);
+        std::string cap = "CAP * LS :\r\n";
+        send(client.getFD(), cap.c_str(), cap.length(), 0);//test
+        return ;
+    }
+    else if (arg == "END")
+    {
+        client.setCapNegotiation(false);
+        std::cout << "END " << arg << std::endl;//test
+    }
+    else
+    {
+        err_response = ERR_NOTREGISTERED(client.getNick());
+        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        return ;  
+    }
 }
 
 void Server::handlePassword(Client& client, std::istringstream& args)

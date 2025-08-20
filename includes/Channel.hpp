@@ -51,6 +51,7 @@ class Channel
         bool isEmpty() const;
         bool isOperator(int client_fd) const;
         bool isUserInvited(int client_fd) const;
+        bool isValidPassword(const std::string& password) const;
 
         bool handleInviteOnly(const bool& isAdding);
         bool handleMemberLimit(const bool& isAdding, int& limit);

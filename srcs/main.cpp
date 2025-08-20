@@ -10,7 +10,7 @@ bool isValidArgs(std::string port_num, std::string password)
         return (false);
     
     port = std::strtol(port_num.c_str(), &pscalar_end, 10);
-    if (*pscalar_end != '\0' || errno == ERANGE || port < 1024 || port > 65535)
+    if (*pscalar_end != '\0' || port == LONG_MIN || port == LONG_MAX || port < 1024 || port > 65535)
         return (false);
     if (port_num.find_first_not_of("0123456789") != std::string::npos)
         return (false);

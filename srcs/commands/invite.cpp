@@ -56,7 +56,7 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     message = RPL_INVITING(client.getNick(), channel_name, nick);
     send(client.getFD(), message.c_str(), message.size(), 0);
 
-    message = client.getPrefix() + INVITE + nick + channel_name + TERMIN;
+    message = client.getPrefix() + INVITE + " " + nick + " " + channel_name + TERMIN;
     send(target_fd, message.c_str(), message.size(), 0);
     channel.addUserToInviteList(target_fd);
     

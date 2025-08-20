@@ -75,12 +75,14 @@ void Channel::addMode(char new_mode)
     return ;
 }
 
+//to modify
 void Channel::removeMode(char mode_to_remove)
 {
     size_t ind = this->_modes.find(mode_to_remove, 0);
 
     if (ind != std::string::npos)
-        this->_modes.erase(mode_to_remove);
+		this->_modes.erase(ind, 1);//test
+        // this->_modes.erase(mode_to_remove);
     return ;
 }
 
@@ -357,14 +359,30 @@ bool Channel::handleTopicOper(const bool& isAdding)
     return (true);
 }
 
+bool Channel::isValidPassword(const std::string& password) const
+{
+    if (password.empty() || password.length() < 5 || password.length() > 20)
+		return (false);
+    for (size_t ind = 0; ind < password.length(); ind++)
+    {
+        if (password[ind] == ' ' || !std::isalnum(password[ind]))
+        	return (false);
+    }
+    return (true);
+}
+
 bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
     std::string err_message;
-    (void)client;
+    (void)client;//test
 
-    if (password.empty())
+    if (isValidPassword(password) == false)
+	{
+        err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
+						"Password requirements: alphanumeric characters only and size range: [5-20]");
+        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return (false);
-
+	}
     if (isAdding)
     {
         this->addMode('k');
@@ -418,9 +436,11 @@ void Channel::printModes(Client& client) const
     if (ind_k != std::string::npos && ind_l != std::string::npos)
     {
         if (ind_k > ind_l)
-            mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
+            // mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
+            mode_params = ft_itos(this->_membersLimit) + " ***";
         else 
-            mode_params = this->_key + " " + ft_itos(this->_membersLimit);
+            // mode_params = this->_key + " " + ft_itos(this->_membersLimit);
+            mode_params = "*** " + ft_itos(this->_membersLimit);
     }
     else
     {

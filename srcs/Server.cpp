@@ -193,8 +193,6 @@ void Server::acceptNewClient()
     new_client.setIPAddr(ip);
     this->_clients[client_fd] = new_client;
 
-    send(client_fd, init_mess.c_str(), init_mess.length(), 0);
-
     std::cout << "[DEBUG] ";
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
 
@@ -253,8 +251,6 @@ void Server::receiveNewData(int& clientFD)
                 std::cout << "No TERMIN" << std::endl;//test
                 return ;
             }
-            std::cout << "TERMIN" << std::endl;//test
-            std::cout << "pos_end:" << pos_end << std::endl;//test
             //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
             raw_cmd = our_client.getBuffer().substr(0, pos_end);
             our_client.splitBuffer(0, pos_end + 2);// == this->_recvBuffer.erase(start, end);
@@ -416,7 +412,7 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
         func_map[PRIVMSG] = &Server::handlePrivateMessage;
         func_map[QUIT] = &Server::handleQuit;
         func_map[TOPIC] = &Server::handleTopic;
-        func_map["CAP"] = &Server::handleTopic;//test
+        func_map[CAP] = &Server::handleTopic;//test
     }
     return (func_map);
 }

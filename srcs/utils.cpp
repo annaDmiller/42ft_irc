@@ -35,7 +35,7 @@ std::string ft_itos(int number)
     std::string str_number;
     char car;
     
-    if (number > 0)
+    if (number < 0)
     {
         str_number += std::string("-");
         number *= -1;
