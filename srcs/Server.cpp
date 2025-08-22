@@ -233,14 +233,21 @@ void Server::receiveNewData(int& clientFD)
         std::cout << "Client " << clientFD << " sent data." << std::endl;
 
         std::string str(buffer);
+        std::cout << "str:\n" << str << "!" << std::endl;//test
+        for (size_t i = 0; i < str.size(); i++)
+        {
+            std::cout << "str[" << i << "]:" << str[i] << "(" << static_cast<int>(str[i]) << ")!" << std::endl;//test
+        }
 
         Client& our_client = this->_clients[clientFD];
         our_client.appendBuffer(buffer);
-        // std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
-        // for (size_t i = 0; i < str.size(); i++)
-        // {
-        //     std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
-        // }
+        std::cout << "our_client.getBuffer()0:\n" << our_client.getBuffer() << "!" << std::endl;//test
+            
+        std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
+        for (size_t i = 0; i < str.size(); i++)
+        {
+            std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
+        }
         size_t counter = 0;//test
         while (our_client.getBuffer().find(TERMIN) != std::string::npos)//test
         {
@@ -412,7 +419,7 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
         func_map[PRIVMSG] = &Server::handlePrivateMessage;
         func_map[QUIT] = &Server::handleQuit;
         func_map[TOPIC] = &Server::handleTopic;
-        func_map[CAP] = &Server::handleTopic;//test
+        func_map[CAP] = &Server::handleTopic;
     }
     return (func_map);
 }

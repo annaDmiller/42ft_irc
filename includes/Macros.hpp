@@ -4,7 +4,7 @@
 # define TERMIN "\r\n" //-> line termination in IRC (based on RFC 2812)
 # define SERVERNAME "FT_IRC"
 # define VERSION "1.0"
-# define CREATEDDATE "13.08.2025"
+# define CREATEDDATE "13.08.2025" //to check
 # define USERMODES "-"
 # define CHANNELMODES "iklt"
 # define HOST "irc.local"

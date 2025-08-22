@@ -18,6 +18,9 @@ void Server::handleMode(Client& client, std::istringstream& args)
         return ;
     }
 
+    if (checkDupNicknamesOnServer(channel_name) == true) //test
+        return ;
+
     if (isChannelExist(channel_name) == false)
     {
         std::cout << "handleMode 1: " << std::endl; //test
@@ -63,6 +66,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
 std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
+    std::cout << "modeHandlingChannel" << std::endl; //test
     size_t ind_param = 1, ind_mode = 0;
     std::string &modes = params[0], err_message, pass, message, tmp_param;
     std::vector<std::string> params_for_message;
@@ -73,7 +77,9 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     long limit;
     char *pscalar_end;
 
-    
+     std::cout << "modes: " << modes << std::endl; //test
+
+
     //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param
     //That's why we check valid modes only in the first iterator of params vector
 
@@ -96,6 +102,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (ind_mode < modes.size())
     {
+        std::cout << "1.mode[" << ind_mode << "]: " << modes[ind_mode] << std::endl; //test
         if (modes[ind_mode] == '-')
         {
             isAdding = false;
@@ -113,7 +120,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
         if (ind_mode >= modes.size())
             break;
-
+        std::cout << "2.mode[" << ind_mode << "]: " << modes[ind_mode] << std::endl; //test
         switch (modes[ind_mode])
         {
             //for this and next modes' handling:
@@ -125,40 +132,43 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 break;
             
             case 'l':
-                if (ind_param >= params.size())
+                if (isAdding)
                 {
-                    err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
-                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-                    return (std::string());
+                    if (ind_param >= params.size())
+                    {
+                        err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+                        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                        return (std::string());
+                    }
+                    tmp_param = params[ind_param];
+                    limit = std::strtol(params[ind_param++].c_str(), &pscalar_end, 10);
+                    if (*pscalar_end != '\0' || limit == LONG_MIN || limit == LONG_MAX
+                        || limit < std::numeric_limits<int>::min() || limit > std::numeric_limits<int>::max())
+                    {
+                        err_message = ERR_INVALIDMODEPARAM(client.getNick(), channel.getName(), "l", tmp_param, "Invalid limit");
+                        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                        return (std::string());
+                    }
+                    member_limit = static_cast<int>(limit);
                 }
-                tmp_param = params[ind_param];
-                limit = std::strtol(params[ind_param++].c_str(), &pscalar_end, 10);
-                if (*pscalar_end != '\0' || limit == LONG_MIN || limit == LONG_MAX
-                    || limit < std::numeric_limits<int>::min() || limit > std::numeric_limits<int>::max())
-                {
-                    err_message = ERR_INVALIDMODEPARAM(client.getNick(), channel.getName(), "l", tmp_param, "Invalid limit");
-                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-                    return (std::string());
-                }
-                member_limit = static_cast<int>(limit);
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
                     modes_for_message.push_back('l');
-                    if (member_limit != -1 && !isAdding)
+                    // if (member_limit != -1 && !isAdding)
+                    if (member_limit != -1 && isAdding)
                         params_for_message.push_back(params[ind_param - 1]);
                 }
-
+                member_limit = -1;
                 break ;
             
             case 't':
                 if (channel.handleTopicOper(isAdding))
                     modes_for_message.push_back('t');
-
                 break ;
             
             case 'k':
-                if (ind_param < params.size())
-                    pass = params[ind_param++];
+                if (isAdding && ind_param < params.size())
+                        pass = params[ind_param++];
 
                 if (channel.handleKey(isAdding, pass, client))
                 {
@@ -168,7 +178,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     else
                         params_for_message.push_back(std::string("*"));
                 }
-
                 break ;
             
             case 'o':
@@ -201,14 +210,14 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             default:
                 err_message = ERR_UNKNOWNMODE(client.getNick(), modes[ind_mode]);
                 send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-                removeOperMode(modes_for_message);//test
+                removeOperMode(modes_for_message);
                 message = composeMessage(modes_for_message, params_for_message);
                 return (message);         
                 break ;
         }
         ind_mode++;
     }
-    removeOperMode(modes_for_message);//test
+    removeOperMode(modes_for_message);
     message = composeMessage(modes_for_message, params_for_message);
     return (message);
 }

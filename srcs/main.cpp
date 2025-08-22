@@ -1,12 +1,24 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
+bool checkPassword(const std::string& password)
+{
+    if (password.empty())
+		return (false);
+    for (size_t ind = 0; ind < password.length(); ind++)
+    {
+        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)
+        	return (false);
+    }
+    return (true);
+}
+
 bool isValidArgs(std::string port_num, std::string password)
 {
     long port;
     char *pscalar_end;
 
-    if (port_num.empty() || password.empty())
+    if (port_num.empty() || checkPassword(password) == false)
         return (false);
     
     port = std::strtol(port_num.c_str(), &pscalar_end, 10);

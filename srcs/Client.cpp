@@ -180,14 +180,14 @@ void Client::splitBuffer(size_t start, size_t end)
 
 bool Client::tryAuthenticate()
 {
-    std::cout << "_isAuth " << _isAuth << std::endl; 
+    //test
     std::cout << "_hasNickname " << _hasNickname << std::endl; 
     std::cout << "_hasUsername " << _hasUsername << std::endl; 
     std::cout << "_isPasswordChecked " << _isPasswordChecked << std::endl; 
 
     if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
         this->_isAuth = true;
-    
+    std::cout << "_isAuth " << _isAuth << std::endl;//test
     return (this->_isAuth);
 }
 

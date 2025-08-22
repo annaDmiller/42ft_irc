@@ -253,10 +253,12 @@ void Channel::sendMemberList(const Client& client) const
             message += TERMIN;
             send(client.getFD(), message.c_str(), message.size(), 0);
             message = RPL_NAMREPLY(client.getNick(), this->_name);
+            users = "";
         }
         if (message.length() != prefix_length)
             message += " ";
         message += users;
+        users = "";
     }
     if (message.length() != prefix_length)
     {
@@ -361,11 +363,11 @@ bool Channel::handleTopicOper(const bool& isAdding)
 
 bool Channel::isValidPassword(const std::string& password) const
 {
-    if (password.empty() || password.length() < 5 || password.length() > 20)
+    if (password.empty() || password.length() < 3 || password.length() > 20)
 		return (false);
     for (size_t ind = 0; ind < password.length(); ind++)
     {
-        if (password[ind] == ' ' || !std::isalnum(password[ind]))
+        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)
         	return (false);
     }
     return (true);
@@ -374,17 +376,16 @@ bool Channel::isValidPassword(const std::string& password) const
 bool Channel::handleKey(const bool& isAdding, std::string& password, Client& client)
 {
     std::string err_message;
-    (void)client;//test
 
-    if (isValidPassword(password) == false)
-	{
-        err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
-						"Password requirements: alphanumeric characters only and size range: [5-20]");
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-        return (false);
-	}
     if (isAdding)
     {
+        if (isValidPassword(password) == false)
+        {
+            err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
+                            "Password requirements: alphanumeric characters only and size range: [3-20]");
+            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            return (false);
+        }
         this->addMode('k');
         this->_key = password;
     }
@@ -414,11 +415,15 @@ bool Channel::handleOperators(const bool& isAdding, int& target_fd, Client& clie
     {
         if (this->_operators.find(target_fd) == this->_operators.end())
             this->_operators.insert(target_fd);
+        else
+            return (false);
     }
     else
     {
         if (this->_operators.find(target_fd) != this->_operators.end())
             this->_operators.erase(target_fd);
+        else
+            return (false);
     }
 
     return (true);

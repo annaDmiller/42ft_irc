@@ -35,7 +35,7 @@ class Channel;
 class Server
 {
     private:
-        int _port; //-> server port
+        int _port; //-> server port2
         int _sockfd; //-> server socket FD
         std::string _password;
         std::map<int, Client> _clients; //-> map of clients, key is fd

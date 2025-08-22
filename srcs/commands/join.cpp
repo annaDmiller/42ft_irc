@@ -18,8 +18,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     }
 
     //The message '0' is handled by JOIN as PART command
-    // if (channel[0] == '0')
-    if (channel == "0") //test
+    if (channel == "0")
     {
         this->handlePart(client);
         return ;
@@ -55,7 +54,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         channel_list.erase(it_channel);
         it_channel = it_temp;
         key_list.erase(it_key);
-        return ; //test
+        return ;
     }
     //if now we don't have any values in the channels vector, then we just return
     if (channel_list.empty())
@@ -164,20 +163,12 @@ bool Server::isChannelExist(std::string &channel_name)
 
     upper_name = toUpperString(channel_name);
 
-    //test
-    std::cout << "upper_name: " << upper_name << std::endl;
-
     for (std::map<std::string, Channel>::const_iterator it_map = this->_availableChannels.begin();
         it_map != this->_availableChannels.end(); it_map++)
     {
         tmp_name = toUpperString(it_map->first);
-        std::cout << "tmp_name: " << tmp_name << std::endl;
         if (upper_name == tmp_name)
-        {
-            std::cout << "Channel found" << std::endl;//test
-            // channel_name = it_map->first; //test
             return (true);
-        }
     }
     return (false);
 }
