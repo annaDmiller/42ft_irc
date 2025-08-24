@@ -16,7 +16,7 @@ void Server::signalHandler(int signum)
     return ;
 }
 
-Server::Server() : _port(0), _sockfd(-1)
+Server::Server() : _port(0), _sockfd(-1), _password("")
 {
     return ;
 }
@@ -145,7 +145,7 @@ void Server::runServer()
                 if (this->_pollfds[ind].fd == this->_sockfd)
                     this->acceptNewClient();
                 else
-                //otherwise, we receive a new data from already connected client
+                	//otherwise, we receive a new data from already connected client
                     this->receiveNewData(this->_pollfds[ind].fd);
             }
         }
@@ -208,7 +208,7 @@ void Server::receiveNewData(int& clientFD)
     char buffer[1024];
     ssize_t bytes;
     size_t pos_end;
-    std::string raw_cmd;
+    std::string raw_cmd, remain_line;
 
     //we need an empty buffer to store the receiving message
     memset(buffer, 0, sizeof(buffer));
@@ -220,13 +220,12 @@ void Server::receiveNewData(int& clientFD)
         //if the return value of recv equals or less than 0, it means that the client disconnected
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " disconnected." << std::endl;
-
         this->clearClient(clientFD);
     }
     else
     {
         std::cout << "buffer1:\n" << buffer << "!" << std::endl;//test
-
+        std::cout << "bytes:\n" << bytes << "!" << std::endl;//test
         //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
         std::cout << "[DEBUG] ";
@@ -234,33 +233,39 @@ void Server::receiveNewData(int& clientFD)
 
         std::string str(buffer);
         std::cout << "str:\n" << str << "!" << std::endl;//test
-        for (size_t i = 0; i < str.size(); i++)
-        {
-            std::cout << "str[" << i << "]:" << str[i] << "(" << static_cast<int>(str[i]) << ")!" << std::endl;//test
-        }
+        // for (size_t i = 0; i < str.size(); i++)
+        // {
+        //     std::cout << "str[" << i << "]:" << str[i] << "(" << static_cast<int>(str[i]) << ")!" << std::endl;//test
+        // }
+
+        std::map<int, Client>::const_iterator it = _clients.find(clientFD);//test
+        if (it == _clients.end())//test
+            return ;
 
         Client& our_client = this->_clients[clientFD];
+
         our_client.appendBuffer(buffer);
-        std::cout << "our_client.getBuffer()0:\n" << our_client.getBuffer() << "!" << std::endl;//test
-            
-        std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
         for (size_t i = 0; i < str.size(); i++)
         {
             std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
         }
         size_t counter = 0;//test
-        while (our_client.getBuffer().find(TERMIN) != std::string::npos)//test
+
+        remain_line = our_client.getBuffer();
+        while (remain_line.find(TERMIN) != std::string::npos)//test
+        // while (our_client.getBuffer().find(TERMIN) != std::string::npos)
+
         {
             std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
             //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
             if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
-            {
-                std::cout << "No TERMIN" << std::endl;//test
                 return ;
-            }
+
             //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
             raw_cmd = our_client.getBuffer().substr(0, pos_end);
-            our_client.splitBuffer(0, pos_end + 2);// == this->_recvBuffer.erase(start, end);
+            our_client.splitBuffer(0, pos_end + 2); // == this->_recvBuffer.erase(start, end);
+            remain_line = our_client.getBuffer();
+
             std::cout << "-------------------" << std::endl;//test
             std::cout << "our_client.getBuffer(): " << counter << "\n" << our_client.getBuffer() << std::endl;//test
             std::cout << "-------------------" << std::endl;//test
@@ -280,7 +285,7 @@ void Server::receiveNewData(int& clientFD)
 void Server::disconnectClient(const int& client_fd)
 {
     this->clearClient(client_fd);
-    close(client_fd);
+    // close(client_fd); //already in clearClient(client_fd) function
     
 }
 
@@ -299,7 +304,7 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     //as we have initial commands in uppercase, we need to transform our command
     cmd = toUpperString(cmd);
 
-    //here we launch the command handlers depending on what we receive in CMD (check getMapCmdFunc method)
+    //here we launch the command handlers depending on what we receive in CMD
     std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);
 
     if (!client.isRegistered())
@@ -312,7 +317,10 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     }
 
     if (it != allowed_cmds.end())
+    {
+        std::cout << "allowed_cmds: "<< it->first << std::endl;//test
         (this->*it->second)(client, line);
+    }
     else
     {
         err_message = ERR_UNKNOWNCOMMAND(client.getNick(), cmd);
@@ -347,13 +355,13 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
     {
         body = std::string(":");
         if (message.length() > symb_left)
-            body += message.substr(0, symb_left) + TERMIN;
+            body += message.substr(0, symb_left);
         else
             body += message;
     }
-    
-    // full_message += body;
-    full_message += body + TERMIN; //test
+    full_message += body + TERMIN;
+
+    std::cout << "target_fd: " << target_fd << ", full_message: " << full_message << std::endl;//test
     send(target_fd, full_message.c_str(), full_message.size(), 0);
     return ;
 }
@@ -372,6 +380,8 @@ void Server::closeFDs()
 
 void Server::clearClient(const int& client_fd)
 {
+	int	fdToClose = client_fd;
+
     //make the client leave all the channels if it is registered
     if (this->_clients[client_fd].isRegistered())
         this->_clients[client_fd].leaveAllChannels(*this);
@@ -385,11 +395,12 @@ void Server::clearClient(const int& client_fd)
     {
         if (it->fd == client_fd)
         {
+			//change the value of the parameter 'client_fd' when the pollfd is erased
             this->_pollfds.erase(it);
             break ;
         }
     }
-    close(client_fd);
+    close(fdToClose);
     return ;
 }
 

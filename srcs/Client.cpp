@@ -1,10 +1,13 @@
 #include "Client.hpp"
 
+
+
 Client::Client() : 
-        _fd(-1), _nickname("*"), _hasNickname(false),
-        _isAuth(false), _isPasswordChecked(false),
-        _hasUsername(false), _isOperator(false),
-        _capNegotiation(false)//test
+        _fd(-1), _ipAddr(""), _recvBuffer(""),
+        _nickname("*"), _username(""), _realname(""),
+        _hasNickname(false), _isAuth(false), 
+        _isPasswordChecked(false), _hasUsername(false),
+        _isOperator(false), _capNegotiation(false)
 {
     return ;
 }
@@ -28,6 +31,7 @@ Client::Client(const Client& other)
     this->_hasUsername = other._hasUsername;
     this->_isOperator = other._isOperator;
     this->_joinedChannels = other._joinedChannels;
+    this->_capNegotiation = other._capNegotiation;
     return ;
 }
 
@@ -49,6 +53,7 @@ Client& Client::operator=(const Client& other)
         this->_hasUsername = other._hasUsername;
         this->_isOperator = other._isOperator;
         this->_joinedChannels = other._joinedChannels;
+        this->_capNegotiation = other._capNegotiation;
     }
     return (*this);
 }
@@ -156,7 +161,7 @@ void Client::setRealname(const std::string& realname)
 void Client::setUsername(const std::string& username)
 {
     this->_username = username;
-    this->_hasUsername = true;//test
+    this->_hasUsername = true;
     return ;
 }
 
@@ -187,23 +192,17 @@ bool Client::tryAuthenticate()
 
     if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
         this->_isAuth = true;
-    std::cout << "_isAuth " << _isAuth << std::endl;//test
     return (this->_isAuth);
 }
 
 bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
 {
-    //test
-    std::cout << "isAlreadyJoinedChannel() " << std::endl; 
-    std::cout << "channel_name: " << channel_name << std::endl; 
-
     if (this->_joinedChannels.empty())
         return (false);
     
     for (std::map<std::string, Channel *>::const_iterator it = this->_joinedChannels.begin();
         it != this->_joinedChannels.end(); it++)
     {
-         std::cout << "it->first: " << it->first << std::endl; 
         if (channel_name == it->first)
             return (true);
     }

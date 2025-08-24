@@ -35,7 +35,7 @@ all : $(NAME)
 $(NAME): $(OBJECTS)
 		$(CC) $(CC_FLAGS) -o $(NAME) $(OBJECTS)
 
-%.o:%.cpp
+%.o:%.cpp includes/Channel.hpp includes/Client.hpp includes/Macros.hpp includes/Server.hpp
 		$(CC) $(CC_FLAGS) -c $< -o $@
 
 clean:

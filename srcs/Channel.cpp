@@ -1,7 +1,9 @@
 # include "Channel.hpp"
 # include "Server.hpp"
 
-Channel::Channel() : _membersLimit(-1)
+Channel::Channel() : _name(""), _topic(""), _whoSetTopic(""),
+                    _whenSetTopic(""), _key(""), _modes(""),
+                    _membersLimit(-1), _isJustCreated(false)
 {
     return ;
 }
@@ -20,6 +22,7 @@ Channel::Channel(const Channel& other)
     this->_modes = other._modes;
     this->_membersLimit = other._membersLimit;
     this->_key = other._key;
+    this->_isJustCreated = other._isJustCreated;
     return ;
 }
 
@@ -34,6 +37,7 @@ Channel& Channel::operator=(const Channel& other)
         this->_modes = other._modes;
         this->_membersLimit = other._membersLimit;
         this->_key = other._key;
+        this->_isJustCreated = other._isJustCreated;
     }
     return (*this);
 }
@@ -63,7 +67,6 @@ void Channel::setTopic(const std::string& topic, const std::string &nick)
     std::ostringstream os_time;
     os_time << setTime;
     this->_whenSetTopic = std::string(os_time.str());
-    // this->_whenSetTopic = std::to_string(setTime);
 
     return ;
 }
@@ -75,14 +78,12 @@ void Channel::addMode(char new_mode)
     return ;
 }
 
-//to modify
 void Channel::removeMode(char mode_to_remove)
 {
     size_t ind = this->_modes.find(mode_to_remove, 0);
 
     if (ind != std::string::npos)
-		this->_modes.erase(ind, 1);//test
-        // this->_modes.erase(mode_to_remove);
+		this->_modes.erase(ind, 1);
     return ;
 }
 
@@ -104,7 +105,7 @@ void Channel::addMember(const int& client_fd, Client* client)
 
 void Channel::removeMember(const int& client_fd, Server& server)
 {
-    std::set<int>::iterator oper_it;
+    std::set<int>::iterator oper_it, invited_it;
 
     this->_members.erase(client_fd);
 
@@ -120,11 +121,16 @@ void Channel::removeMember(const int& client_fd, Server& server)
         }
     }
 
+    invited_it = this->_invited_members.find(client_fd);
+    if (invited_it != this->_invited_members.end())
+        this->_invited_members.erase(client_fd);
+
     if (this->_members.empty())
         server.deleteChannel(this->getName());
 
     return ;
 }
+
 
 void Channel::addUserToInviteList(int& client_fd)
 {
@@ -169,6 +175,7 @@ void Channel::sendJoinMessages(const Client& client) const
     
     message = client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
     this->sendMessageToAll(message);
+
     if (this->_isJustCreated)
     {
         message = std::string(":") + HOST + " " + MODE + " " + this->_name + TERMIN;
@@ -209,10 +216,7 @@ bool Channel::isOperator(int client_fd) const
     std::cout << std::endl;
 
     if (this->_operators.find(client_fd) != this->_operators.end())
-    {
-        std::cout << client_fd << " is an operator" << std::endl;//test
         return (true);  
-    }
     // if (std::lower_bound(this->_operators.begin(), this->_operators.end(), client_fd)
     //     != this->_operators.end())
     //     return (true);
@@ -283,10 +287,16 @@ void Channel::sendMessageToAll(const std::string& message) const
 void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
         const std::string& message, const int& except_fd, const std::string& cmd) const
 {
+
+     std::cout << "sendMessageToAll 1" << std::endl;//test
+     std::cout << "this->_members.size: " << this->_members.size() << std::endl;//test
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
+    {
+        std::cout << "Client fd: " << it->first << std::endl;//test
         if (it->first != except_fd)
             server.sendMessageToUser(client, it->first, target, message, cmd);
+    }
 
     return ;
 }
@@ -294,9 +304,12 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
 void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
         const std::string& message, std::set<int>& except_fds, const std::string& cmd) const
 {
+    std::cout << "sendMessageToAll 2" << std::endl;//test
+    std::cout << "this->_members.size: " << this->_members.size() << std::endl;//test
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
     {
+        std::cout << "Client fd: " << it->first << std::endl;//test
         if (except_fds.find(it->first) != except_fds.end())
             continue ;
         
@@ -442,10 +455,10 @@ void Channel::printModes(Client& client) const
     {
         if (ind_k > ind_l)
             // mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
-            mode_params = ft_itos(this->_membersLimit) + " ***";
+            mode_params = ft_itos(this->_membersLimit) + " ***";//test
         else 
             // mode_params = this->_key + " " + ft_itos(this->_membersLimit);
-            mode_params = "*** " + ft_itos(this->_membersLimit);
+            mode_params = "*** " + ft_itos(this->_membersLimit);//test
     }
     else
     {

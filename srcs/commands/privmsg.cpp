@@ -15,6 +15,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
     else
         args >> message;
 
+    std::cout << "message: "<< message << "!" << std::endl;//test
     //Firstly, we check whether we have empty arguments for the command
     if (receivers.empty())
     {
@@ -44,6 +45,8 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
         //for each receiver, we must check whether it is channel or a user - different behavior
         if (isChannelTarget(rec_list[ind]))
         {
+
+            std::cout << "isChannelTarget() rec_list[ind]: "<< ind << "!" << std::endl;//test
             //handle channel
             if (!isChannelExist(rec_list[ind]))
             {

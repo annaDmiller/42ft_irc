@@ -22,7 +22,7 @@ class Client
         bool _isPasswordChecked;
         bool _hasUsername;
         bool _isOperator;
-        bool _capNegotiation; //test
+        bool _capNegotiation;
         std::map<std::string, Channel*> _joinedChannels;
 
     public:

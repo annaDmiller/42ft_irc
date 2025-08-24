@@ -34,7 +34,7 @@ class Channel;
 
 class Server
 {
-    private:
+//     private:
         int _port; //-> server port2
         int _sockfd; //-> server socket FD
         std::string _password;
