@@ -77,7 +77,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     long limit;
     char *pscalar_end;
 
-     std::cout << "modes: " << modes << std::endl; //test
+    std::cout << "modes: " << modes << std::endl; //test
 
 
     //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param

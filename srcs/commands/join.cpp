@@ -2,15 +2,15 @@
 
 void Server::handleJoin(Client& client, std::istringstream& args)
 {
-    std::string channel, key, err_response, temp_str, channel_modes;
+    std::string channel_name, key, err_response, temp_str, channel_modes;
     std::vector<std::string> channel_list, key_list;
-    std::vector<std::string>::iterator it_channel, it_key, it_temp;
+    std::vector<std::string>::iterator it_channel, it_key;
     size_t temp_ind;
 
     //firstly, we separate the words from args stream into channel (channel_name) and key strings
-    args >> channel >> key;
+    args >> channel_name >> key;
 
-    if (channel.empty())
+    if (channel_name.empty())
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), JOIN);
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
@@ -18,14 +18,14 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     }
 
     //The message '0' is handled by JOIN as PART command
-    if (channel == "0")
+    if (channel_name == "0")
     {
         this->handlePart(client);
         return ;
     }
 
     //We split our channel and key strings into the vectors to handle joining of multiple channels per command
-    channel_list = ft_split(channel, ',');
+    channel_list = ft_split(channel_name, ',');
     if (!key.empty())
         key_list = ft_split(key, ',');
     if (key_list.size() != channel_list.size())
@@ -35,31 +35,30 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             key_list.push_back("");
     }
 
+    std::cout << "key_list.size(): " << key_list.size() << std::endl;//test
+
     //we check that the channel_name has correct mask. If it's not, we send error and erase it from the vector
     it_channel = channel_list.begin();
     while (it_channel != channel_list.end())
     {
-        std::cout << "*it_channel: " << *it_channel << std::endl;//test
         if (isValidChannelName(*it_channel))
         {
-            std::cout << "*isValidChannelName true: " << *it_channel << std::endl;//test
             it_channel++;
             continue ;
         }
         err_response = ERR_BADCHANMASK(client.getNick(), *it_channel);
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
-        temp_ind =  it_channel - channel_list.begin();
+        temp_ind = it_channel - channel_list.begin();
         it_key = key_list.begin() + temp_ind;
-        it_temp = it_channel + 1;
         channel_list.erase(it_channel);
-        it_channel = it_temp;
+        it_channel = channel_list.begin() + temp_ind;
         key_list.erase(it_key);
-        return ;
     }
+
     //if now we don't have any values in the channels vector, then we just return
     if (channel_list.empty())
         return ;
-
+    std::cout << "2.handleJoin: " << std::endl;//test
     //now, we iterater channels one by one from the vector
     for (size_t ind = 0; ind < channel_list.size(); ind++)
     {
@@ -82,6 +81,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             new_channel.setName(channel_list[ind]);
             new_channel.addOperator(client.getFD());
             new_channel.checkJustCreated();
+            new_channel.setCreationTime();
             this->_availableChannels[channel_list[ind]] = new_channel;
         }
         else

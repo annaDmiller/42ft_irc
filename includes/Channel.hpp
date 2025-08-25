@@ -16,6 +16,7 @@ class Channel
         std::string _topic;
         std::string _whoSetTopic;
         std::string _whenSetTopic;
+        std::string _whenCreated;
         std::set<int> _operators;
         std::set<int> _invited_members;
         std::map<int, Client*> _members;
@@ -33,10 +34,13 @@ class Channel
         Channel& operator=(const Channel& other);
 
         std::string getName() const;
+        std::string whoSetTopic() const;
         std::string getChannelModes() const;
+        std::string getCreationTime() const;
 
         void setName(const std::string& name);
         void setTopic(const std::string& topic, const std::string& nick);
+        void setCreationTime();
         void addMode(char new_mode);
         void removeMode(char mode_to_remove);
         void addOperator(const int& client_fd);

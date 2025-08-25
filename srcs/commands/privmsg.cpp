@@ -24,7 +24,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (message.empty())
+    if (message.empty() || message.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
         err_message = ERR_NOTEXTTOSEND(client.getNick());
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);

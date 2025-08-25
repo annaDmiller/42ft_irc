@@ -2,8 +2,8 @@
 # include "Server.hpp"
 
 Channel::Channel() : _name(""), _topic(""), _whoSetTopic(""),
-                    _whenSetTopic(""), _key(""), _modes(""),
-                    _membersLimit(-1), _isJustCreated(false)
+                    _whenSetTopic(""), _whenCreated(""), _key(""),
+                    _modes(""), _membersLimit(-1), _isJustCreated(false)
 {
     return ;
 }
@@ -17,7 +17,11 @@ Channel::Channel(const Channel& other)
 {
     this->_name = other._name;
     this->_topic = other._topic;
+    this->_whoSetTopic = other._whoSetTopic;
+    this->_whenSetTopic = other._whenSetTopic;
+    this->_whenCreated = other._whenCreated;
     this->_operators = other._operators;
+    this->_invited_members = other._invited_members;
     this->_members = other._members;
     this->_modes = other._modes;
     this->_membersLimit = other._membersLimit;
@@ -32,7 +36,11 @@ Channel& Channel::operator=(const Channel& other)
     {
         this->_name = other._name;
         this->_topic = other._topic;
+        this->_whoSetTopic = other._whoSetTopic;
+        this->_whenSetTopic = other._whenSetTopic;
+        this->_whenCreated = other._whenCreated;
         this->_operators = other._operators;
+        this->_invited_members = other._invited_members;
         this->_members = other._members;
         this->_modes = other._modes;
         this->_membersLimit = other._membersLimit;
@@ -45,6 +53,11 @@ Channel& Channel::operator=(const Channel& other)
 std::string Channel::getName() const
 {
     return (this->_name);
+}
+
+std::string Channel::whoSetTopic() const
+{
+    return (this->_whoSetTopic);
 }
 
 std::string Channel::getChannelModes() const
@@ -67,8 +80,21 @@ void Channel::setTopic(const std::string& topic, const std::string &nick)
     std::ostringstream os_time;
     os_time << setTime;
     this->_whenSetTopic = std::string(os_time.str());
-
     return ;
+}
+
+void Channel::setCreationTime()
+{
+    time_t setTime = time(NULL);
+    std::ostringstream os_time;
+    os_time << setTime;
+    this->_whenCreated = std::string(os_time.str());
+    return ;
+}
+
+std::string Channel::getCreationTime() const
+{
+    return (this->_whenCreated);
 }
 
 void Channel::addMode(char new_mode)
@@ -287,13 +313,9 @@ void Channel::sendMessageToAll(const std::string& message) const
 void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
         const std::string& message, const int& except_fd, const std::string& cmd) const
 {
-
-     std::cout << "sendMessageToAll 1" << std::endl;//test
-     std::cout << "this->_members.size: " << this->_members.size() << std::endl;//test
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
     {
-        std::cout << "Client fd: " << it->first << std::endl;//test
         if (it->first != except_fd)
             server.sendMessageToUser(client, it->first, target, message, cmd);
     }
@@ -304,12 +326,9 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
 void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
         const std::string& message, std::set<int>& except_fds, const std::string& cmd) const
 {
-    std::cout << "sendMessageToAll 2" << std::endl;//test
-    std::cout << "this->_members.size: " << this->_members.size() << std::endl;//test
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
     {
-        std::cout << "Client fd: " << it->first << std::endl;//test
         if (except_fds.find(it->first) != except_fds.end())
             continue ;
         
@@ -447,18 +466,19 @@ void Channel::printModes(Client& client) const
     std::string modes, mode_params, message;
     size_t ind_k, ind_l;
 
-    modes = std::string("+") + this->_modes;
+    if (!_modes.empty())
+        modes = std::string("+") + this->_modes;
     ind_k = this->_modes.find('k', 0);
     ind_l = this->_modes.find('l', 0);
 
     if (ind_k != std::string::npos && ind_l != std::string::npos)
     {
         if (ind_k > ind_l)
-            // mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
-            mode_params = ft_itos(this->_membersLimit) + " ***";//test
+            mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
+            // mode_params = ft_itos(this->_membersLimit) + " ***";//test
         else 
-            // mode_params = this->_key + " " + ft_itos(this->_membersLimit);
-            mode_params = "*** " + ft_itos(this->_membersLimit);//test
+            mode_params = this->_key + " " + ft_itos(this->_membersLimit);
+            // mode_params = "*** " + ft_itos(this->_membersLimit);//test
     }
     else
     {
@@ -466,9 +486,12 @@ void Channel::printModes(Client& client) const
             mode_params = ft_itos(this->_membersLimit);
         if (ind_k != std::string::npos)
             mode_params = this->_key;
+            // mode_params = "*** ";
     }
 
     message = RPL_CHANNELMODEIS(client.getNick(), this->_name, modes, mode_params);
+    send(client.getFD(), message.c_str(), message.size(), 0);
+    message = RPL_CREATIONTIME(client.getNick(), this->_name, this->_whenCreated);
     send(client.getFD(), message.c_str(), message.size(), 0);
     return ;
 }

@@ -12,7 +12,7 @@ void Server::handleNickname(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (nick.empty())
+    if (nick.empty() || nick.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
         err_response = ERR_NONICKNAMEGIVEN(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);

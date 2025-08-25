@@ -4,8 +4,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 {
     std::string welcome_mess, err_response;
 
-    std::cout << "handleInitCommands" << std::endl;//test
-    std::cout << "cmd: " << cmd << std::endl;//test
+    std::cout << "handleInitCommands:" << cmd << std::endl;//test
 
     if (cmd == NICK)
         handleNickname(client, args);
@@ -48,20 +47,16 @@ void Server::handleCap(Client& client, std::istringstream& args)
 {
     std::string arg, err_response;
     args >> arg;
-    std::cout << "arg: " << arg << "!" << std::endl;//test
 
     if (arg == "LS")
     {
         client.setCapNegotiation(true);
         std::string cap = "CAP * LS :\r\n";
-        send(client.getFD(), cap.c_str(), cap.length(), 0);//test
+        send(client.getFD(), cap.c_str(), cap.length(), 0);
         return ;
     }
     else if (arg == "END")
-    {
         client.setCapNegotiation(false);
-        std::cout << "END " << arg << std::endl;//test
-    }
     else
     {
         err_response = ERR_NOTREGISTERED(client.getNick());
@@ -109,7 +104,6 @@ void Server::handlePassword(Client& client, std::istringstream& args)
 
 void Server::handleUsername(Client& client, std::istringstream& args)
 {
-    std::cout << "handleUsername" << std::endl;//test
     //I named the below vars based on the params of command according to RFC 2812
     //However, mode and unused params are not used in our project
     std::string username, mode, unused, realname, err_response;
@@ -118,7 +112,6 @@ void Server::handleUsername(Client& client, std::istringstream& args)
 
     if (client.isRegistered())
     { 
-        std::cout << "handleUsername 1" << std::endl;//test
         err_response = ERR_ALREADYREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
@@ -126,24 +119,23 @@ void Server::handleUsername(Client& client, std::istringstream& args)
 
     if (!client.isPassChecked())
     {
-         std::cout << "handleUsername 2" << std::endl;//test
         err_response = "ERROR :Password required\r\n";
         send(client.getFD(), err_response.c_str(), err_response.size(), 0);
         return ;
     }
 
-    if (username.empty() || realname.empty())
+    if (username.empty() || realname.empty()
+        || username.find_first_not_of(" \t\n\v\f\r") == std::string::npos
+        || realname.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
-         std::cout << "handleUsername 3" << std::endl;//test
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
-    std::cout << "handleUsername 4" << std::endl;//test
     if (realname[0] == ':')
         realname = realname.substr(1);
-     std::cout << "username " << username << std::endl;//test
-      std::cout << "realname " << realname << std::endl;//test
+    std::cout << "username " << username << std::endl;//test
+    std::cout << "realname " << realname << std::endl;//test
 
     client.setUsername(username);
     client.setRealname(realname);

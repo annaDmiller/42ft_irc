@@ -71,6 +71,7 @@
 # define RPL_ENDOFNAMES(nick, channel_name) (std::string(":") + HOST + " 366 " + nick + " " + channel_name + " :End of /NAMES list" + TERMIN)
 # define RPL_INVITING(nick, channel_name, target_nick) (std::string(":") + HOST + " 341 " + nick + " " + target_nick + " " + channel_name + TERMIN)
 # define RPL_CHANNELMODEIS(nick, channel_name, mode, mode_params) (std::string(":") + HOST + " 324 " + nick + " " + channel_name + " " + mode + " " + mode_params + TERMIN)
+# define RPL_CREATIONTIME(nick, channel_name, creationtime) (std::string(":") + HOST + " 329 " + nick + " " + channel_name + " " + creationtime + TERMIN)
 # define RPL_YOUREOPER(nick) (std::string(":") + HOST + " 381 " + nick + " :You are now an IRC operator" + TERMIN)
 
 //Macros: Additional messages

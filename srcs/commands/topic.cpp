@@ -3,6 +3,7 @@
 void Server::handleTopic(Client& client, std::istringstream& args)
 {
     std::string channel_name, topic, err_message, message, channel_modes;
+    bool        isColon = false;
 
     args >> channel_name;
     if (args.peek() == ' ')
@@ -13,7 +14,10 @@ void Server::handleTopic(Client& client, std::istringstream& args)
         args >> topic;
     
     if (!topic.empty() && topic[0] == ':')
+    {
+        isColon = true;
         topic = topic.substr(1);
+    }
 
     if (channel_name.empty())
     {
@@ -39,8 +43,13 @@ void Server::handleTopic(Client& client, std::istringstream& args)
     Channel& channel = this->_availableChannels[channel_name];
     if (topic.empty())
     {
-        channel.printTopic(client);
-        return ;
+        if (!isColon)
+		{
+            channel.printTopic(client);
+			return ;
+		}
+		//If topic is an empty string, the topic for the channel will be cleared
+		channel.setTopic("", client.getNick());
     }
 
     channel_modes = channel.getChannelModes();
@@ -51,7 +60,8 @@ void Server::handleTopic(Client& client, std::istringstream& args)
         return ;
     }
 
-    channel.setTopic(topic, client.getNick());
+	if (!topic.empty())
+    	channel.setTopic(topic, client.getNick());
     channel.sendMessageToAll(client, *this, channel_name, topic, -1, TOPIC);
     return ;
 }
