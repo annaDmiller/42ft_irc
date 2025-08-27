@@ -7,8 +7,9 @@ bool checkPassword(const std::string& password)
 		return (false);
     for (size_t ind = 0; ind < password.length(); ind++)
     {
-        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)
-        	return (false);
+        // if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)//test
+        if (std::isspace(password[ind]) != 0)
+            return (false);
     }
     return (true);
 }

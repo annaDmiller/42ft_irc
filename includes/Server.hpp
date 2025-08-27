@@ -85,7 +85,7 @@ class Server
         std::string modeHandlingChannel(Client& client, Channel& channel,
                 std::vector<std::string>& params);
         bool isValidModes(const std::string& modes, char& incorrect_mode);
-        bool isValidMode(char mode);//test
+        bool isValidMode(char mode);
         void removeOperMode(std::vector<char>& modes);
         std::string composeMessage(std::vector<char>& modes, std::vector<std::string>& params) const;
 

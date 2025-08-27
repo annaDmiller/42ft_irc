@@ -35,8 +35,6 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             key_list.push_back("");
     }
 
-    std::cout << "key_list.size(): " << key_list.size() << std::endl;//test
-
     //we check that the channel_name has correct mask. If it's not, we send error and erase it from the vector
     it_channel = channel_list.begin();
     while (it_channel != channel_list.end())
@@ -58,7 +56,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     //if now we don't have any values in the channels vector, then we just return
     if (channel_list.empty())
         return ;
-    std::cout << "2.handleJoin: " << std::endl;//test
+
     //now, we iterater channels one by one from the vector
     for (size_t ind = 0; ind < channel_list.size(); ind++)
     {
@@ -127,8 +125,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
 
 bool Server::isValidChannelName(const std::string& chan_name) const
 {
-    if (chan_name[0] != '#' && chan_name[0] != '&'
-            && chan_name[0] != '+')
+    if (chan_name[0] != '#')        
         return (false);
 
     if (chan_name.length() == 1)

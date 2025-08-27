@@ -7,8 +7,6 @@ void Server::handleMode(Client& client, std::istringstream& args)
 
     args >> channel_name;
 
-    std::cout << "channel_name: " << channel_name << "!" << std::endl; //test
-
     std::getline(args, params);
 
     if (channel_name.empty())
@@ -18,12 +16,11 @@ void Server::handleMode(Client& client, std::istringstream& args)
         return ;
     }
 
-    if (checkDupNicknamesOnServer(channel_name) == true) //test
+    if (checkDupNicknamesOnServer(channel_name) == true)
         return ;
 
     if (isChannelExist(channel_name) == false)
     {
-        std::cout << "handleMode 1: " << std::endl; //test
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
@@ -32,7 +29,6 @@ void Server::handleMode(Client& client, std::istringstream& args)
     Channel& channel = this->_availableChannels[channel_name];
     if (!client.isAlreadyJoinedChannel(channel_name) || !channel.isOperator(client.getFD()))
     {
-        std::cout << "handleMode 2: " << std::endl; //test
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
         send(client.getFD(), err_message.c_str(), err_message.size(), 0);
         return ;
@@ -53,11 +49,10 @@ void Server::handleMode(Client& client, std::istringstream& args)
     params_mode = ft_split(params, ' ');
     message = modeHandlingChannel(client, channel, params_mode);
 
-    if (message.size() > 0) //test
+    if (message.size() > 0)
     {
         //after handling is done, we need to output message for the client itself and all member of the channel
-        // message = client.getPrefix() + MODE + channel_name + message;
-        message = client.getPrefix() + " " + MODE + " " + channel_name + " " + message + TERMIN;//test
+        message = client.getPrefix() + " " + MODE + " " + channel_name + " " + message + TERMIN;
         channel.sendMessageToAll(message);
     }
     return ;
@@ -66,24 +61,17 @@ void Server::handleMode(Client& client, std::istringstream& args)
 std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
-    std::cout << "modeHandlingChannel" << std::endl; //test
     size_t ind_param = 1, ind_mode = 0;
     std::string &modes = params[0], err_message, pass, message, tmp_param;
     std::vector<std::string> params_for_message;
     std::vector<char> modes_for_message;
     bool isAdding = true;
-    // char incorrect_mode;
     int member_limit = -1, target_fd;
     long limit;
     char *pscalar_end;
 
-    std::cout << "modes: " << modes << std::endl; //test
-
-
     //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param
     //That's why we check valid modes only in the first iterator of params vector
-
-    //test a modifier et executer les modes valides precedant le mauvais mode
     // if (!isValidModes(modes, incorrect_mode))
     // {
     //     err_message = ERR_UNKNOWNMODE(client.getNick(), incorrect_mode);
@@ -102,7 +90,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (ind_mode < modes.size())
     {
-        std::cout << "1.mode[" << ind_mode << "]: " << modes[ind_mode] << std::endl; //test
         if (modes[ind_mode] == '-')
         {
             isAdding = false;
@@ -120,7 +107,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
         if (ind_mode >= modes.size())
             break;
-        std::cout << "2.mode[" << ind_mode << "]: " << modes[ind_mode] << std::endl; //test
+
         switch (modes[ind_mode])
         {
             //for this and next modes' handling:
@@ -154,7 +141,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
                     modes_for_message.push_back('l');
-                    // if (member_limit != -1 && !isAdding)
                     if (member_limit != -1 && isAdding)
                         params_for_message.push_back(params[ind_param - 1]);
                 }

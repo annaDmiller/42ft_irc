@@ -231,21 +231,8 @@ bool Channel::isEmpty() const
 
 bool Channel::isOperator(int client_fd) const
 {
-    //test
-    std::cout << "isOperator" << std::endl;
-    std::cout << "client_fd: " << client_fd << std::endl;
-    std::cout << "operators fd: ";
-    //test
-    for (std::set<int>::const_iterator it = this->_operators.begin();
-        it != this->_operators.end(); it++)  
-        std::cout << *it << " ";
-    std::cout << std::endl;
-
     if (this->_operators.find(client_fd) != this->_operators.end())
         return (true);  
-    // if (std::lower_bound(this->_operators.begin(), this->_operators.end(), client_fd)
-    //     != this->_operators.end())
-    //     return (true);
     return (false);
 }
 
@@ -395,11 +382,12 @@ bool Channel::handleTopicOper(const bool& isAdding)
 
 bool Channel::isValidPassword(const std::string& password) const
 {
-    if (password.empty() || password.length() < 3 || password.length() > 20)
+    if (password.empty() || password.length() > 20)
 		return (false);
     for (size_t ind = 0; ind < password.length(); ind++)
     {
-        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)
+        if (std::isspace(password[ind]) != 0)
+        // if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)//test
         	return (false);
     }
     return (true);
@@ -414,7 +402,7 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
         if (isValidPassword(password) == false)
         {
             err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
-                            "Password requirements: alphanumeric characters only and size range: [3-20]");
+                            "Invalid password: spaces forbidden and maximum length: 20");
             send(client.getFD(), err_message.c_str(), err_message.size(), 0);
             return (false);
         }
@@ -486,7 +474,7 @@ void Channel::printModes(Client& client) const
             mode_params = ft_itos(this->_membersLimit);
         if (ind_k != std::string::npos)
             mode_params = this->_key;
-            // mode_params = "*** ";
+            // mode_params = "*** ";//test
     }
 
     message = RPL_CHANNELMODEIS(client.getNick(), this->_name, modes, mode_params);

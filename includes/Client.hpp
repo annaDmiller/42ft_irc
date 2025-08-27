@@ -51,7 +51,7 @@ class Client
         void checkPassword();
         void addChannel(const std::string& channel_name, Channel* channel);
         void setOperator(bool value);
-        void setCapNegotiation(bool value);//test
+        void setCapNegotiation(bool value);
         bool getCapNegotiation() const;
 
         void splitBuffer(size_t start, size_t end);

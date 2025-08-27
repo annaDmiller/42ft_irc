@@ -61,10 +61,9 @@ bool Server::isValidNickname(const std::string& nick) const
 bool Server::checkDupNicknamesOnServer(std::string& nick)
 {
     std::string upper_nick, tmp_nick;
-    size_t size = this->_clients.size();
 
     upper_nick = toUpperString(nick);
-    for (size_t ind = 0; ind < size; ind++)
+    for (size_t ind = 0; ind < this->_clients.size(); ind++)
     {
         tmp_nick = toUpperString(this->_clients[ind].getNick());
         if (this->_clients[ind].isHaveNick() && tmp_nick == upper_nick)

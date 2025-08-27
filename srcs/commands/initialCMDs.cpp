@@ -4,8 +4,6 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 {
     std::string welcome_mess, err_response;
 
-    std::cout << "handleInitCommands:" << cmd << std::endl;//test
-
     if (cmd == NICK)
         handleNickname(client, args);
     else if (cmd == USER)
@@ -21,23 +19,28 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     }
     else
     {
-        std::cout << "ERR_NOTREGISTERED " << std::endl;//test
         err_response = ERR_NOTREGISTERED(client.getNick());
         send(client.getFD(), err_response.c_str(), err_response.length(), 0);
         return ;
     }
-    
+
     if (client.getCapNegotiation() == false && client.tryAuthenticate())
     {
-        std::cout << "tryAuthenticate " << std::endl;//test
+		char output[50];
+		time_t setTime = time(NULL);
+		struct tm dateTime = *localtime(&setTime);
+		strftime(output, 50, "%m/%d/%Y", &dateTime);
+
         welcome_mess = RPL_WELCOME(client.getNick());
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
-        welcome_mess = RPL_CREATED(client.getNick(), CREATEDDATE);
+        welcome_mess = RPL_CREATED(client.getNick(), output);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
         welcome_mess = RPL_MYINFO(client.getNick(), SERVERNAME, VERSION, USERMODES, CHANNELMODES);
         send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        welcome_mess = RPL_ISUPPORT(client.getNick(), ISUPPORT);
+    	send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
     }
 
     return ;
@@ -134,8 +137,6 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     }
     if (realname[0] == ':')
         realname = realname.substr(1);
-    std::cout << "username " << username << std::endl;//test
-    std::cout << "realname " << realname << std::endl;//test
 
     client.setUsername(username);
     client.setRealname(realname);

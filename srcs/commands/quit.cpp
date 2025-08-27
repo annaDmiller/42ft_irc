@@ -2,6 +2,7 @@
 
 void Server::handleQuit(Client& client, std::istringstream& args)
 {
+    std::cout << "0.handleQuit fd: " << client.getFD() << std::endl;
     std::string message, rpl_message;
 
     if (args.peek() == ' ')
@@ -30,7 +31,7 @@ void Server::handleQuit(Client& client, std::istringstream& args)
     rpl_message = QUIT_MESS(client.getIPAddr(), message);
     if (rpl_message.length() > MAXLINELENGTH)
         rpl_message = rpl_message.substr(0, MAXLINELENGTH - 3) + ")" + TERMIN;
-    send(client.getFD(), rpl_message.c_str(), rpl_message.size(), 0);
+    send(client.getFD(), rpl_message.c_str(), rpl_message.size(), MSG_NOSIGNAL);
     this->clearClient(client.getFD());
     
     return ;

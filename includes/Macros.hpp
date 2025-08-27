@@ -4,7 +4,7 @@
 # define TERMIN "\r\n" //-> line termination in IRC (based on RFC 2812)
 # define SERVERNAME "FT_IRC"
 # define VERSION "1.0"
-# define CREATEDDATE "13.08.2025" //to check
+// # define CREATEDDATE "2025"
 # define USERMODES "-"
 # define CHANNELMODES "iklt"
 # define HOST "irc.local"
@@ -12,6 +12,7 @@
 # define MAXLINELENGTH 512
 # define OPER_NAME "ADMIN"
 # define OPER_PASSWORD "ADMIN"
+# define ISUPPORT "CASEMAPPING=ascii CHANLIMIT=#:10 KEYLEN=20"
 
 //Command names
 # define USER "USER" //DONE
@@ -60,9 +61,9 @@
 # define ERR_INVALIDMODEPARAM(nick, channel_name, mode_char, parameter, description) (std::string(":") + HOST + " 696 " + nick + " " + channel_name + " " + mode_char + " " + parameter + ": " + description + TERMIN)
 
 //Macros: Replies to the client
-# define RPL_WELCOME(nick) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network " + nick + TERMIN)
+# define RPL_WELCOME(nick) (std::string(":") + HOST + " 001 " + nick + " :Welcome to the Internet Relay Network, " + nick + TERMIN)
 # define RPL_YOURHOST(nick, servername, version) (std::string(":") + HOST + " 002 " + nick + " :Your host is " + servername + ", running version " + version + TERMIN)
-# define RPL_CREATED(nick, date) (std::string(":") + HOST + " 003 " + nick + " :This server was created " + date + TERMIN)
+# define RPL_CREATED(nick, date) (std::string(":") + HOST + " 003 " + nick + " :This server was created on " + date + TERMIN)
 # define RPL_MYINFO(nick, servername, version, user_modes, channel_modes) (std::string(":") + HOST + " 004 " + nick + " " + servername + " " + version + " " + user_modes + " " + channel_modes + TERMIN)
 # define RPL_TOPIC(nick, channel_name, topic) (std::string(":") + HOST + " 332 " + nick + " " + channel_name + " :" + topic + TERMIN)
 # define RPL_TOPICWHOWHEN(nick, channel_name, who, when) (std::string(":") + HOST + " 333 " + nick + " " + channel_name + " " + who + " " + when + TERMIN)
@@ -73,6 +74,7 @@
 # define RPL_CHANNELMODEIS(nick, channel_name, mode, mode_params) (std::string(":") + HOST + " 324 " + nick + " " + channel_name + " " + mode + " " + mode_params + TERMIN)
 # define RPL_CREATIONTIME(nick, channel_name, creationtime) (std::string(":") + HOST + " 329 " + nick + " " + channel_name + " " + creationtime + TERMIN)
 # define RPL_YOUREOPER(nick) (std::string(":") + HOST + " 381 " + nick + " :You are now an IRC operator" + TERMIN)
+# define RPL_ISUPPORT(nick, mode) (std::string(":") + HOST + " 005 " + nick + " " + mode + " :are supported by this server" + TERMIN)
 
 //Macros: Additional messages
 # define QUIT_MESS(host, message) ("ERROR :Closing Link: " + host + " (" + message + ")" + TERMIN)

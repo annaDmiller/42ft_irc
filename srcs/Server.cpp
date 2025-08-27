@@ -198,16 +198,14 @@ void Server::acceptNewClient()
 
     //here we send a welcome message to the connected client
     send(client_fd, init_mess.c_str(), init_mess.length(), 0);
-
     return ;
 }
 
 void Server::receiveNewData(int& clientFD)
 {
-    std::cout << "receiveNewData" << std::endl;//test
     char buffer[1024];
-    ssize_t bytes;
-    size_t pos_end;
+    ssize_t bytes = 0;
+    size_t pos_end = 0, termin_len = 0;
     std::string raw_cmd, remain_line;
 
     //we need an empty buffer to store the receiving message
@@ -234,36 +232,37 @@ void Server::receiveNewData(int& clientFD)
         std::string str(buffer);
         std::cout << "str:\n" << str << "!" << std::endl;//test
         // for (size_t i = 0; i < str.size(); i++)
-        // {
         //     std::cout << "str[" << i << "]:" << str[i] << "(" << static_cast<int>(str[i]) << ")!" << std::endl;//test
-        // }
 
-        std::map<int, Client>::const_iterator it = _clients.find(clientFD);//test
-        if (it == _clients.end())//test
+        std::map<int, Client>::const_iterator it = _clients.find(clientFD);
+        if (it == _clients.end())
             return ;
 
         Client& our_client = this->_clients[clientFD];
 
         our_client.appendBuffer(buffer);
-        for (size_t i = 0; i < str.size(); i++)
-        {
-            std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
-        }
+        // for (size_t i = 0; i < str.size(); i++)
+        //     std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
         size_t counter = 0;//test
 
         remain_line = our_client.getBuffer();
-        while (remain_line.find(TERMIN) != std::string::npos)//test
-        // while (our_client.getBuffer().find(TERMIN) != std::string::npos)
-
+        //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
+        while ((pos_end = remain_line.find(TERMIN)) != std::string::npos || (pos_end = remain_line.find_first_of(TERMIN)) != std::string::npos)
         {
             std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
-            //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
-            if ((pos_end = our_client.getBuffer().find(TERMIN)) == std::string::npos)
-                return ;
+
 
             //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
+            if (remain_line.find(TERMIN) != std::string::npos)
+                termin_len = 2;
+            else if (remain_line.find_first_of(TERMIN) != std::string::npos)
+                termin_len = 1;
+
             raw_cmd = our_client.getBuffer().substr(0, pos_end);
-            our_client.splitBuffer(0, pos_end + 2); // == this->_recvBuffer.erase(start, end);
+            if (raw_cmd.size() > (512 - termin_len))//test
+                raw_cmd = raw_cmd.substr(0, 512 - termin_len);//test
+            // our_client.splitBuffer(0, pos_end + 2); // == this->_recvBuffer.erase(start, end);
+            our_client.splitBuffer(0, pos_end + termin_len); // == this->_recvBuffer.erase(start, end);
             remain_line = our_client.getBuffer();
 
             std::cout << "-------------------" << std::endl;//test
@@ -285,13 +284,12 @@ void Server::receiveNewData(int& clientFD)
 void Server::disconnectClient(const int& client_fd)
 {
     this->clearClient(client_fd);
-    // close(client_fd); //already in clearClient(client_fd) function
+    // close(client_fd); //already in clearClient(client_fd) function //test
     
 }
 
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
-    std::cout << "handleCommand" << std::endl;//test
     std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
     std::string cmd, err_message;
     const std::map<std::string, FuncType> allowed_cmds = this->getMapCmdFunc();
@@ -309,7 +307,6 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
 
     if (!client.isRegistered())
     {
-        std::cout << "not isRegistered" << std::endl;//test
         if (it == allowed_cmds.end())
             return ;
         this->handleInitCommands(client, cmd, line);
@@ -317,10 +314,7 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
     }
 
     if (it != allowed_cmds.end())
-    {
-        std::cout << "allowed_cmds: "<< it->first << std::endl;//test
         (this->*it->second)(client, line);
-    }
     else
     {
         err_message = ERR_UNKNOWNCOMMAND(client.getNick(), cmd);
@@ -360,8 +354,6 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
             body += message;
     }
     full_message += body + TERMIN;
-
-    std::cout << "target_fd: " << target_fd << ", full_message: " << full_message << std::endl;//test
     send(target_fd, full_message.c_str(), full_message.size(), 0);
     return ;
 }
