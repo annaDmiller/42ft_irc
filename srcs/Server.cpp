@@ -281,13 +281,6 @@ void Server::receiveNewData(int& clientFD)
     return ;
 }
 
-void Server::disconnectClient(const int& client_fd)
-{
-    this->clearClient(client_fd);
-    // close(client_fd); //already in clearClient(client_fd) function //test
-    
-}
-
 void Server::handleCommand(Client& client, std::string& raw_cmd)
 {
     std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol

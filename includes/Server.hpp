@@ -50,7 +50,6 @@ class Server
 
         void acceptNewClient();
         void receiveNewData(int& clientFD);
-        void disconnectClient(const int& client_fd);
 
         void handleCommand(Client& client, std::string& raw_cmd);
         void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
