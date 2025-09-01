@@ -63,7 +63,7 @@ bool Server::checkDupNicknamesOnServer(std::string& nick)
     std::string upper_nick, tmp_nick;
 
     upper_nick = toUpperString(nick);
-    if (upper_nick == BOT_NICK)
+    if (upper_nick == toUpperString(BOT_NICK))
         return(false);
     for (size_t ind = 0; ind < this->_clients.size(); ind++)
     {
