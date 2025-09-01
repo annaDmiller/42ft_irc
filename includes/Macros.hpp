@@ -13,6 +13,7 @@
 # define OPER_NAME "ADMIN"
 # define OPER_PASSWORD "ADMIN"
 # define ISUPPORT "CASEMAPPING=ascii CHANLIMIT=#:10 KEYLEN=20"
+# define BOT_NICK "bot"
 
 //Command names
 # define USER "USER" //DONE
