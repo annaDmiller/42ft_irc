@@ -199,7 +199,7 @@ void Channel::sendJoinMessages(const Client& client) const
 {
     std::string message;
     
-    message = client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
+    message = ":" + client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
     this->sendMessageToAll(message);
 
     if (this->_isJustCreated)
@@ -386,8 +386,8 @@ bool Channel::isValidPassword(const std::string& password) const
 		return (false);
     for (size_t ind = 0; ind < password.length(); ind++)
     {
-        if (std::isspace(password[ind]) != 0)
-        // if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)//test
+        // if (std::isspace(password[ind]) != 0)
+        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)//test
         	return (false);
     }
     return (true);

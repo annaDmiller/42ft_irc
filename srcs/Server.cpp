@@ -332,9 +332,9 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
         const std::string& target_name, const std::string& message,
         const std::string& cmd) const
 {
-    std::string body, full_message = client.getPrefix() + " " + cmd + " ";
+    std::string body, full_message = ":" + client.getPrefix() + " " + cmd + " ";
     if (!target_name.empty())
-        full_message += target_name;
+        full_message += target_name + " ";
     
     const size_t symb_left = MAXLINELENGTH - full_message.length() - 3;
     
