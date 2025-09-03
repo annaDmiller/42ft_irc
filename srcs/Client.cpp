@@ -192,6 +192,8 @@ bool Client::tryAuthenticate()
 
     if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
         this->_isAuth = true;
+    std::cout << "_isAuth " << _isAuth << std::endl;//test
+    std::cout << "fd: " << this->_fd << std::endl;//test
     return (this->_isAuth);
 }
 

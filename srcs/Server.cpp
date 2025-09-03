@@ -40,6 +40,8 @@ Server& Server::operator=(const Server& other)
 
 void Server::initServer(char* port_num, char* password)
 {
+    if (!port_num || !password)
+        return ;
     this->_port = atoi(port_num);
     this->_password = password;
     
