@@ -1,8 +1,13 @@
 CC = c++
 
 CC_FLAGS = -Wall -Werror -Wextra -std=c++98 -g3 -I./includes
+CC_BOT_FLAGS = -Wall -Werror -Wextra -std=c++98 -g3 -I./bot/includes
 
 NAME = ircserv
+BOT = ircbot
+
+SERV_DIR = ./srcs/
+BOT_DIR = ./bot/
 
 SOURCES =	./srcs/main.cpp \
 			./srcs/Channel.cpp \
@@ -24,25 +29,37 @@ SOURCES =	./srcs/main.cpp \
 			./srcs/commands/invite.cpp \
 			./srcs/commands/oper.cpp
 
+BOT_SOURCES =	$(BOT_DIR)main.cpp \
+				$(BOT_DIR)Bot.cpp
+
 OBJECTS = $(SOURCES:.cpp=.o)
+BOT_OBJECTS = $(BOT_SOURCES:.cpp=.o)
 
 RM = rm
 
 RM_FLAGS = -f
 
-all : $(NAME)
+all : $(NAME) $(BOT)
 
 $(NAME): $(OBJECTS)
 		$(CC) $(CC_FLAGS) -o $(NAME) $(OBJECTS)
 
-%.o:%.cpp includes/Channel.hpp includes/Client.hpp includes/Macros.hpp includes/Server.hpp
+$(BOT): $(BOT_OBJECTS)
+		$(CC) $(CC_BOT_FLAGS) -o $(BOT) $(BOT_OBJECTS)
+
+$(SERV_DIR)%.o:$(SERV_DIR)%.cpp includes/Channel.hpp includes/Client.hpp includes/Macros.hpp includes/Server.hpp
 		$(CC) $(CC_FLAGS) -c $< -o $@
+
+$(BOT_DIR)%.o:$(BOT_DIR)%.cpp $(BOT_DIR)/includes/Bot.hpp
+		$(CC) $(CC_BOT_FLAGS) -c $< -o $@
 
 clean:
 		$(RM) $(RM_FLAGS) $(OBJECTS)
+		$(RM) $(RM_FLAGS) $(BOT_OBJECTS)
 
 fclean: clean
 		$(RM) $(RM_FLAGS) $(NAME)
+		$(RM) $(RM_FLAGS) $(BOT)
 
 re: fclean all
 
