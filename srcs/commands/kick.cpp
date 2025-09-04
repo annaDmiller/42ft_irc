@@ -75,6 +75,9 @@ void Server::handleKick(Client& client, std::istringstream& args)
             return ;
         }
 
+        if (user_fd == client.getFD())
+            return ;
+
         if (!comment.empty() && comment[0] == ':')
             comment = comment.substr(1);
 
