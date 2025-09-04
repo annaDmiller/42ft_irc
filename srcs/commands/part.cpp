@@ -5,6 +5,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
 {
     std::string channels, message, err_message;
     std::vector<std::string> channel_list;
+    std::string channel_name;
 
     args >> channels;
     if (args.peek() == ' ')
@@ -41,6 +42,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
         }
 
         Channel& channel = this->_availableChannels[channel_list[ind]];
+        channel_name = channel.getName();
         if (!client.isAlreadyJoinedChannel(channel.getName()))
         {
             err_message = ERR_NOTONCHANNEL(client.getNick(), channel.getName());
@@ -50,10 +52,8 @@ void Server::handlePart(Client& client, std::istringstream& args)
 
         channel.sendMessageToAll(client, *this, channel.getName(), message, -1, PART);
         channel.removeMember(client.getFD(), *this);
-        client.leaveChannel(channel.getName());
 
-        if (channel.isEmpty())
-            this->_availableChannels.erase(channel.getName());
+        client.leaveChannel(channel_name);
     }
 }
 

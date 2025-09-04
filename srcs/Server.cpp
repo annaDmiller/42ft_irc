@@ -16,6 +16,27 @@ void Server::signalHandler(int signum)
     return ;
 }
 
+void Server::initSignal()
+{
+   struct sigaction	sa, sb;
+
+        sa.sa_handler = &Server::signalHandler;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = 0;
+        sb.sa_handler = SIG_IGN;
+        sigemptyset(&sb.sa_mask);
+        sb.sa_flags = 0;
+        sigaction(SIGTERM, &sa, NULL);
+        sigaction(SIGINT, &sa, NULL);
+        if (sigaction(SIGTERM, &sa, NULL) != 0)
+            throw (std::runtime_error("sigaction error"));
+        if (sigaction(SIGINT, &sa, NULL) != 0)
+            throw (std::runtime_error("sigaction error"));
+        if (sigaction(SIGPIPE, &sb, NULL) != 0)
+            throw (std::runtime_error("sigaction error"));           
+    return ;
+}
+
 Server::Server() : _port(0), _sockfd(-1), _password("")
 {
     return ;
@@ -40,9 +61,12 @@ Server& Server::operator=(const Server& other)
 
 void Server::initServer(char* port_num, char* password)
 {
+    if (!port_num || !password)
+        return ;
     this->_port = atoi(port_num);
     this->_password = password;
     
+    this->initSignal();
     this->createServSocket(port_num);
 
     return ;

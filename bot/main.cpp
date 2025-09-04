@@ -1,5 +1,4 @@
-#include "Client.hpp"
-#include "Server.hpp"
+#include "Bot.hpp"
 
 bool checkPassword(const std::string& password)
 {
@@ -34,7 +33,7 @@ int main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cerr << "You must run the server with port and password as arguments" << std::endl;
+        std::cerr << "You must run the bot with port and password as arguments" << std::endl;
         return (1);
     }
 
@@ -43,17 +42,16 @@ int main(int argc, char** argv)
         std::cerr << "Incorrect port number or password" << std::endl;
         return (1);
     }
-
-    Server serv;
     try
     {
-        serv.initServer(argv[1], argv[2]);
-        std::cout << "[DEBUG] Server is launched" << std::endl;
-        serv.runServer();
+	    Bot bot;
+		bot.initBot(argv[1], argv[2]);
+        std::cout << "[DEBUG] Bot is launched" << std::endl;
+        bot.runBot();
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
     }
-    return (0);
+    return (0);    
 }
