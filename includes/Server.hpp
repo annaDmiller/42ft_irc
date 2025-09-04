@@ -104,7 +104,7 @@ class Server
                 const std::string& target_name, const std::string& message,
                 const std::string& cmd) const;
         void deleteChannel(const std::string& channel_name);
-
+        void initSignal();
         static void signalHandler(int signum); //-> signal handler for any signals
 };
 

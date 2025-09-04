@@ -132,6 +132,8 @@ void Channel::addMember(const int& client_fd, Client* client)
 void Channel::removeMember(const int& client_fd, Server& server)
 {
     std::set<int>::iterator oper_it, invited_it;
+    int bot_fd;
+    std::string channel_name = this->getName();
 
     this->_members.erase(client_fd);
 
@@ -151,9 +153,27 @@ void Channel::removeMember(const int& client_fd, Server& server)
     if (invited_it != this->_invited_members.end())
         this->_invited_members.erase(client_fd);
 
-    if (this->_members.empty())
-        server.deleteChannel(this->getName());
+    if (this->_members.empty()) {
+        server.deleteChannel(channel_name);
+        return ;
+    }
 
+    if (this->_members.size() == 1)
+    {
+        for (std::map<int, Client*>::iterator it = this->_members.begin(); it != this->_members.end(); it++)
+        {
+            if (it->second->getNick() == BOT_NICK)
+            {
+                bot_fd = it->second->getFD();
+                it->second->leaveChannel(channel_name);
+            }
+        }
+        this->_members.erase(bot_fd);
+        if (this->_members.empty()) {
+            server.deleteChannel(channel_name);
+            return ;
+        }
+    }
     return ;
 }
 
