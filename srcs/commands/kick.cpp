@@ -16,21 +16,21 @@ void Server::handleKick(Client& client, std::istringstream& args)
     if (channel_name.empty() || nick.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), KICK);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (!isValidChannelName(channel_name))
     {
         err_message = ERR_BADCHANMASK(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (this->_availableChannels.find(channel_name) == this->_availableChannels.end())
     {
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -44,7 +44,7 @@ void Server::handleKick(Client& client, std::istringstream& args)
         if (user_fd == -1)
         {
             err_message = ERR_NOSUCHNICK(client.getNick(), *it_user);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             it_user++;
             continue ;
         }
@@ -54,7 +54,7 @@ void Server::handleKick(Client& client, std::istringstream& args)
         if (!target_user.isAlreadyJoinedChannel(channel_name))
         {
             err_message = ERR_USERNOTINCHANNEL(client.getNick(), channel_name, *it_user);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             it_user++;
             continue ;
         }
@@ -62,7 +62,7 @@ void Server::handleKick(Client& client, std::istringstream& args)
         if (!client.isAlreadyJoinedChannel(channel_name))
         {
             err_message = ERR_NOTONCHANNEL(client.getNick(), channel_name);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             it_user++;
             continue ;
         }
@@ -71,7 +71,7 @@ void Server::handleKick(Client& client, std::istringstream& args)
         if (!channel.isOperator(client.getFD()))
         {
             err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             return ;
         }
 

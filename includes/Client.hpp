@@ -14,6 +14,7 @@ class Client
         int _fd; //-> client FD
         std::string _ipAddr; //-> client IP address
         std::string _recvBuffer; //-> to store the incoming message from client
+        std::string _sendBuffer;
         std::string _nickname; //-> set with NICK command
         std::string _username; //-> set with USER command
         std::string _realname; //-> set with USER command
@@ -34,6 +35,7 @@ class Client
         int getFD() const;
         std::string getIPAddr() const;
         std::string getBuffer() const;
+        std::string getSendBuffer() const;
         bool isRegistered() const;
         bool isPassChecked() const;
         std::string getNick() const;
@@ -45,6 +47,7 @@ class Client
         void setFD(int fd);
         void setIPAddr(std::string addr);
         void appendBuffer(std::string buff);
+        void appendSendBuffer(std::string buff);
         void setNickname(const std::string& nick);
         void setUsername(const std::string& username);
         void setRealname(const std::string& realname);
@@ -55,12 +58,13 @@ class Client
         bool getCapNegotiation() const;
 
         void splitBuffer(size_t start, size_t end);
+        void splitSendBuffer(size_t start, size_t end);
 
         bool tryAuthenticate();
         bool isAlreadyJoinedChannel(const std::string& channel_name) const;
 
-        void sendToAllJoinedChannels(const Server& server, const std::string& message,
-                const std::string& cmd, bool isOnce, bool includeChannelName) const;
+        void sendToAllJoinedChannels(Server& server, const std::string& message,
+                const std::string& cmd, bool isOnce, bool includeChannelName);
 
         void leaveAllChannels(Server& server);
         void leaveChannel(const std::string& channel_name);

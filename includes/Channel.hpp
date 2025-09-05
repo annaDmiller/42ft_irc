@@ -25,7 +25,7 @@ class Channel
         int _membersLimit;
         bool _isJustCreated;
 
-        void sendInitReplies(const Client& client) const;
+        void sendInitReplies(Client& client) const;
 
     public:
         Channel();
@@ -63,16 +63,16 @@ class Channel
         bool handleKey(const bool& isAdding, std::string& password, Client& client);
         bool handleOperators(const bool& isAdding, int& client_fd, Client& client, std::string& target);
 
-        void sendJoinMessages(const Client& client) const;
+       void sendJoinMessages(Client& client) const;
         void sendMessageToAll(const std::string& message) const;
-        void sendMessageToAll(const Client &client, const Server& server, 
-                const std::string& target, const std::string& message,
+        void sendMessageToAll(Client &client, Server& server, 
+                const std::string& target, const std::string& message, 
                 const int& except_fd, const std::string& cmd) const;
-        void sendMessageToAll(const Client &client, const Server& server, 
+         void sendMessageToAll(Client &client, Server& server, 
                 const std::string& target, const std::string& message,
                 std::set<int>& except_fds, const std::string& cmd) const;
 
-        void sendMemberList(const Client& client) const;
+        void sendMemberList(Client& client) const;
         void printModes(Client& client) const;
-        void printTopic(const Client& client) const;
+        void printTopic(Client& client) const;
 };

@@ -12,7 +12,7 @@ void Server::handlePing(Client& client, std::istringstream& args)
     if (token.empty())
     {
         err_message = ERR_NOORIGIN(client.getNick(), PING);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -20,6 +20,6 @@ void Server::handlePing(Client& client, std::istringstream& args)
         token = token.substr(1);
 
     std::string pong_reply = std::string(":") + HOST + " " + PONG + " " + client.getNick() + " " + std::string(":") + token + TERMIN;
-    send(client.getFD(), pong_reply.c_str(), pong_reply.size(), 0);
+    client.appendSendBuffer(pong_reply);
     return ;
 }

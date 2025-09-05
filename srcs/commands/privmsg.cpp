@@ -19,14 +19,14 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
     if (receivers.empty())
     {
         err_message = ERR_NORECIPIENT(client.getNick(), PRIVMSG);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (message.empty() || message.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
         err_message = ERR_NOTEXTTOSEND(client.getNick());
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -48,7 +48,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
             if (!isChannelExist(rec_list[ind]))
             {
                 err_message = ERR_NOSUCHNICK(client.getNick(), rec_list[ind]);
-                send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                client.appendSendBuffer(err_message);
                 continue ;
             }
 
@@ -56,7 +56,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
             if (!channel.userIsMember(client.getFD()))
             {
                 err_message = ERR_CANNOTSENDTOCHAN(client.getNick(), channel.getName());
-                send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                client.appendSendBuffer(err_message);
                 continue ;
             }
             
@@ -69,7 +69,7 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
             if ((fd_target = this->findUserbyNickname(rec_list[ind])) == -1)
             {
                 err_message = ERR_NOSUCHNICK(client.getNick(), rec_list[ind]);
-                send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                client.appendSendBuffer(err_message);
                 continue ;
             }
             

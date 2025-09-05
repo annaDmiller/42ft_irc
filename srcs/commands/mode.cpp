@@ -12,7 +12,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
     if (channel_name.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -22,7 +22,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
     if (isChannelExist(channel_name) == false)
     {
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -30,7 +30,7 @@ void Server::handleMode(Client& client, std::istringstream& args)
     if (!client.isAlreadyJoinedChannel(channel_name) || !channel.isOperator(client.getFD()))
     {
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -124,7 +124,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     if (ind_param >= params.size())
                     {
                         err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
-                        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                        client.appendSendBuffer(err_message);
                         return (std::string());
                     }
                     tmp_param = params[ind_param];
@@ -133,7 +133,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                         || limit < std::numeric_limits<int>::min() || limit > std::numeric_limits<int>::max())
                     {
                         err_message = ERR_INVALIDMODEPARAM(client.getNick(), channel.getName(), "l", tmp_param, "Invalid limit");
-                        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                        client.appendSendBuffer(err_message);
                         return (std::string());
                     }
                     member_limit = static_cast<int>(limit);
@@ -170,7 +170,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 if (ind_param >= params.size())
                 {
                     err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
-                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                    client.appendSendBuffer(err_message);
                     return (std::string());
                 }
 
@@ -178,7 +178,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 if (target_fd == -1)
                 {
                     err_message = ERR_NOSUCHNICK(client.getNick(), params[ind_param - 1]);
-                    send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                    client.appendSendBuffer(err_message);
                     break ;
                 }
 
@@ -195,7 +195,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
             
             default:
                 err_message = ERR_UNKNOWNMODE(client.getNick(), modes[ind_mode]);
-                send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+                client.appendSendBuffer(err_message);
                 removeOperMode(modes_for_message);
                 message = composeMessage(modes_for_message, params_for_message);
                 return (message);         

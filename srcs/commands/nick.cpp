@@ -8,28 +8,28 @@ void Server::handleNickname(Client& client, std::istringstream& args)
     if (!client.isPassChecked())
     {
         err_response = "ERROR :Password required\r\n";
-        send(client.getFD(), err_response.c_str(), err_response.size(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
     if (nick.empty() || nick.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
         err_response = ERR_NONICKNAMEGIVEN(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
     
     if (this->checkDupNicknamesOnServer(nick))
     {
         err_response = ERR_NICKNAMEINUSE(client.getNick(), nick);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
     if (!this->isValidNickname(nick))
     {
         err_response = ERR_ERRONEUSNICKNAME(client.getNick(), nick);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 

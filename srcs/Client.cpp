@@ -3,7 +3,7 @@
 
 
 Client::Client() : 
-        _fd(-1), _ipAddr(""), _recvBuffer(""),
+        _fd(-1), _ipAddr(""), _recvBuffer(""), _sendBuffer(""),
         _nickname("*"), _username(""), _realname(""),
         _hasNickname(false), _isAuth(false), 
         _isPasswordChecked(false), _hasUsername(false),
@@ -22,6 +22,7 @@ Client::Client(const Client& other)
     this->_fd = other._fd;
     this->_ipAddr = other._ipAddr;
     this->_recvBuffer = other._recvBuffer;
+    this->_sendBuffer = other._sendBuffer;
     this->_nickname = other._nickname;
     this->_username = other._username;
     this->_realname = other._realname;
@@ -44,6 +45,7 @@ Client& Client::operator=(const Client& other)
         this->_fd = other._fd;
         this->_ipAddr = other._ipAddr;
         this->_recvBuffer = other._recvBuffer;
+        this->_sendBuffer = other._sendBuffer;
         this->_nickname = other._nickname;
         this->_username = other._username;
         this->_realname = other._realname;
@@ -128,6 +130,12 @@ void Client::appendBuffer(std::string buff)
     return ;
 }
 
+void Client::appendSendBuffer(std::string buff)
+{
+    this->_sendBuffer.append(buff);
+    return ;
+}
+
 void Client::setNickname(const std::string& nick)
 {
     this->_nickname = nick;
@@ -150,6 +158,11 @@ void Client::setCapNegotiation(bool value)
 bool Client::getCapNegotiation() const
 {
     return (this->_capNegotiation);
+}
+
+std::string Client::getSendBuffer() const
+{
+    return (this->_sendBuffer);
 }
 
 void Client::setRealname(const std::string& realname)
@@ -183,17 +196,16 @@ void Client::splitBuffer(size_t start, size_t end)
     return ;
 }
 
+void Client::splitSendBuffer(size_t start, size_t end)
+{
+    this->_sendBuffer.erase(start, end);
+    return ;
+}
+
 bool Client::tryAuthenticate()
 {
-    //test
-    std::cout << "_hasNickname " << _hasNickname << std::endl; 
-    std::cout << "_hasUsername " << _hasUsername << std::endl; 
-    std::cout << "_isPasswordChecked " << _isPasswordChecked << std::endl; 
-
     if (!this->_isAuth && this->_hasNickname && this->_hasUsername && this->_isPasswordChecked)
         this->_isAuth = true;
-    std::cout << "_isAuth " << _isAuth << std::endl;//test
-    std::cout << "fd: " << this->_fd << std::endl;//test
     return (this->_isAuth);
 }
 
@@ -211,8 +223,8 @@ bool Client::isAlreadyJoinedChannel(const std::string& channel_name) const
     return (false);
 }
 
-void Client::sendToAllJoinedChannels(const Server& server, const std::string& message,
-        const std::string& cmd, bool isOnce, bool includeChannelName) const
+void Client::sendToAllJoinedChannels(Server& server, const std::string& message,
+        const std::string& cmd, bool isOnce, bool includeChannelName)
 {
     std::set<int> already_sent_fds;
 

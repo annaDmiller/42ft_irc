@@ -132,7 +132,7 @@ void Channel::addMember(const int& client_fd, Client* client)
 void Channel::removeMember(const int& client_fd, Server& server)
 {
     std::set<int>::iterator oper_it, invited_it;
-    int bot_fd;
+    int bot_fd = -1;
     std::string channel_name = this->getName();
 
     this->_members.erase(client_fd);
@@ -158,7 +158,7 @@ void Channel::removeMember(const int& client_fd, Server& server)
         return ;
     }
 
-    if (this->_members.size() == 1)
+    if (!this->_members.empty() && this->_members.size() == 1)
     {
         for (std::map<int, Client*>::iterator it = this->_members.begin(); it != this->_members.end(); it++)
         {
@@ -168,7 +168,8 @@ void Channel::removeMember(const int& client_fd, Server& server)
                 it->second->leaveChannel(channel_name);
             }
         }
-        this->_members.erase(bot_fd);
+        if (bot_fd != -1)
+            this->_members.erase(bot_fd);
         if (this->_members.empty()) {
             server.deleteChannel(channel_name);
             return ;
@@ -215,7 +216,7 @@ bool Channel::isKeyCorrect(const std::string& key) const
     return (false);
 }
 
-void Channel::sendJoinMessages(const Client& client) const
+void Channel::sendJoinMessages(Client& client) const
 {
     std::string message;
     
@@ -225,7 +226,7 @@ void Channel::sendJoinMessages(const Client& client) const
     if (this->_isJustCreated)
     {
         message = std::string(":") + HOST + " " + MODE + " " + this->_name + TERMIN;
-        send(client.getFD(), message.c_str(), message.size(), 0);
+        client.appendSendBuffer(message);
     }
     this->sendInitReplies(client);
     return ;
@@ -263,7 +264,7 @@ bool Channel::isUserInvited(int client_fd) const
     return (false);
 }
 
-void Channel::sendInitReplies(const Client& client) const
+void Channel::sendInitReplies(Client& client) const
 {
     if (!this->_topic.empty())
         this->printTopic(client);
@@ -271,7 +272,7 @@ void Channel::sendInitReplies(const Client& client) const
     return ;
 }
 
-void Channel::sendMemberList(const Client& client) const
+void Channel::sendMemberList(Client& client) const
 {
     std::string message, users;
     size_t prefix_length;
@@ -288,7 +289,7 @@ void Channel::sendMemberList(const Client& client) const
         if (users.size() + message.length() + 1 > MAXLINELENGTH - 2)
         {
             message += TERMIN;
-            send(client.getFD(), message.c_str(), message.size(), 0);
+            client.appendSendBuffer(message);
             message = RPL_NAMREPLY(client.getNick(), this->_name);
             users = "";
         }
@@ -300,11 +301,11 @@ void Channel::sendMemberList(const Client& client) const
     if (message.length() != prefix_length)
     {
         message += TERMIN;
-        send(client.getFD(), message.c_str(), message.size(), 0);
+        client.appendSendBuffer(message);
     }
 
     message = RPL_ENDOFNAMES(client.getNick(), this->_name);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
     return ;
 }
 
@@ -312,12 +313,12 @@ void Channel::sendMessageToAll(const std::string& message) const
 {
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
             it != this->_members.end(); it++)
-        send(it->first, message.c_str(), message.size(), 0);
+        it->second->appendSendBuffer(message);
 
     return ;
 }
 
-void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
+void Channel::sendMessageToAll(Client& client, Server& server, const std::string& target, 
         const std::string& message, const int& except_fd, const std::string& cmd) const
 {
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
@@ -330,7 +331,7 @@ void Channel::sendMessageToAll(const Client& client, const Server& server, const
     return ;
 }
 
-void Channel::sendMessageToAll(const Client& client, const Server& server, const std::string& target, 
+void Channel::sendMessageToAll(Client& client, Server& server, const std::string& target, 
         const std::string& message, std::set<int>& except_fds, const std::string& cmd) const
 {
     for (std::map<int, Client*>::const_iterator it = this->_members.begin();
@@ -406,8 +407,7 @@ bool Channel::isValidPassword(const std::string& password) const
 		return (false);
     for (size_t ind = 0; ind < password.length(); ind++)
     {
-        // if (std::isspace(password[ind]) != 0)
-        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)//test
+        if (std::isspace(password[ind]) != 0 || std::isalnum(password[ind]) == 0)
         	return (false);
     }
     return (true);
@@ -423,7 +423,7 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
         {
             err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
                             "Invalid password: spaces forbidden and maximum length: 20");
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             return (false);
         }
         this->addMode('k');
@@ -447,7 +447,7 @@ bool Channel::handleOperators(const bool& isAdding, int& target_fd, Client& clie
     if (this->_members.find(target_fd) == this->_members.end())
     {
         err_message = ERR_USERNOTINCHANNEL(client.getNick(), this->_name, target);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return (false);
     }
     
@@ -498,30 +498,30 @@ void Channel::printModes(Client& client) const
     }
 
     message = RPL_CHANNELMODEIS(client.getNick(), this->_name, modes, mode_params);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
     message = RPL_CREATIONTIME(client.getNick(), this->_name, this->_whenCreated);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
     return ;
 }
 
-void Channel::printTopic(const Client& client) const
+void Channel::printTopic(Client& client) const
 {
     std::string message;
 
     if (this->_topic.empty())
     {
         message = RPL_NOTOPIC(client.getNick(), this->_name);
-        send(client.getFD(), message.c_str(), message.size(), 0);
+        client.appendSendBuffer(message);
         return ;
     }
     
     message = RPL_TOPIC(client.getNick(), this->_name, this->_topic);
     if (message.length() > MAXLINELENGTH)
         message = message.substr(0, MAXLINELENGTH - 2) + TERMIN;
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
 
     message = RPL_TOPICWHOWHEN(client.getNick(), this->_name, this->_whoSetTopic, this->_whenSetTopic);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
     
     return ;
 }

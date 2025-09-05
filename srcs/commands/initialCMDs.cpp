@@ -20,7 +20,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     else
     {
         err_response = ERR_NOTREGISTERED(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
@@ -32,15 +32,15 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
 		strftime(output, 50, "%m/%d/%Y", &dateTime);
 
         welcome_mess = RPL_WELCOME(client.getNick());
-        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        client.appendSendBuffer(welcome_mess);
         welcome_mess = RPL_YOURHOST(client.getNick(), SERVERNAME, VERSION);
-        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        client.appendSendBuffer(welcome_mess);
         welcome_mess = RPL_CREATED(client.getNick(), output);
-        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        client.appendSendBuffer(welcome_mess);
         welcome_mess = RPL_MYINFO(client.getNick(), SERVERNAME, VERSION, USERMODES, CHANNELMODES);
-        send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        client.appendSendBuffer(welcome_mess);
         welcome_mess = RPL_ISUPPORT(client.getNick(), ISUPPORT);
-    	send(client.getFD(), welcome_mess.c_str(), welcome_mess.length(), 0);
+        client.appendSendBuffer(welcome_mess);
     }
 
     return ;
@@ -55,7 +55,7 @@ void Server::handleCap(Client& client, std::istringstream& args)
     {
         client.setCapNegotiation(true);
         std::string cap = "CAP * LS :\r\n";
-        send(client.getFD(), cap.c_str(), cap.length(), 0);
+        client.appendSendBuffer(cap);
         return ;
     }
     else if (arg == "END")
@@ -63,7 +63,7 @@ void Server::handleCap(Client& client, std::istringstream& args)
     else
     {
         err_response = ERR_NOTREGISTERED(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;  
     }
 }
@@ -77,7 +77,7 @@ void Server::handlePassword(Client& client, std::istringstream& args)
     if (client.isRegistered())
     {
         err_response = ERR_ALREADYREGISTERED(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
@@ -88,14 +88,14 @@ void Server::handlePassword(Client& client, std::istringstream& args)
     if (pass.empty())
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), PASS);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);;
         return ;
     }
 
     if (this->_password != pass)
     {
         err_response = ERR_PASSWDMISMATCH(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
@@ -116,14 +116,14 @@ void Server::handleUsername(Client& client, std::istringstream& args)
     if (client.isRegistered())
     { 
         err_response = ERR_ALREADYREGISTERED(client.getNick());
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
     if (!client.isPassChecked())
     {
         err_response = "ERROR :Password required\r\n";
-        send(client.getFD(), err_response.c_str(), err_response.size(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
@@ -132,7 +132,7 @@ void Server::handleUsername(Client& client, std::istringstream& args)
         || realname.find_first_not_of(" \t\n\v\f\r") == std::string::npos)
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), USER);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
     if (realname[0] == ':')

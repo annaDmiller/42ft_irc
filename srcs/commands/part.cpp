@@ -18,7 +18,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
     if (channels.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), PART);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -37,7 +37,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
         if (!this->isChannelExist(channel_list[ind]))
         {
             err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_list[ind]);
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             continue ;
         }
 
@@ -46,7 +46,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
         if (!client.isAlreadyJoinedChannel(channel.getName()))
         {
             err_message = ERR_NOTONCHANNEL(client.getNick(), channel.getName());
-            send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+            client.appendSendBuffer(err_message);
             continue ;
         }
 

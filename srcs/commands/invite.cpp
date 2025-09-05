@@ -10,7 +10,7 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     if (nick.empty() || channel_name.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), INVITE);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -18,14 +18,14 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     if (target_fd == -1)
     {
         err_message = ERR_NOSUCHNICK(client.getNick(), nick);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (this->_availableChannels.find(channel_name) == this->_availableChannels.end())
     {
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -33,14 +33,14 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     if (target_user.isAlreadyJoinedChannel(channel_name))
     {
         err_message = ERR_USERONCHANNEL(client.getNick(), nick, channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (!client.isAlreadyJoinedChannel(channel_name))
     {
         err_message = ERR_NOTONCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -49,15 +49,21 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     if (channel_modes.find('i', 0) != std::string::npos && !channel.isOperator(client.getFD()))
     {
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     message = RPL_INVITING(client.getNick(), channel_name, nick);
-    send(client.getFD(), message.c_str(), message.size(), 0);
+    client.appendSendBuffer(message);
 
     message = ":" + client.getPrefix() + " " + INVITE + " " + nick + " " + channel_name + TERMIN;
-    send(target_fd, message.c_str(), message.size(), 0);
+	std::map<int, Client>::iterator it = _clients.find(target_fd);
+	if (it == _clients.end()) {
+		return ;
+    }
+	Client& target_client = this->_clients[it->first];
+	target_client.appendSendBuffer(message);
+
     channel.addUserToInviteList(target_fd);
     
     return ;

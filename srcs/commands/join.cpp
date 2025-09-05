@@ -13,7 +13,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
     if (channel_name.empty())
     {
         err_response = ERR_NEEDMOREPARAMS(client.getNick(), JOIN);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         return ;
     }
 
@@ -45,7 +45,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
             continue ;
         }
         err_response = ERR_BADCHANMASK(client.getNick(), *it_channel);
-        send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+        client.appendSendBuffer(err_response);
         temp_ind = it_channel - channel_list.begin();
         it_key = key_list.begin() + temp_ind;
         channel_list.erase(it_channel);
@@ -68,7 +68,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         if (client.joinedChannelQuantity() >= MAXJOINEDCHANNELS)
         {
             err_response = ERR_TOOMANYCHANNELS(client.getNick(), channel_list[ind]);
-            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+            client.appendSendBuffer(err_response);
             continue ;
         }
 
@@ -93,7 +93,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         if (channel_modes.find('i', 0) != std::string::npos && !channel.isUserInvited(client.getFD()))
         {
             err_response = ERR_INVITEONLYCHAN(client.getNick(), channel.getName());
-            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+            client.appendSendBuffer(err_response);
             continue ;
         }
 
@@ -101,7 +101,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         if (channel_modes.find('l', 0) != std::string::npos && !channel.canBeJoined())
         {
             err_response = ERR_CHANNELISFULL(client.getNick(), channel.getName());
-            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+            client.appendSendBuffer(err_response);
             continue ;
         }
 
@@ -109,7 +109,7 @@ void Server::handleJoin(Client& client, std::istringstream& args)
         if (channel_modes.find('k', 0) != std::string::npos && !channel.isKeyCorrect(key_list[ind]))
         {
             err_response = ERR_BADCHANNELKEY(client.getNick(), channel.getName());
-            send(client.getFD(), err_response.c_str(), err_response.length(), 0);
+            client.appendSendBuffer(err_response);
             continue ;
         }
         

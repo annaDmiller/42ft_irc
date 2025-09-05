@@ -76,6 +76,7 @@ class Server
         bool isValidNickname(const std::string& nick) const;
         bool checkDupNicknamesOnServer(std::string& nick);
         int findUserbyNickname(const std::string& nick) const;
+        void sendReply(int clientFD);
 
         bool isValidChannelName(const std::string& chan_name) const;
         bool isChannelExist(std::string &channel_name);
@@ -100,11 +101,12 @@ class Server
 
         void initServer(char* port_num, char* password);
         void runServer();
-        void sendMessageToUser(const Client& sender, const int& target_fd, 
+        void sendMessageToUser(Client& sender, const int& target_fd, 
                 const std::string& target_name, const std::string& message,
-                const std::string& cmd) const;
+                const std::string& cmd);
         void deleteChannel(const std::string& channel_name);
         void initSignal();
+
         static void signalHandler(int signum); //-> signal handler for any signals
 };
 

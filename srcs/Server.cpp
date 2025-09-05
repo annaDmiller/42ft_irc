@@ -26,8 +26,6 @@ void Server::initSignal()
         sb.sa_handler = SIG_IGN;
         sigemptyset(&sb.sa_mask);
         sb.sa_flags = 0;
-        sigaction(SIGTERM, &sa, NULL);
-        sigaction(SIGINT, &sa, NULL);
         if (sigaction(SIGTERM, &sa, NULL) != 0)
             throw (std::runtime_error("sigaction error"));
         if (sigaction(SIGINT, &sa, NULL) != 0)
@@ -65,7 +63,6 @@ void Server::initServer(char* port_num, char* password)
         return ;
     this->_port = atoi(port_num);
     this->_password = password;
-    
     this->initSignal();
     this->createServSocket(port_num);
 
@@ -162,15 +159,15 @@ void Server::runServer()
             if (this->_pollfds[ind].revents & POLLIN)
             {
                 //if its the socket fd, then it means that the new client is trying to connect
-
-                std::cout << "this->_pollfds[ind].fd: " << this->_pollfds[ind].fd << std::endl;
-                std::cout << "this->_sockfd: " << this->_sockfd << std::endl;
-
                 if (this->_pollfds[ind].fd == this->_sockfd)
                     this->acceptNewClient();
                 else
                 	//otherwise, we receive a new data from already connected client
                     this->receiveNewData(this->_pollfds[ind].fd);
+            }
+            else if (this->_pollfds[ind].revents & POLLOUT)
+            {
+			    sendReply(this->_pollfds[ind].fd);
             }
         }
     }
@@ -186,7 +183,7 @@ void Server::acceptNewClient()
     struct sockaddr_in client_addr;
     struct pollfd new_poll;
     socklen_t len_addr = sizeof(client_addr);
-    int client_fd = -1;
+	int client_fd = -1, yes = 1;
     std::string init_mess = ":irc.local NOTICE AUTH :Welcome!\r\n";
 
     //we accept the new connection and save the address of client
@@ -205,9 +202,15 @@ void Server::acceptNewClient()
         return ;
     }
 
+	if (setsockopt(client_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int)) == -1)
+	{
+		close(client_fd);
+		throw (std::runtime_error("Failed to set option SO_KEEPALIVE to the socket"));
+	}
+
     //then we save the new client fd into pollfds vector
     new_poll.fd = client_fd;
-    new_poll.events = POLLIN;
+    new_poll.events = POLLIN | POLLOUT;
     new_poll.revents = 0;
     this->_pollfds.push_back(new_poll);
 
@@ -221,7 +224,7 @@ void Server::acceptNewClient()
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
 
     //here we send a welcome message to the connected client
-    send(client_fd, init_mess.c_str(), init_mess.length(), 0);
+    new_client.appendSendBuffer(init_mess);
     return ;
 }
 
@@ -246,36 +249,22 @@ void Server::receiveNewData(int& clientFD)
     }
     else
     {
-        std::cout << "buffer1:\n" << buffer << "!" << std::endl;//test
-        std::cout << "bytes:\n" << bytes << "!" << std::endl;//test
         //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
 
         std::string str(buffer);
-        std::cout << "str:\n" << str << "!" << std::endl;//test
-        // for (size_t i = 0; i < str.size(); i++)
-        //     std::cout << "str[" << i << "]:" << str[i] << "(" << static_cast<int>(str[i]) << ")!" << std::endl;//test
-
         std::map<int, Client>::const_iterator it = _clients.find(clientFD);
         if (it == _clients.end())
             return ;
 
         Client& our_client = this->_clients[clientFD];
-
         our_client.appendBuffer(buffer);
-        // for (size_t i = 0; i < str.size(); i++)
-        //     std::cout << "getBuffer[" << i << "]:" << our_client.getBuffer()[i] << "(" << static_cast<int>(our_client.getBuffer()[i]) << ")!" << std::endl;//test
-        size_t counter = 0;//test
-
         remain_line = our_client.getBuffer();
         //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
         while ((pos_end = remain_line.find(TERMIN)) != std::string::npos || (pos_end = remain_line.find_first_of(TERMIN)) != std::string::npos)
         {
-            std::cout << "our_client.getBuffer()1:\n" << our_client.getBuffer() << "!" << std::endl;//test
-
-
             //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
             if (remain_line.find(TERMIN) != std::string::npos)
                 termin_len = 2;
@@ -283,22 +272,13 @@ void Server::receiveNewData(int& clientFD)
                 termin_len = 1;
 
             raw_cmd = our_client.getBuffer().substr(0, pos_end);
-            if (raw_cmd.size() > (512 - termin_len))//test
-                raw_cmd = raw_cmd.substr(0, 512 - termin_len);//test
-            // our_client.splitBuffer(0, pos_end + 2); // == this->_recvBuffer.erase(start, end);
+            if (raw_cmd.size() > (512 - termin_len))
+                raw_cmd = raw_cmd.substr(0, 512 - termin_len);
             our_client.splitBuffer(0, pos_end + termin_len); // == this->_recvBuffer.erase(start, end);
             remain_line = our_client.getBuffer();
 
-            std::cout << "-------------------" << std::endl;//test
-            std::cout << "our_client.getBuffer(): " << counter << "\n" << our_client.getBuffer() << std::endl;//test
-            std::cout << "-------------------" << std::endl;//test
-
-            std::cout << "raw_cmd: " << raw_cmd << "!" << std::endl;//test
+            std::cout << raw_cmd << std::endl;
             this->handleCommand(our_client, raw_cmd);
-
-            std::cout << "-------------------" << std::endl;//test
-            std::cout << "-------------------" << std::endl;//test
-            counter++;//test
         }
     }
 
@@ -330,12 +310,13 @@ void Server::handleCommand(Client& client, std::string& raw_cmd)
         return ;
     }
 
-    if (it != allowed_cmds.end())
+    if (it != allowed_cmds.end()) {
         (this->*it->second)(client, line);
+	}
     else
     {
         err_message = ERR_UNKNOWNCOMMAND(client.getNick(), cmd);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+		client.appendSendBuffer(err_message);
     }
 
     return ;
@@ -352,9 +333,9 @@ int Server::findUserbyNickname(const std::string& nick) const
     return (-1);
 }
 
-void Server::sendMessageToUser(const Client& client, const int& target_fd,
+void Server::sendMessageToUser(Client& client, const int& target_fd,
         const std::string& target_name, const std::string& message,
-        const std::string& cmd) const
+        const std::string& cmd)
 {
     std::string body, full_message = ":" + client.getPrefix() + " " + cmd + " ";
     if (!target_name.empty())
@@ -371,7 +352,14 @@ void Server::sendMessageToUser(const Client& client, const int& target_fd,
             body += message;
     }
     full_message += body + TERMIN;
-    send(target_fd, full_message.c_str(), full_message.size(), 0);
+
+	std::map<int, Client>::iterator it = _clients.find(target_fd);
+	if (it == _clients.end()) {
+		return ;
+    }
+	Client& target_client = this->_clients[it->first];
+	target_client.appendSendBuffer(full_message);	
+
     return ;
 }
 
@@ -442,4 +430,31 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
         func_map[CAP] = &Server::handleTopic;
     }
     return (func_map);
+}
+
+void Server::sendReply(int clientFD)
+{
+    // int fd = clientFD;
+	std::string message;
+	size_t pos_end = 0;
+	std::map<int, Client>::iterator it = _clients.find(clientFD);
+
+	if (it == _clients.end()) {
+		return ;
+	}
+
+	Client& our_client = this->_clients[clientFD];
+    message = our_client.getSendBuffer();
+
+    if (message.empty()) {
+            return ;
+	}
+
+	if ((pos_end = message.find(TERMIN)) != std::string::npos)
+	{
+		message = message.substr(0, pos_end + 2);
+		our_client.splitSendBuffer(0, pos_end + 2);
+		send(clientFD, message.c_str(), message.size(), 0);
+	}
+    return ;
 }

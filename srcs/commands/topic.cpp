@@ -22,21 +22,21 @@ void Server::handleTopic(Client& client, std::istringstream& args)
     if (channel_name.empty())
     {
         err_message = ERR_NEEDMOREPARAMS(client.getNick(), TOPIC);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (this->_availableChannels.find(channel_name) == this->_availableChannels.end())
     {
         err_message = ERR_NOSUCHCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
     if (!client.isAlreadyJoinedChannel(channel_name))
     {
         err_message = ERR_NOTONCHANNEL(client.getNick(), channel_name);
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
@@ -56,7 +56,7 @@ void Server::handleTopic(Client& client, std::istringstream& args)
     if (channel_modes.find('t', 0) != std::string::npos && !channel.isOperator(client.getFD()))
     {
         err_message = ERR_CHANOPRIVSNEEDED(client.getNick(), channel.getName());
-        send(client.getFD(), err_message.c_str(), err_message.size(), 0);
+        client.appendSendBuffer(err_message);
         return ;
     }
 
