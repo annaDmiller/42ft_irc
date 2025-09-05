@@ -166,6 +166,7 @@ void Channel::removeMember(const int& client_fd, Server& server)
             {
                 bot_fd = it->second->getFD();
                 it->second->leaveChannel(channel_name);
+                this->_members.erase(bot_fd);
             }
         }
         if (bot_fd != -1)
