@@ -22,6 +22,6 @@ void Server::handleOper(Client& client, std::istringstream& args)
 
     client.setOperator(true);
     message = RPL_YOUREOPER(client.getNick());
-    client.appendSendBuffer(err_message);
+    client.appendSendBuffer(message);
     return ;
 }

@@ -462,7 +462,15 @@ bool Channel::handleOperators(const bool& isAdding, int& target_fd, Client& clie
     else
     {
         if (this->_operators.find(target_fd) != this->_operators.end())
+        {
             this->_operators.erase(target_fd);
+            if (this->_operators.empty() && !this->_members.empty())
+            {
+                std::map<int, Client*>::iterator it = this->_members.begin();
+                if (it != this->_members.end())
+                    this->_operators.insert(it->first);
+            }
+        }
         else
             return (false);
     }

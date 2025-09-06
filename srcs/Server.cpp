@@ -208,12 +208,20 @@ void Server::acceptNewClient()
     socklen_t len_addr = sizeof(client_addr);
 	int client_fd = -1, yes = 1;
     std::string init_mess = ":irc.local NOTICE AUTH :Welcome!\r\n";
+    std::string err_message = ":irc.local Impossible to establish connection (too many connected clients). Try later.\r\n";
 
     //we accept the new connection and save the address of client
     client_fd = accept(this->_sockfd, reinterpret_cast<sockaddr*>(&client_addr), &len_addr);
     if (client_fd == -1)
     {
         std::cerr << "Failed accept() of new client" << std::endl;
+        return ;
+    }
+
+    if (this->_clients.size() == SOCKMAXCONN)
+    {
+        send(client_fd, err_message.c_str(), err_message.size(), 0);
+        close(client_fd);
         return ;
     }
 
@@ -298,7 +306,6 @@ void Server::receiveNewData(int& clientFD)
             our_client.splitBuffer(0, pos_end + termin_len); // == this->_recvBuffer.erase(start, end);
             remain_line = our_client.getBuffer();
 
-            std::cout << raw_cmd << std::endl;
             this->handleCommand(our_client, raw_cmd);
         }
     }

@@ -8,6 +8,8 @@ void Server::handleKick(Client& client, std::istringstream& args)
     int user_fd;
 
     args >> channel_name >> nick;
+    if (args.peek() == ' ')
+        args.get();
     if (args.peek() == ':')
         std::getline(args, comment);
     else

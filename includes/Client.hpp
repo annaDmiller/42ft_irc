@@ -56,6 +56,7 @@ class Client
         void setOperator(bool value);
         void setCapNegotiation(bool value);
         bool getCapNegotiation() const;
+        bool hasMessToSend() const;
 
         void splitBuffer(size_t start, size_t end);
         void splitSendBuffer(size_t start, size_t end);

@@ -190,6 +190,11 @@ void Client::addChannel(const std::string& channel_name, Channel* channel)
     return ;
 }
 
+bool Client::hasMessToSend() const
+{
+    return (!this->_sendBuffer.empty());
+}
+
 void Client::splitBuffer(size_t start, size_t end)
 {
     this->_recvBuffer.erase(start, end);
@@ -227,6 +232,12 @@ void Client::sendToAllJoinedChannels(Server& server, const std::string& message,
         const std::string& cmd, bool isOnce, bool includeChannelName)
 {
     std::set<int> already_sent_fds;
+
+    if (this->_joinedChannels.empty() && cmd == NICK)
+    {
+        server.sendMessageToUser(*this, this->_fd, "",  message, cmd);
+        return ;
+    }
 
     for (std::map<std::string, Channel*>::const_iterator it = this->_joinedChannels.begin();
             it != this->_joinedChannels.end(); it++)

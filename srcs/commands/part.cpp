@@ -60,10 +60,7 @@ void Server::handlePart(Client& client, std::istringstream& args)
 //this function is used only out of JOIN function with '0' argument which means PART from ALL joined channels
 void Server::handlePart(Client& client)
 {
-    std::string message;
-
-    message = client.getNick();
-    client.sendToAllJoinedChannels(*this, message, PART, false, true);
+    client.sendToAllJoinedChannels(*this, "", PART, false, true);
     client.leaveAllChannels(*this);
     return ;
 }
