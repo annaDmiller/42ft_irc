@@ -151,11 +151,21 @@ void Server::runServer()
             throw (std::runtime_error("Failed to use poll() function"));
         
         if (Server::_signalReceived)
+        {
+            std::cout << "[DEBUG] signal is received; breaking the loop" << std::endl;
             break ;
+        }
 
         //We loop through the pollfds to find which fd got event
         for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
         {
+            if (this->_pollfds[ind].revents & (POLLHUP | POLLERR))
+            {
+                this->clearClient(this->_pollfds[ind].fd);
+                ind--;
+                continue;
+            }
+
             if (this->_pollfds[ind].revents & POLLIN)
             {
                 //if its the socket fd, then it means that the new client is trying to connect
@@ -165,7 +175,8 @@ void Server::runServer()
                 	//otherwise, we receive a new data from already connected client
                     this->receiveNewData(this->_pollfds[ind].fd);
             }
-            else if (this->_pollfds[ind].revents & POLLOUT)
+
+            if (this->_pollfds[ind].revents & POLLOUT)
             {
 			    sendReply(this->_pollfds[ind].fd);
             }
@@ -434,7 +445,6 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
 
 void Server::sendReply(int clientFD)
 {
-    // int fd = clientFD;
 	std::string message;
 	size_t pos_end = 0;
 	std::map<int, Client>::iterator it = _clients.find(clientFD);
