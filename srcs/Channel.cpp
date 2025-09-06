@@ -160,18 +160,16 @@ void Channel::removeMember(const int& client_fd, Server& server)
 
     if (!this->_members.empty() && this->_members.size() == 1)
     {
-        for (std::map<int, Client*>::iterator it = this->_members.begin(); it != this->_members.end(); it++)
+        std::map<int, Client*>::iterator it = this->_members.begin();
+        if (it != this->_members.end() && it->second->getNick() == BOT_NICK)
         {
-            if (it->second->getNick() == BOT_NICK)
-            {
-                bot_fd = it->second->getFD();
-                it->second->leaveChannel(channel_name);
-                this->_members.erase(bot_fd);
-            }
+            bot_fd = it->second->getFD();
+            it->second->leaveChannel(channel_name);
+			if (bot_fd != -1)
+            	this->_members.erase(bot_fd);
         }
-        if (bot_fd != -1)
-            this->_members.erase(bot_fd);
-        if (this->_members.empty()) {
+        if (this->_members.empty())
+		{
             server.deleteChannel(channel_name);
             return ;
         }
