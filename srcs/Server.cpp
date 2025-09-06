@@ -145,7 +145,7 @@ void Server::runServer()
 {
     std::string message = "The connection is closed: the server is stopped.\r\n";
     //We run eternal loop until we receive any signal pre-defined
-    while (!Server::_signalReceived)
+    while (1)
     {
         //poll() allows us to wait in background mode for any events for saved fds. After they happen, we continue
         if (poll(&(this->_pollfds[0]), this->_pollfds.size(), -1) == -1 && Server::_signalReceived == false)
@@ -156,10 +156,11 @@ void Server::runServer()
             std::cout << "[DEBUG] signal is received; breaking the loop" << std::endl;
             for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
             {
-                if (this->_pollfds[ind].revents & POLLOUT)
+                if (this->_pollfds[ind].fd != this->_sockfd
+                        && this->_pollfds[ind].revents & POLLOUT)
                 {
                     Client& client = this->_clients[this->_pollfds[ind].fd];
-                    client.appendBuffer(message);
+                    client.appendSendBuffer(message);
                     this->sendReply(client.getFD());
                 }
             }
@@ -186,7 +187,8 @@ void Server::runServer()
                     this->receiveNewData(this->_pollfds[ind].fd);
             }
 
-            if (this->_pollfds[ind].revents & POLLOUT)
+            if (this->_pollfds[ind].fd != this->_sockfd
+                    && this->_pollfds[ind].revents & POLLOUT)
             {
 			    sendReply(this->_pollfds[ind].fd);
             }
@@ -239,13 +241,11 @@ void Server::acceptNewClient()
     new_client.setFD(client_fd);
     char *ip = inet_ntoa(client_addr.sin_addr);
     new_client.setIPAddr(ip);
+    new_client.appendSendBuffer(init_mess);
     this->_clients[client_fd] = new_client;
 
     std::cout << "[DEBUG] ";
     std::cout << "New client " << new_client.getFD() << " is accepted." << std::endl;
-
-    //here we send a welcome message to the connected client
-    new_client.appendSendBuffer(init_mess);
     return ;
 }
 
