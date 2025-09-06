@@ -143,6 +143,7 @@ void Server::createServSocket(char* port_num)
 
 void Server::runServer()
 {
+    std::string message = "The connection is closed: the server is stopped.\r\n";
     //We run eternal loop until we receive any signal pre-defined
     while (!Server::_signalReceived)
     {
@@ -153,6 +154,15 @@ void Server::runServer()
         if (Server::_signalReceived)
         {
             std::cout << "[DEBUG] signal is received; breaking the loop" << std::endl;
+            for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
+            {
+                if (this->_pollfds[ind].revents & POLLOUT)
+                {
+                    Client& client = this->_clients[this->_pollfds[ind].fd];
+                    client.appendBuffer(message);
+                    this->sendReply(client.getFD());
+                }
+            }
             break ;
         }
 
