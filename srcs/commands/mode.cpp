@@ -72,12 +72,6 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 
     //even though we can handle up to 3 modes at one command, we need to input all modes in 1st(!!!) param
     //That's why we check valid modes only in the first iterator of params vector
-    // if (!isValidModes(modes, incorrect_mode))
-    // {
-    //     err_message = ERR_UNKNOWNMODE(client.getNick(), incorrect_mode);
-    //     send(client.getFD(), err_message.c_str(), err_message.size(), 0);
-    //     return (std::string());
-    // }
 
     if (modes[0] != '-' && modes[0] != '+')
         modes = std::string("+") + modes;
@@ -90,26 +84,29 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (ind_mode < modes.size())
     {
-        if (modes[ind_mode] == '-')
-        {
-            isAdding = false;
-            if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true)
-                modes_for_message.push_back(modes[ind_mode]);
-            ind_mode++;
-        }
-        else if (modes[ind_mode] == '+')
-        {
-            isAdding = true;
-            if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true)
-                modes_for_message.push_back(modes[ind_mode]);
-            ind_mode++;
-        }
-
-        if (ind_mode >= modes.size())
-            break;
-
+        std::cout << "[DEBUG] What ind_mode? " << ind_mode << " and mode? " << modes[ind_mode] << std::endl;
         switch (modes[ind_mode])
         {
+            case '-':
+                if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
+                        && (isAdding == true || ind_mode == 0))
+                        {
+                            std::cout << "[DEBUG] add mode - to the list" << std::endl;
+                    modes_for_message.push_back(modes[ind_mode]);
+                        }
+                isAdding = false;
+                break ;
+            
+            case '+':
+                if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
+                        && (isAdding == false || ind_mode == 0))
+                        {
+                            std::cout << "[DEBUG] add mode + to the list" << std::endl;
+                    modes_for_message.push_back(modes[ind_mode]);
+                        }
+                isAdding = true;
+                break ;
+
             //for this and next modes' handling:
             //after each successful mode handling we increment the number of already handled modes
             case 'i':
@@ -199,10 +196,10 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 removeOperMode(modes_for_message);
                 message = composeMessage(modes_for_message, params_for_message);
                 return (message);         
-                break ;
         }
         ind_mode++;
     }
+    
     removeOperMode(modes_for_message);
     message = composeMessage(modes_for_message, params_for_message);
     return (message);
@@ -216,6 +213,8 @@ bool Server::isValidMode(char mode)
     allowed_chars.push_back('t');
     allowed_chars.push_back('k');
     allowed_chars.push_back('o');
+    allowed_chars.push_back('+');
+    allowed_chars.push_back('-');
 
     for (size_t ind = 0; ind < allowed_chars.size(); ind++)
     {
