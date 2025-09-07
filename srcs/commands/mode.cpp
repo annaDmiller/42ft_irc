@@ -2,7 +2,7 @@
 
 void Server::handleMode(Client& client, std::istringstream& args)
 {
-    std::string channel_name, params, err_message, message;
+    std::string channel_name, params, err_message, message, final_line;
     std::vector<std::string> params_mode;
 
     args >> channel_name;
@@ -52,8 +52,8 @@ void Server::handleMode(Client& client, std::istringstream& args)
     if (message.size() > 0)
     {
         //after handling is done, we need to output message for the client itself and all member of the channel
-        message = client.getPrefix() + " " + MODE + " " + channel_name + " " + message + TERMIN;
-        channel.sendMessageToAll(message);
+        final_line = std::string(":") + client.getPrefix() + " " + MODE + " " + channel_name + " " + message + TERMIN;
+        channel.sendMessageToAll(final_line);
     }
     return ;
 }
