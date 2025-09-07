@@ -62,7 +62,7 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
     size_t ind_param = 1, ind_mode = 0;
-    std::string &modes = params[0], err_message, pass, message, tmp_param;
+    std::string &modes = params[0], err_message = "", pass, message = "", tmp_param;
     std::vector<std::string> params_for_message;
     std::vector<char> modes_for_message;
     bool isAdding = true;
@@ -115,7 +115,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     {
                         err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
                         client.appendSendBuffer(err_message);
-                        return (std::string());
+                        message = composeMessage(modes_for_message, params_for_message);
+                        return (message);
                     }
                     tmp_param = params[ind_param];
                     limit = std::strtol(params[ind_param++].c_str(), &pscalar_end, 10);
@@ -124,7 +125,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                     {
                         err_message = ERR_INVALIDMODEPARAM(client.getNick(), channel.getName(), "l", tmp_param, "Invalid limit");
                         client.appendSendBuffer(err_message);
-                        return (std::string());
+                        message = composeMessage(modes_for_message, params_for_message);
+                        return (message);
                     }
                     member_limit = static_cast<int>(limit);
                 }
@@ -147,7 +149,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
 				{
 					err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
 					client.appendSendBuffer(err_message);
-					return (std::string());
+                    message = composeMessage(modes_for_message, params_for_message);
+                    return (message);
 				}
        
                 if (isAdding && ind_param < params.size())
@@ -168,7 +171,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 {
                     err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
                     client.appendSendBuffer(err_message);
-                    return (std::string());
+                    message = composeMessage(modes_for_message, params_for_message);
+                    return (message);
                 }
 
                 target_fd = findUserbyNickname(params[ind_param++]);
