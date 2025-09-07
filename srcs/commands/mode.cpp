@@ -84,26 +84,19 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
     //o - to provide a channel's member(!) with operator privilage; requires members' nickname as additional parameter
     while (ind_mode < modes.size())
     {
-        std::cout << "[DEBUG] What ind_mode? " << ind_mode << " and mode? " << modes[ind_mode] << std::endl;
         switch (modes[ind_mode])
         {
             case '-':
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == true || ind_mode == 0))
-                        {
-                            std::cout << "[DEBUG] add mode - to the list" << std::endl;
                     modes_for_message.push_back(modes[ind_mode]);
-                        }
                 isAdding = false;
                 break ;
             
             case '+':
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == false || ind_mode == 0))
-                        {
-                            std::cout << "[DEBUG] add mode + to the list" << std::endl;
                     modes_for_message.push_back(modes[ind_mode]);
-                        }
                 isAdding = true;
                 break ;
 
