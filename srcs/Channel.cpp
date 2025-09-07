@@ -219,7 +219,7 @@ void Channel::sendJoinMessages(Client& client) const
 {
     std::string message;
     
-    message = ":" + client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
+    message = std::string(":") + client.getPrefix() + " " + JOIN + " " + this->_name + TERMIN;
     this->sendMessageToAll(message);
 
     if (this->_isJustCreated)

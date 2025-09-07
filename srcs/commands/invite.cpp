@@ -56,7 +56,7 @@ void Server::handleInvite(Client& client, std::istringstream& args)
     message = RPL_INVITING(client.getNick(), channel_name, nick);
     client.appendSendBuffer(message);
 
-    message = ":" + client.getPrefix() + " " + INVITE + " " + nick + " " + channel_name + TERMIN;
+    message = std::string(":") + client.getPrefix() + " " + INVITE + " " + nick + " " + channel_name + TERMIN;
 	std::map<int, Client>::iterator it = _clients.find(target_fd);
 	if (it == _clients.end()) {
 		return ;

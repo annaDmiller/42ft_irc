@@ -143,7 +143,7 @@ void Server::createServSocket(char* port_num)
 
 void Server::runServer()
 {
-    std::string message = "The connection is closed: the server is stopped.\r\n";
+    std::string message = ":irc.local :The connection is closed: the server is stopped.\r\n";
     //We run eternal loop until we receive any signal pre-defined
     while (1)
     {
@@ -207,8 +207,8 @@ void Server::acceptNewClient()
     struct pollfd new_poll;
     socklen_t len_addr = sizeof(client_addr);
 	int client_fd = -1, yes = 1;
-    std::string init_mess = ":irc.local NOTICE AUTH :Welcome!\r\n";
-    std::string err_message = ":irc.local Impossible to establish connection (too many connected clients). Try later.\r\n";
+    std::string init_mess = ":irc.local :NOTICE AUTH :Welcome!\r\n";
+    std::string err_message = ":irc.local :Impossible to establish connection (too many connected clients). Try later.\r\n";
 
     //we accept the new connection and save the address of client
     client_fd = accept(this->_sockfd, reinterpret_cast<sockaddr*>(&client_addr), &len_addr);
@@ -365,7 +365,7 @@ void Server::sendMessageToUser(Client& client, const int& target_fd,
         const std::string& target_name, const std::string& message,
         const std::string& cmd)
 {
-    std::string body, full_message = ":" + client.getPrefix() + " " + cmd + " ";
+    std::string body, full_message = std::string(":") + client.getPrefix() + " " + cmd + " ";
     if (!target_name.empty())
         full_message += target_name + " ";
     
@@ -455,7 +455,7 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
         func_map[PRIVMSG] = &Server::handlePrivateMessage;
         func_map[QUIT] = &Server::handleQuit;
         func_map[TOPIC] = &Server::handleTopic;
-        func_map[CAP] = &Server::handleTopic;
+        func_map[CAP] = &Server::handleCap;
     }
     return (func_map);
 }
