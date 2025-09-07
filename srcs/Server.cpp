@@ -177,7 +177,7 @@ void Server::runServer()
                 continue;
             }
 
-            if (this->_pollfds[ind].revents & POLLIN)
+            else if (this->_pollfds[ind].revents & POLLIN)
             {
                 //if its the socket fd, then it means that the new client is trying to connect
                 if (this->_pollfds[ind].fd == this->_sockfd)
@@ -187,7 +187,7 @@ void Server::runServer()
                     this->receiveNewData(this->_pollfds[ind].fd);
             }
 
-            if (this->_pollfds[ind].fd != this->_sockfd
+            else if (this->_pollfds[ind].fd != this->_sockfd
                     && this->_pollfds[ind].revents & POLLOUT)
             {
 			    sendReply(this->_pollfds[ind].fd);
