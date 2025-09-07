@@ -146,6 +146,13 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 if (isAdding && ind_param < params.size())
                         pass = params[ind_param++];
 
+				if (isAdding && ind_param >= params.size())
+				{
+					err_message = ERR_NEEDMOREPARAMS(client.getNick(), MODE);
+					client.appendSendBuffer(err_message);
+					return (std::string());
+				}
+
                 if (channel.handleKey(isAdding, pass, client))
                 {
                     modes_for_message.push_back('k');
