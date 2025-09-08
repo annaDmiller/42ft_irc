@@ -270,7 +270,6 @@ void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_ch
 {
 	if (isAdding)
 	{
-
         if (modes_start.find(mode_change) == std::string::npos && (mode_change == "i" || mode_change == "t")) {
 		    modes_add[mode_change] = add_value;
         }
@@ -278,6 +277,14 @@ void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_ch
 		{
 		    modes_add[mode_change] = add_value;
 		}
+        else if (mode_change == "o")
+        {
+                int target_fd = findUserbyNickname(add_value);
+                if (target_fd != -1 && !channel.isOperator(target_fd))
+                {
+                    modes_add[mode_change] = add_value;     
+                }
+        }
 		for (std::map<std::string, std::string>::iterator it_mode = modes_remove.begin();
 			it_mode != modes_remove.end(); it_mode++)
 		{
@@ -293,6 +300,14 @@ void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_ch
 		if (modes_start.find(mode_change) != std::string::npos) {
 			modes_remove[mode_change] = remove_value;
 		}
+        else if (mode_change == "o")
+        {
+                int target_fd = findUserbyNickname(add_value);
+                if (target_fd != -1 && channel.isOperator(target_fd))
+                {
+                    modes_remove[mode_change] = remove_value;
+                }
+        }
 		for (std::map<std::string, std::string>::iterator it_mode = modes_add.begin();
 			it_mode != modes_add.end(); it_mode++)
 		{
