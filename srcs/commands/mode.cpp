@@ -180,7 +180,8 @@ std::string Server::modeHandlingChannel(Client& client, Channel& channel,
                 {
                     err_message = ERR_NOSUCHNICK(client.getNick(), params[ind_param - 1]);
                     client.appendSendBuffer(err_message);
-                    break ;
+                    message = composeMessage(modes_for_message, params_for_message);
+                    return (message);
                 }
 
                 if (target_fd == client.getFD() && isAdding)
