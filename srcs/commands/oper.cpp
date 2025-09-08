@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void Server::handleOper(Client& client, std::istringstream& args)
+void Server::handleOperCmd(Client& client, std::istringstream& args)
 {
     std::string nick, password, err_message, message;
 

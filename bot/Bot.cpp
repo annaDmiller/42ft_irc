@@ -194,8 +194,8 @@ const std::map<std::string, FuncType>& Bot::getMapCmdFunc()
     static std::map<std::string, FuncType> func_map;
     if (func_map.empty())
     {
-        func_map[INVITE] = &Bot::handleInvite;
-        func_map[PRIVMSG] = &Bot::handlePrivateMessage;
+        func_map[INVITE] = &Bot::handleInviteCmd;
+        func_map[PRIVMSG] = &Bot::handlePrivmsgCmd;
     }
     return (func_map);
 }
@@ -276,7 +276,7 @@ std::string Bot::getSendBuffer() const
     return (this->_sendBuffer);
 }
 
-void Bot::handleInvite(std::string& nickname, std::istringstream& args)
+void Bot::handleInviteCmd(std::string& nickname, std::istringstream& args)
 {
     std::string recipient, channel_name, message;
 
@@ -291,7 +291,7 @@ void Bot::handleInvite(std::string& nickname, std::istringstream& args)
     return ;
 }
 
-void Bot::handlePrivateMessage(std::string& nickname, std::istringstream& args)
+void Bot::handlePrivmsgCmd(std::string& nickname, std::istringstream& args)
 {
     std::string recipient, recv_msg, send_msg, reply;
 

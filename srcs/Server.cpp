@@ -1,9 +1,4 @@
 #include "Server.hpp"
-//NEED: to adapt the code so send() function is used only after check of poll() - create a sending buffer for the client?
-//NEED: what is network interface? - it's written in the evaluation sheet
-//NEED: to check with nc tool
-//NEED: to test with telnet and IRSSI
-//NEED: to test when kill nc with half of command sent (how to manage this? And what does it mean?)
 
 typedef void (Server::*FuncType)(Client&, std::istringstream&);
 
@@ -75,7 +70,6 @@ void Server::createServSocket(char* port_num)
     int yes = 1;
     struct pollfd new_poll;
 
-    //First of all, we need to get the network address to connect it to socket
     memset(&temp, 0, sizeof(temp));
     temp.ai_family = AF_INET;
     temp.ai_socktype = SOCK_STREAM;
@@ -84,30 +78,24 @@ void Server::createServSocket(char* port_num)
     if (getaddrinfo(NULL, port_num, &temp, &servinfo) == -1)
         throw (std::runtime_error("Failed to get network address"));
     
-    //Loop through the addresses of servinfo to find the socket that we can bind
     for (it = servinfo; it != NULL; it = it->ai_next)
     {
-        //Firstly, we try to create the socket for network address
         this->_sockfd = socket(it->ai_family, it->ai_socktype, it->ai_protocol);
-        //If we can't create socket for this network address, we move to the next address in the struct
         if (this->_sockfd == -1)
             continue ;
 
-        //Now we need to set option of SO_REUSEADDR to reuse the address if it's still being cleaned
         if (setsockopt(this->_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
         {
             freeaddrinfo(servinfo);
             throw (std::runtime_error("Failed to set option SO_REUSEADDR to the socket"));
         }
 
-        //The next step is to set option of O_NONBLOCK to the socket to prevent its blocking
         if (fcntl(this->_sockfd, F_SETFL, O_NONBLOCK) == -1)
         {
             freeaddrinfo(servinfo);
             throw (std::runtime_error("Failed to set option O_NONBLOCK to the socket"));
         }
 
-        //Next, binding - assotiating the socket with the port for future connection establishment
         if (bind(this->_sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
         {
             close(this->_sockfd);
@@ -115,24 +103,20 @@ void Server::createServSocket(char* port_num)
             continue ;
         }
 
-        //If we reach this point, then we assotiated the socket to the port successfully
         break ;
     }
 
-    freeaddrinfo(servinfo); //-> We don't need this any more
+    freeaddrinfo(servinfo); 
 
-    //Additional check that we binded the socket successfully (if we didn't reach the end of for cycle)
     if (it == NULL) 
         throw (std::runtime_error("Failed to bind socket"));
     
-    //The last step - listening to the socket
     if (listen(this->_sockfd, SOCKMAXCONN) == -1)
     {
         close(this->_sockfd);
         throw (std::runtime_error("Failed to start listening"));
     }
 
-    //We also need to put our sockfd to the pollfd struct
     new_poll.fd = this->_sockfd;
     new_poll.events = POLLIN;
     new_poll.revents = 0;
@@ -144,16 +128,13 @@ void Server::createServSocket(char* port_num)
 void Server::runServer()
 {
     std::string message = ":irc.local :The connection is closed: the server is stopped.\r\n";
-    //We run eternal loop until we receive any signal pre-defined
     while (1)
     {
-        //poll() allows us to wait in background mode for any events for saved fds. After they happen, we continue
         if (poll(&(this->_pollfds[0]), this->_pollfds.size(), -1) == -1 && Server::_signalReceived == false)
             throw (std::runtime_error("Failed to use poll() function"));
         
         if (Server::_signalReceived)
         {
-            std::cout << "[DEBUG] signal is received; breaking the loop" << std::endl;
             for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
             {
                 if (this->_pollfds[ind].fd != this->_sockfd
@@ -167,7 +148,6 @@ void Server::runServer()
             break ;
         }
 
-        //We loop through the pollfds to find which fd got event
         for (size_t ind = 0; ind < this->_pollfds.size(); ind++)
         {
             if (this->_pollfds[ind].revents & (POLLHUP | POLLERR))
@@ -179,23 +159,18 @@ void Server::runServer()
 
             else if (this->_pollfds[ind].revents & POLLIN)
             {
-                //if its the socket fd, then it means that the new client is trying to connect
                 if (this->_pollfds[ind].fd == this->_sockfd)
                     this->acceptNewClient();
                 else
-                	//otherwise, we receive a new data from already connected client
                     this->receiveNewData(this->_pollfds[ind].fd);
             }
 
             else if (this->_pollfds[ind].fd != this->_sockfd
                     && this->_pollfds[ind].revents & POLLOUT)
-            {
 			    sendReply(this->_pollfds[ind].fd);
-            }
         }
     }
 
-    //in the end, we close all our FDs to avoid leaks
     this->closeFDs();
     return ;
 }
@@ -210,7 +185,6 @@ void Server::acceptNewClient()
     std::string init_mess = ":irc.local :NOTICE AUTH :Welcome!\r\n";
     std::string err_message = ":irc.local :Impossible to establish connection (too many connected clients). Try later.\r\n";
 
-    //we accept the new connection and save the address of client
     client_fd = accept(this->_sockfd, reinterpret_cast<sockaddr*>(&client_addr), &len_addr);
     if (client_fd == -1)
     {
@@ -225,7 +199,6 @@ void Server::acceptNewClient()
         return ;
     }
 
-    //we add option of O_NONBLOCK to the new fd of client to avoid blocking
     if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         std::cerr << "Failed O_NONBLOCK option for new client" << std::endl;
@@ -239,13 +212,11 @@ void Server::acceptNewClient()
 		throw (std::runtime_error("Failed to set option SO_KEEPALIVE to the socket"));
 	}
 
-    //then we save the new client fd into pollfds vector
     new_poll.fd = client_fd;
     new_poll.events = POLLIN | POLLOUT;
     new_poll.revents = 0;
     this->_pollfds.push_back(new_poll);
 
-    //we set the values of fd and ID-address of the client to the Client var and then add it into vector of Clients
     new_client.setFD(client_fd);
     char *ip = inet_ntoa(client_addr.sin_addr);
     new_client.setIPAddr(ip);
@@ -264,21 +235,17 @@ void Server::receiveNewData(int& clientFD)
     size_t pos_end = 0, termin_len = 0;
     std::string raw_cmd, remain_line;
 
-    //we need an empty buffer to store the receiving message
     memset(buffer, 0, sizeof(buffer));
 
-    //receive the message
     bytes = recv(clientFD, buffer, sizeof(buffer) - 1, 0);
     if (bytes <= 0)
     {
-        //if the return value of recv equals or less than 0, it means that the client disconnected
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " disconnected." << std::endl;
         this->clearClient(clientFD);
     }
     else
     {
-        //otherwise, we store the message and add it to the buffer of Client
         buffer[bytes] = '\0';
         std::cout << "[DEBUG] ";
         std::cout << "Client " << clientFD << " sent data." << std::endl;
@@ -291,10 +258,8 @@ void Server::receiveNewData(int& clientFD)
         Client& our_client = this->_clients[clientFD];
         our_client.appendBuffer(buffer);
         remain_line = our_client.getBuffer();
-        //here we check if there is a TERMIN in the Client's buffer. If there isn't, then we shall wait for the next portion
         while ((pos_end = remain_line.find(TERMIN)) != std::string::npos || (pos_end = remain_line.find_first_of(TERMIN)) != std::string::npos)
         {
-            //if there is a TERMIN in buffer, we must take a substring, remove it from Client's buffer and process it as a command
             if (remain_line.find(TERMIN) != std::string::npos)
                 termin_len = 2;
             else if (remain_line.find_first_of(TERMIN) != std::string::npos)
@@ -303,31 +268,29 @@ void Server::receiveNewData(int& clientFD)
             raw_cmd = our_client.getBuffer().substr(0, pos_end);
             if (raw_cmd.size() > (512 - termin_len))
                 raw_cmd = raw_cmd.substr(0, 512 - termin_len);
-            our_client.splitBuffer(0, pos_end + termin_len); // == this->_recvBuffer.erase(start, end);
+            our_client.splitBuffer(0, pos_end + termin_len);
             remain_line = our_client.getBuffer();
 
-            this->handleCommand(our_client, raw_cmd);
+            this->handleCommands(our_client, raw_cmd);
         }
     }
 
     return ;
 }
 
-void Server::handleCommand(Client& client, std::string& raw_cmd)
+void Server::handleCommands(Client& client, std::string& raw_cmd)
 {
-    std::istringstream line(raw_cmd); // it allows to use a string as a stream. Stream send words divided by ' ' (space) symbol
+    std::istringstream line(raw_cmd);
     std::string cmd, err_message;
     const std::map<std::string, FuncType> allowed_cmds = this->getMapCmdFunc();
 
     if (raw_cmd.empty())
         return ;
 
-    line >> cmd; // it means that we put 1st word from str into command
+    line >> cmd;
 
-    //as we have initial commands in uppercase, we need to transform our command
     cmd = toUpperString(cmd);
 
-    //here we launch the command handlers depending on what we receive in CMD
     std::map<std::string, FuncType>::const_iterator it = allowed_cmds.find(cmd);
 
     if (!client.isRegistered())
@@ -407,20 +370,16 @@ void Server::clearClient(const int& client_fd)
 {
 	int	fdToClose = client_fd;
 
-    //make the client leave all the channels if it is registered
     if (this->_clients[client_fd].isRegistered())
         this->_clients[client_fd].leaveAllChannels(*this);
        
-    //remove client from the list of clients of server
     this->_clients.erase(client_fd);
 
-    //remove client from pollfd vector
     for (std::vector<struct pollfd>::iterator it = this->_pollfds.begin();
             it != this->_pollfds.end(); it++)
     {
         if (it->fd == client_fd)
         {
-			//change the value of the parameter 'client_fd' when the pollfd is erased
             this->_pollfds.erase(it);
             break ;
         }
@@ -440,22 +399,22 @@ const std::map<std::string, FuncType>& Server::getMapCmdFunc()
     static std::map<std::string, FuncType> func_map;
     if (func_map.empty())
     {
-        func_map[USER] = &Server::handleUsername;
-        func_map[PASS] = &Server::handlePassword;
-        func_map[NICK] = &Server::handleNickname;
-        func_map[INVITE] = &Server::handleInvite;
-        func_map[JOIN] = &Server::handleJoin;
-        func_map[KICK] = &Server::handleKick;
-        func_map[MODE] = &Server::handleMode;
-        func_map[NAMES] = &Server::handleNames;
-        func_map[NOTICE] = &Server::handleNotice;
-        func_map[OPER] = &Server::handleOper;
-        func_map[PART] = &Server::handlePart;
-        func_map[PING] = &Server::handlePing;
-        func_map[PRIVMSG] = &Server::handlePrivateMessage;
-        func_map[QUIT] = &Server::handleQuit;
-        func_map[TOPIC] = &Server::handleTopic;
-        func_map[CAP] = &Server::handleCap;
+        func_map[USER] = &Server::handleUsernameCmd;
+        func_map[PASS] = &Server::handlePasswordCmd;
+        func_map[NICK] = &Server::handleNicknameCmd;
+        func_map[INVITE] = &Server::handleInviteCmd;
+        func_map[JOIN] = &Server::handleJoinCmd;
+        func_map[KICK] = &Server::handleKickCmd;
+        func_map[MODE] = &Server::handleModeCmd;
+        func_map[NAMES] = &Server::handleNamesCmd;
+        func_map[NOTICE] = &Server::handleNoticeCmd;
+        func_map[OPER] = &Server::handleOperCmd;
+        func_map[PART] = &Server::handlePartCmd;
+        func_map[PING] = &Server::handlePingCmd;
+        func_map[PRIVMSG] = &Server::handlePrivmsgCmd;
+        func_map[QUIT] = &Server::handleQuitCmd;
+        func_map[TOPIC] = &Server::handleTopicCmd;
+        func_map[CAP] = &Server::handleCapCmd;
     }
     return (func_map);
 }

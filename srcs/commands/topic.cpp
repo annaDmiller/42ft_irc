@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void Server::handleTopic(Client& client, std::istringstream& args)
+void Server::handleTopicCmd(Client& client, std::istringstream& args)
 {
     std::string channel_name, topic, err_message, message, channel_modes;
     bool        isColon = false;
@@ -48,7 +48,6 @@ void Server::handleTopic(Client& client, std::istringstream& args)
             channel.printTopic(client);
 			return ;
 		}
-		//If topic is an empty string, the topic for the channel will be cleared
 		channel.setTopic("", client.getNick());
     }
 

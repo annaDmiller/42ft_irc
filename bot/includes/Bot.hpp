@@ -75,8 +75,8 @@ class Bot
 		void splitSendBuffer(size_t start, size_t end);
 		void handleCommand(std::string& raw_cmd);
 		std::string handleBotCommand(std::string& raw_cmd);
-		void handleInvite(std::string& nickname, std::istringstream& args);
-		void handlePrivateMessage(std::string& nickname, std::istringstream& args);
+		void handleInviteCmd(std::string& nickname, std::istringstream& args);
+		void handlePrivmsgCmd(std::string& nickname, std::istringstream& args);
 		void sendReply();
 
 		std::string handleHelp();

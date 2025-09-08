@@ -2,13 +2,11 @@
 
 # include <iostream>
 # include <sstream> //-> to use std::istringstream to extract words from string
-# include <cerrno> //-> for using errno global var
-# include <cstdlib> //-> for using exit function
-# include <csignal> //-> for signal handling
-# include <cstring> //-> for using memset
+# include <csignal> 
+# include <cstring>
 # include <string>
-# include <vector> //-> for vector using
-# include <map> //-> for map using
+# include <vector>
+# include <map>
 # include <algorithm>
 # include <cctype>
 # include <limits>
@@ -17,13 +15,13 @@
 # include <unistd.h> //-> for using C-type close() function for socket fds
 //C++-type of closing can't be used as it requires non-raw FD
 
-# include <sys/socket.h> //-> for socket() functions
-# include <sys/types.h> //-> for socket() functions
-# include <netinet/in.h> //-> for sockaddr_in
-# include <arpa/inet.h> //-> for inet_ntoa()
-# include <netdb.h> //-> for getaddrinfo() and related structures
-# include <fcntl.h> //-> for fcntl() function
-# include <poll.h> //-> for poll() function
+# include <sys/socket.h>
+# include <sys/types.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+# include <netdb.h>
+# include <fcntl.h>
+# include <poll.h>
 
 # include "Client.hpp"
 # include "Macros.hpp"
@@ -35,13 +33,13 @@ class Channel;
 class Server
 {
     private:
-        int _port; //-> server port2
-        int _sockfd; //-> server socket FD
+        int _port;
+        int _sockfd;
         std::string _password;
-        std::map<int, Client> _clients; //-> map of clients, key is fd
-        std::vector<struct pollfd> _pollfds; //-> vector of pollfds which will be used for poll() function
+        std::map<int, Client> _clients;
+        std::vector<struct pollfd> _pollfds;
         static bool _signalReceived;
-        std::map<std::string, Channel> _availableChannels; //-> map of available channels, key is its channel names
+        std::map<std::string, Channel> _availableChannels;
 
         Server(const Server& other);
         Server& operator=(const Server&other);
@@ -51,25 +49,25 @@ class Server
         void acceptNewClient();
         void receiveNewData(int& clientFD);
 
-        void handleCommand(Client& client, std::string& raw_cmd);
+        void handleCommands(Client& client, std::string& raw_cmd);
         void handleInitCommands(Client& client, std::string& cmd, std::istringstream& args);
-        void handleNickname(Client& client, std::istringstream& args);
-        void handleUsername(Client& client, std::istringstream& args);
-        void handlePassword(Client& client, std::istringstream& args);
-        void handleCap(Client& client, std::istringstream& args);
-        void handleJoin(Client& client, std::istringstream& args);
-        void handlePrivateMessage(Client& client, std::istringstream& args);
-        void handleQuit(Client& client, std::istringstream& args);
-        void handlePing(Client& client, std::istringstream& args);
-        void handleNames(Client& client, std::istringstream& args);
-        void handlePart(Client& client, std::istringstream& args);
-        void handlePart(Client& client); // -> for PART from all the channels
-        void handleNotice(Client& client, std::istringstream& args);
-        void handleMode(Client& client, std::istringstream& args);
-        void handleTopic(Client& client, std::istringstream& args);
-        void handleInvite(Client& client, std::istringstream& args);
-        void handleOper(Client& client, std::istringstream& args);
-        void handleKick(Client& client, std::istringstream& args);
+        void handleNicknameCmd(Client& client, std::istringstream& args);
+        void handleUsernameCmd(Client& client, std::istringstream& args);
+        void handlePasswordCmd(Client& client, std::istringstream& args);
+        void handleCapCmd(Client& client, std::istringstream& args);
+        void handleJoinCmd(Client& client, std::istringstream& args);
+        void handlePrivmsgCmd(Client& client, std::istringstream& args);
+        void handleQuitCmd(Client& client, std::istringstream& args);
+        void handlePingCmd(Client& client, std::istringstream& args);
+        void handleNamesCmd(Client& client, std::istringstream& args);
+        void handlePartCmd(Client& client, std::istringstream& args);
+        void handlePartCmd(Client& client);
+        void handleNoticeCmd(Client& client, std::istringstream& args);
+        void handleModeCmd(Client& client, std::istringstream& args);
+        void handleTopicCmd(Client& client, std::istringstream& args);
+        void handleInviteCmd(Client& client, std::istringstream& args);
+        void handleOperCmd(Client& client, std::istringstream& args);
+        void handleKickCmd(Client& client, std::istringstream& args);
 
         std::string toUpperString(std::string str);
         std::string getChannelName(std::string &channel_name);
@@ -82,12 +80,10 @@ class Server
         bool isChannelExist(std::string &channel_name);
         bool isChannelTarget(const std::string& target) const;
 
-        std::string modeHandlingChannel(Client& client, Channel& channel,
+        std::string changeChannelModes(Client& client, Channel& channel,
                 std::vector<std::string>& params);
-        bool isValidModes(const std::string& modes, char& incorrect_mode);
         bool isValidMode(char mode);
         void removeOperMode(std::vector<char>& modes);
-        std::string composeMessage(std::vector<char>& modes, std::vector<std::string>& params) const;
         std::string composeModeMessage(std::map<std::string, std::string> &modes_add, 
                                         std::map<std::string, std::string> &modes_remove) const;
         void setMessageMode(bool isAdding, std::string mode_change, std::string add_value, 
@@ -95,7 +91,7 @@ class Server
                                 std::map<std::string, std::string> &modes_add, 
                                 std::map<std::string, std::string> &modes_remove);
 
-        void closeFDs(); //-> close ALL fds
+        void closeFDs();
         void clearClient(const int& client_fd);
 
         typedef void (Server::*FuncType)(Client&, std::istringstream&);
@@ -113,7 +109,7 @@ class Server
         void deleteChannel(const std::string& channel_name);
         void initSignal();
 
-        static void signalHandler(int signum); //-> signal handler for any signals
+        static void signalHandler(int signum); 
 };
 
 bool isSpecial(char car);

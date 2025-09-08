@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void Server::handleKick(Client& client, std::istringstream& args)
+void Server::handleKickCmd(Client& client, std::istringstream& args)
 {
     std::string channel_name, nick, comment, err_message, target_for_message;
     std::vector<std::string> user_list;

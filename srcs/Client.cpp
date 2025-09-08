@@ -1,7 +1,5 @@
 #include "Client.hpp"
 
-
-
 Client::Client() : 
         _fd(-1), _ipAddr(""), _recvBuffer(""), _sendBuffer(""),
         _nickname("*"), _username(""), _realname(""),
@@ -97,12 +95,7 @@ bool Client::isHaveNick() const
     return (this->_hasNickname);
 }
 
-bool Client::isHaveUsername() const
-{
-    return (this->_hasUsername);
-}
-
-size_t Client::joinedChannelQuantity() const
+size_t Client::getJoinedChannelQuantity() const
 {
     return (this->_joinedChannels.size());    
 }
