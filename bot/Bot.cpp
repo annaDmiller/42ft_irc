@@ -120,8 +120,7 @@ void Bot::receiveNewData()
     else
     {
         buffer[bytes] = '\0';
-        std::cout << "[DEBUG] ";
-        std::cout << "Server sent data:" << std::endl;
+        std::cout << "[DEBUG] Server sent data." << std::endl;
 
         std::string str(buffer);
         this->appendRecvBuffer(buffer);
@@ -133,8 +132,6 @@ void Bot::receiveNewData()
                 raw_cmd = raw_cmd.substr(0, 510);
             this->splitRecvBuffer(0, pos_end + 2);
  			remain_line = this->getRecvBuffer();
-	
-            std::cout << raw_cmd << std::endl;
             this->handleCommand(raw_cmd);
         }
 		this->sendReply();
