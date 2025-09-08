@@ -30,8 +30,9 @@ void Server::handleQuit(Client& client, std::istringstream& args)
     rpl_message = QUIT_MESS(client.getIPAddr(), message);
     if (rpl_message.length() > MAXLINELENGTH)
         rpl_message = rpl_message.substr(0, MAXLINELENGTH - 3) + ")" + TERMIN;
+    client.splitSendBuffer(0, client.getSendBuffer().length());
     client.appendSendBuffer(rpl_message);
-    while (client.hasMessToSend())
+    if (client.hasMessToSend())
         this->sendReply(client.getFD());
     this->clearClient(client.getFD());
     
