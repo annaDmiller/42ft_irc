@@ -60,6 +60,11 @@ std::string Channel::getChannelModes() const
     return (this->_modes);
 }
 
+int Channel::getMembersLimit() const
+{
+    return (this->_membersLimit);    
+}
+
 void Channel::setName(const std::string& name)
 {
     this->_name = name;

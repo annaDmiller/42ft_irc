@@ -94,7 +94,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
             case 'i':
                 if (channel.handleInviteOnly(isAdding))
 				{
-					setMessageMode(isAdding, "i", "", "", modes_start, modes_add, modes_remove);
+					setMessageMode(channel, isAdding, "i", "", "", modes_start, modes_add, modes_remove);
 				}
                 break;           
 
@@ -123,7 +123,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 }
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
-					setMessageMode(isAdding, "l", tmp_param, "", modes_start, modes_add, modes_remove);
+					setMessageMode(channel, isAdding, "l", tmp_param, "", modes_start, modes_add, modes_remove);
                 }
                 member_limit = -1;
                 break ;
@@ -131,7 +131,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
             case 't':
                 if (channel.handleTopicOperOnly(isAdding))
 				{
-					setMessageMode(isAdding, "t", "", "", modes_start, modes_add, modes_remove);
+					setMessageMode(channel, isAdding, "t", "", "", modes_start, modes_add, modes_remove);
 				}
                 break ;
             
@@ -148,7 +148,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
 
                 if (channel.handleKey(isAdding, pass, client))
                 {
-					setMessageMode(isAdding, "k", pass, "", modes_start, modes_add, modes_remove);
+					setMessageMode(channel, isAdding, "k", pass, "", modes_start, modes_add, modes_remove);
                 }
                 break ;
             
@@ -177,7 +177,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 {
 					if (target_fd != -1)
 					{
-						setMessageMode(isAdding, "o", target_name, target_name, modes_start, modes_add, modes_remove);
+						setMessageMode(channel, isAdding, "o", target_name, target_name, modes_start, modes_add, modes_remove);
 					}
                 }
                 break ;
@@ -263,14 +263,21 @@ std::string Server::composeModeMessage(std::map<std::string, std::string> &modes
     return (message);	
 }
 
-void Server::setMessageMode(bool isAdding, std::string mode_change, std::string add_value, 
+void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_change, std::string add_value, 
 							std::string remove_value, std::string modes_start,
 							std::map<std::string, std::string> &modes_add,
 							std::map<std::string, std::string> &modes_remove)
 {
 	if (isAdding)
 	{
-		modes_add[mode_change] = add_value;
+
+        if (modes_start.find(mode_change) == std::string::npos && (mode_change == "i" || mode_change == "t")) {
+		    modes_add[mode_change] = add_value;
+        }
+		else if (mode_change == "l" && channel.getMembersLimit() != atoi(add_value.c_str()))
+		{
+		    modes_add[mode_change] = add_value;
+		}
 		for (std::map<std::string, std::string>::iterator it_mode = modes_remove.begin();
 			it_mode != modes_remove.end(); it_mode++)
 		{

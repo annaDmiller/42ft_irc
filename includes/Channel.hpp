@@ -35,6 +35,7 @@ class Channel
 
         std::string getName() const;
         std::string getChannelModes() const;
+        int getMembersLimit() const;
 
         void setName(const std::string& name);
         void setTopic(const std::string& topic, const std::string& nick);
