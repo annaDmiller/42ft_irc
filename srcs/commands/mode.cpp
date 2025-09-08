@@ -59,8 +59,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
 {
     size_t ind_param = 1, ind_mode = 0;
     std::string &modes = params[0], err_message = "", pass, message = "", tmp_param, modes_start, target_name;
-    std::vector<std::string> params_for_message;
-    std::vector<char> modes_for_message;
     bool isAdding = true;
     int member_limit = -1, target_fd;
     long limit;
@@ -83,7 +81,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == true || ind_mode == 0)
                         && channel.getChannelModes().find(modes[ind_mode + 1]) != std::string::npos)
-                    modes_for_message.push_back(modes[ind_mode]);
                 isAdding = false;
                 break ;
             
@@ -91,14 +88,12 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == false || ind_mode == 0)
                         && channel.getChannelModes().find(modes[ind_mode + 1]) == std::string::npos)
-                    modes_for_message.push_back(modes[ind_mode]);
                 isAdding = true;
                 break ;
 
             case 'i':
                 if (channel.handleInviteOnly(isAdding))
 				{
-                    modes_for_message.push_back('i');
 					setMessageMode(isAdding, "i", "", "", modes_start, modes_add, modes_remove);
 				}
                 break;           
@@ -128,10 +123,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 }
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
-                    modes_for_message.push_back('l');
-                    if (member_limit != -1 && isAdding)
-                        params_for_message.push_back(params[ind_param - 1]);
-
 					setMessageMode(isAdding, "l", tmp_param, "", modes_start, modes_add, modes_remove);
                 }
                 member_limit = -1;
@@ -140,8 +131,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
             case 't':
                 if (channel.handleTopicOperOnly(isAdding))
 				{
-                    modes_for_message.push_back('t');
-
 					setMessageMode(isAdding, "t", "", "", modes_start, modes_add, modes_remove);
 				}
                 break ;
@@ -159,12 +148,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
 
                 if (channel.handleKey(isAdding, pass, client))
                 {
-                    modes_for_message.push_back('k');
-                    if (isAdding)
-                        params_for_message.push_back(params[ind_param - 1]);
-                    else
-                        params_for_message.push_back(std::string("*"));
-
 					setMessageMode(isAdding, "k", pass, "", modes_start, modes_add, modes_remove);
                 }
                 break ;
@@ -192,10 +175,6 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
 
                 if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
                 {
-                    modes_for_message.push_back('o');
-                    if (target_fd != -1)
-                        params_for_message.push_back(params[ind_param - 1]);
-
 					if (target_fd != -1)
 					{
 						setMessageMode(isAdding, "o", target_name, target_name, modes_start, modes_add, modes_remove);
@@ -206,14 +185,12 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
             default:
                 err_message = ERR_UNKNOWNMODE(client.getNick(), modes[ind_mode]);
                 client.appendSendBuffer(err_message);
-                removeOperMode(modes_for_message);
 				message = composeModeMessage(modes_add, modes_remove);
                 return (message);         
         }
         ind_mode++;
     }
     
-    removeOperMode(modes_for_message);
 	message = composeModeMessage(modes_add, modes_remove);
     return (message);
 }
@@ -235,23 +212,6 @@ bool Server::isValidMode(char mode)
             return (true);
     }
     return (false);
-}
-
-void Server::removeOperMode(std::vector<char>& modes)
-{
-    size_t ind = 0;
-    while (ind < modes.size())
-    {
-        if ((modes[ind] == '-' || modes[ind] == '+')
-            && (ind >= (modes.size() - 1) || isValidMode(modes[ind + 1] == false)))
-        {
-            modes.erase(modes.begin() + ind);
-            ind = 0;
-        }
-        else
-            ind++;
-    }
-    return ;
 }
 
 std::string Server::composeModeMessage(std::map<std::string, std::string> &modes_add, std::map<std::string, std::string> &modes_remove) const

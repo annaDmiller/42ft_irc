@@ -83,7 +83,6 @@ class Server
         std::string changeChannelModes(Client& client, Channel& channel,
                 std::vector<std::string>& params);
         bool isValidMode(char mode);
-        void removeOperMode(std::vector<char>& modes);
         std::string composeModeMessage(std::map<std::string, std::string> &modes_add, 
                                         std::map<std::string, std::string> &modes_remove) const;
         void setMessageMode(bool isAdding, std::string mode_change, std::string add_value, 
