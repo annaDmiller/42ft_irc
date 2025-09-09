@@ -5,16 +5,16 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     std::string welcome_mess, err_response;
 
     if (cmd == NICK)
-        handleNickname(client, args);
+        handleNicknameCmd(client, args);
     else if (cmd == USER)
-        handleUsername(client, args);
+        handleUsernameCmd(client, args);
     else if (cmd == PASS)
-        handlePassword(client, args);
+        handlePasswordCmd(client, args);
     else if (cmd == CAP)
-        handleCap(client, args);
+        handleCapCmd(client, args);
     else if (cmd == QUIT)
     {
-        handleQuit(client, args);
+        handleQuitCmd(client, args);
         return ;
     }
     else
@@ -46,7 +46,7 @@ void Server::handleInitCommands(Client& client, std::string& cmd, std::istringst
     return ;
 }
 
-void Server::handleCap(Client& client, std::istringstream& args)
+void Server::handleCapCmd(Client& client, std::istringstream& args)
 {
     std::string arg, err_response;
     args >> arg;
@@ -68,12 +68,11 @@ void Server::handleCap(Client& client, std::istringstream& args)
     }
 }
 
-void Server::handlePassword(Client& client, std::istringstream& args)
+void Server::handlePasswordCmd(Client& client, std::istringstream& args)
 {
     std::string pass, err_response;
     args >> pass;
 
-    //Registered user can't use PASS again
     if (client.isRegistered())
     {
         err_response = ERR_ALREADYREGISTERED(client.getNick());
@@ -81,7 +80,6 @@ void Server::handlePassword(Client& client, std::istringstream& args)
         return ;
     }
 
-    //if user tries to use PASS command multiple times, for ft_irc I decided just to skip this command
     if (client.isPassChecked())
         return ;
 
@@ -99,20 +97,17 @@ void Server::handlePassword(Client& client, std::istringstream& args)
         return ;
     }
 
-    //if we don't detect any errors above, then the user input correct password. We save it
     client.checkPassword();
     
     return ;
 }
 
-void Server::handleUsername(Client& client, std::istringstream& args)
+void Server::handleUsernameCmd(Client& client, std::istringstream& args)
 {
-    //I named the below vars based on the params of command according to RFC 2812
-    //However, mode and unused params are not used in our project
     std::string username, mode, unused, realname, err_response;
     args >> username >> mode >> unused;
-    std::getline(args, realname); //-> we are using getline instead of ">>" to copy the rest part of the line. Realname can contain spaces
-
+    std::getline(args, realname); 
+    
     if (client.isRegistered())
     { 
         err_response = ERR_ALREADYREGISTERED(client.getNick());

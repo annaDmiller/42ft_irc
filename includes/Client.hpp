@@ -4,20 +4,19 @@
 # include "Channel.hpp"
 # include <map>
 
-//NEED: maybe to get rid of _hasNickname and _hasUsername? Why do we need them?
 class Channel;
 class Server;
 
 class Client
 {
     private:
-        int _fd; //-> client FD
-        std::string _ipAddr; //-> client IP address
-        std::string _recvBuffer; //-> to store the incoming message from client
+        int _fd;
+        std::string _ipAddr;
+        std::string _recvBuffer;
         std::string _sendBuffer;
-        std::string _nickname; //-> set with NICK command
-        std::string _username; //-> set with USER command
-        std::string _realname; //-> set with USER command
+        std::string _nickname;
+        std::string _username;
+        std::string _realname;
         bool _hasNickname;
         bool _isAuth;
         bool _isPasswordChecked;
@@ -40,8 +39,7 @@ class Client
         bool isPassChecked() const;
         std::string getNick() const;
         bool isHaveNick() const;
-        bool isHaveUsername() const;
-        size_t joinedChannelQuantity() const;
+        size_t getJoinedChannelQuantity() const;
         std::string getPrefix() const;
 
         void setFD(int fd);

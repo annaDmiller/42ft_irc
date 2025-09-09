@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void Server::handleInvite(Client& client, std::istringstream& args)
+void Server::handleInviteCmd(Client& client, std::istringstream& args)
 {
     std::string channel_name, nick, err_message, message, channel_modes;
     int target_fd;

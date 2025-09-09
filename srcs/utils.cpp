@@ -41,7 +41,7 @@ std::string ft_itos(int number)
         number *= -1;
     }
 
-    if (number > 10)
+    if (number >= 10)
         str_number += ft_itos(number / 10);
     
     car = '0' + number % 10;

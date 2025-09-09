@@ -120,8 +120,7 @@ void Bot::receiveNewData()
     else
     {
         buffer[bytes] = '\0';
-        std::cout << "[DEBUG] ";
-        std::cout << "Server sent data:" << std::endl;
+        std::cout << "[DEBUG] Server sent data." << std::endl;
 
         std::string str(buffer);
         this->appendRecvBuffer(buffer);
@@ -133,8 +132,6 @@ void Bot::receiveNewData()
                 raw_cmd = raw_cmd.substr(0, 510);
             this->splitRecvBuffer(0, pos_end + 2);
  			remain_line = this->getRecvBuffer();
-	
-            std::cout << raw_cmd << std::endl;
             this->handleCommand(raw_cmd);
         }
 		this->sendReply();
@@ -197,8 +194,8 @@ const std::map<std::string, FuncType>& Bot::getMapCmdFunc()
     static std::map<std::string, FuncType> func_map;
     if (func_map.empty())
     {
-        func_map[INVITE] = &Bot::handleInvite;
-        func_map[PRIVMSG] = &Bot::handlePrivateMessage;
+        func_map[INVITE] = &Bot::handleInviteCmd;
+        func_map[PRIVMSG] = &Bot::handlePrivmsgCmd;
     }
     return (func_map);
 }
@@ -279,7 +276,7 @@ std::string Bot::getSendBuffer() const
     return (this->_sendBuffer);
 }
 
-void Bot::handleInvite(std::string& nickname, std::istringstream& args)
+void Bot::handleInviteCmd(std::string& nickname, std::istringstream& args)
 {
     std::string recipient, channel_name, message;
 
@@ -294,7 +291,7 @@ void Bot::handleInvite(std::string& nickname, std::istringstream& args)
     return ;
 }
 
-void Bot::handlePrivateMessage(std::string& nickname, std::istringstream& args)
+void Bot::handlePrivmsgCmd(std::string& nickname, std::istringstream& args)
 {
     std::string recipient, recv_msg, send_msg, reply;
 

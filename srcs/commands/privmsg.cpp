@@ -1,7 +1,6 @@
 #include "Server.hpp"
 
-//This command allows the clients' to send private messages to each other or to the channels
-void Server::handlePrivateMessage(Client& client, std::istringstream& args)
+void Server::handlePrivmsgCmd(Client& client, std::istringstream& args)
 {
     std::string receivers, message, err_message;
     std::vector<std::string> rec_list;
@@ -15,7 +14,6 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
     else
         args >> message;
 
-    //Firstly, we check whether we have empty arguments for the command
     if (receivers.empty())
     {
         err_message = ERR_NORECIPIENT(client.getNick(), PRIVMSG);
@@ -30,21 +28,17 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
         return ;
     }
 
-    //We strip our message line from semicolon and space chars in the beginning
     if (message[0] == ' ')
         message = message.substr(1);
     if (message[0] == ':')
         message = message.substr(1);
 
-    //As there can be multiple receivers, create a list of them
     rec_list = ft_split(receivers, ',');
 
     for (size_t ind = 0; ind < rec_list.size(); ind++)
     {
-        //for each receiver, we must check whether it is channel or a user - different behavior
         if (isChannelTarget(rec_list[ind]))
         {
-            //handle channel
             if (!isChannelExist(rec_list[ind]))
             {
                 err_message = ERR_NOSUCHNICK(client.getNick(), rec_list[ind]);
@@ -60,12 +54,10 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
                 continue ;
             }
             
-            //send the message to all members of the channel except for the user itself
             channel.sendMessageToAll(client, *this, rec_list[ind], message, client.getFD(), PRIVMSG);
         }
         else
         {
-            //handle user
             if ((fd_target = this->findUserbyNickname(rec_list[ind])) == -1)
             {
                 err_message = ERR_NOSUCHNICK(client.getNick(), rec_list[ind]);
@@ -73,7 +65,6 @@ void Server::handlePrivateMessage(Client& client, std::istringstream& args)
                 continue ;
             }
             
-            //send the message to the target-user
             sendMessageToUser(client, fd_target, rec_list[ind], message, PRIVMSG);
         }
     }

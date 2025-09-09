@@ -1,10 +1,9 @@
 #pragma once
 
-# define SOCKMAXCONN 10 //-> maximum number of connections to socket at a time
-# define TERMIN "\r\n" //-> line termination in IRC (based on RFC 2812)
+# define SOCKMAXCONN 10 
+# define TERMIN "\r\n"
 # define SERVERNAME "FT_IRC"
 # define VERSION "1.0"
-// # define CREATEDDATE "2025"
 # define USERMODES "-"
 # define CHANNELMODES "iklt"
 # define HOST "irc.local"
@@ -16,23 +15,23 @@
 # define BOT_NICK "bot"
 
 //Command names
-# define USER "USER" //DONE
-# define PASS "PASS" //DONE
-# define NICK "NICK" //DONE
-# define CAP "CAP" //DONE
-# define JOIN "JOIN" //DONE
-# define QUIT "QUIT" //DONE
-# define PRIVMSG "PRIVMSG" //DONE
-# define PING "PING" //DONE (Client -> Server)
-# define PONG "PONG" //DONE (Server -> Client)
-# define NOTICE "NOTICE" //DONE
-# define PART "PART" //DONE
-# define NAMES "NAMES" //DONE
-# define KICK "KICK" //DONE
+# define USER "USER"
+# define PASS "PASS"
+# define NICK "NICK"
+# define CAP "CAP"
+# define JOIN "JOIN"
+# define QUIT "QUIT"
+# define PRIVMSG "PRIVMSG"
+# define PING "PING" //(Client -> Server)
+# define PONG "PONG" //(Server -> Client)
+# define NOTICE "NOTICE"
+# define PART "PART"
+# define NAMES "NAMES"
+# define KICK "KICK"
 # define INVITE "INVITE"
-# define TOPIC "TOPIC" //DONE
-# define MODE "MODE" //DONE
-# define OPER "OPER" //DONE
+# define TOPIC "TOPIC"
+# define MODE "MODE"
+# define OPER "OPER"
 
 //Macros: Numeric replies for errors
 # define ERR_NEEDMOREPARAMS(nick, cmd) (std::string(":") + HOST + " 461 " + nick + " " + cmd + " :Not enough parameters" + TERMIN)
