@@ -58,9 +58,10 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
         std::vector<std::string>& params)
 {
     size_t ind_param = 1, ind_mode = 0;
-    std::string &modes = params[0], err_message = "", pass, message = "", tmp_param, modes_start, target_name;
-    bool isAdding = true;
-    int member_limit = -1, target_fd;
+    std::string &modes = params[0], err_message = "", pass, message = "",
+				tmp_param = "", modes_start = "", target_name = "", operatorAdded = "";
+    bool isAdding = true, isChannelOper = false;
+    int member_limit = -1, target_fd, tmp_limit;
     long limit;
     char *pscalar_end;
 
@@ -80,21 +81,22 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
             case '-':
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == true || ind_mode == 0)
-                        && channel.getChannelModes().find(modes[ind_mode + 1]) != std::string::npos)
-                isAdding = false;
+                        && (channel.getChannelModes().find(modes[ind_mode + 1]) != std::string::npos
+							|| modes[ind_mode + 1] == 'o'))
+                	isAdding = false;
                 break ;
             
             case '+':
                 if (ind_mode + 1 < modes.size() && isValidMode(modes[ind_mode + 1]) == true
                         && (isAdding == false || ind_mode == 0)
                         && channel.getChannelModes().find(modes[ind_mode + 1]) == std::string::npos)
-                isAdding = true;
+                	isAdding = true;
                 break ;
 
             case 'i':
                 if (channel.handleInviteOnly(isAdding))
 				{
-					setMessageMode(channel, isAdding, "i", "", "", modes_start, modes_add, modes_remove);
+					setMessageMode(isAdding, "i", "", "", modes_start, modes_add, modes_remove);
 				}
                 break;           
 
@@ -121,17 +123,21 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                     }
                     member_limit = static_cast<int>(limit);
                 }
+				tmp_limit = channel.getMembersLimit();
                 if (channel.handleMemberLimit(isAdding, member_limit))
                 {
-					setMessageMode(channel, isAdding, "l", tmp_param, "", modes_start, modes_add, modes_remove);
+					if ((isAdding == false) || (isAdding == true && tmp_limit != member_limit)) {
+						setMessageMode(isAdding, "l", tmp_param, "", modes_start, modes_add, modes_remove);
+					}
                 }
                 member_limit = -1;
+				
                 break ;
             
             case 't':
                 if (channel.handleTopicOperOnly(isAdding))
 				{
-					setMessageMode(channel, isAdding, "t", "", "", modes_start, modes_add, modes_remove);
+					setMessageMode(isAdding, "t", "", "", modes_start, modes_add, modes_remove);
 				}
                 break ;
             
@@ -148,7 +154,7 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
 
                 if (channel.handleKey(isAdding, pass, client))
                 {
-					setMessageMode(channel, isAdding, "k", pass, "", modes_start, modes_add, modes_remove);
+					setMessageMode(isAdding, "k", pass, "", modes_start, modes_add, modes_remove);
                 }
                 break ;
             
@@ -167,17 +173,22 @@ std::string Server::changeChannelModes(Client& client, Channel& channel,
                 {
                     err_message = ERR_NOSUCHNICK(client.getNick(), params[ind_param - 1]);
                     client.appendSendBuffer(err_message);
-                    break ;
+					message = composeModeMessage(modes_add, modes_remove);
+					return (message);
                 }
-
                 if (target_fd == client.getFD() && isAdding)
                     break ;
 
+				isChannelOper = channel.isOperator(target_fd);
                 if (channel.handleOperators(isAdding, target_fd, client, params[ind_param - 1]))
                 {
 					if (target_fd != -1)
 					{
-						setMessageMode(channel, isAdding, "o", target_name, target_name, modes_start, modes_add, modes_remove);
+						if (!isAdding || (isAdding && !isChannelOper && operatorAdded == "")) {
+
+							operatorAdded = target_name;
+							setMessageMode(isAdding, "o", target_name, target_name, modes_start, modes_add, modes_remove);
+						}
 					}
                 }
                 break ;
@@ -263,28 +274,22 @@ std::string Server::composeModeMessage(std::map<std::string, std::string> &modes
     return (message);	
 }
 
-void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_change, std::string add_value, 
+void Server::setMessageMode(bool isAdding, std::string mode_change, std::string add_value, 
 							std::string remove_value, std::string modes_start,
 							std::map<std::string, std::string> &modes_add,
 							std::map<std::string, std::string> &modes_remove)
-{
+{	
 	if (isAdding)
 	{
         if (modes_start.find(mode_change) == std::string::npos && (mode_change == "i" || mode_change == "t")) {
 		    modes_add[mode_change] = add_value;
         }
-		else if (mode_change == "l" && channel.getMembersLimit() != atoi(add_value.c_str()))
-		{
+		else if (mode_change == "l" || mode_change == "o") {
 		    modes_add[mode_change] = add_value;
 		}
-        else if (mode_change == "o")
-        {
-                int target_fd = findUserbyNickname(add_value);
-                if (target_fd != -1 && !channel.isOperator(target_fd))
-                {
-                    modes_add[mode_change] = add_value;     
-                }
-        }
+		else if (mode_change == "k") {
+		    modes_add[mode_change] = "*";
+		}
 		for (std::map<std::string, std::string>::iterator it_mode = modes_remove.begin();
 			it_mode != modes_remove.end(); it_mode++)
 		{
@@ -302,11 +307,7 @@ void Server::setMessageMode(Channel& channel, bool isAdding, std::string mode_ch
 		}
         else if (mode_change == "o")
         {
-                int target_fd = findUserbyNickname(add_value);
-                if (target_fd != -1 && channel.isOperator(target_fd))
-                {
-                    modes_remove[mode_change] = remove_value;
-                }
+			modes_remove[mode_change] = remove_value;
         }
 		for (std::map<std::string, std::string>::iterator it_mode = modes_add.begin();
 			it_mode != modes_add.end(); it_mode++)

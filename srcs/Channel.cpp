@@ -408,7 +408,7 @@ bool Channel::handleKey(const bool& isAdding, std::string& password, Client& cli
     {
         if (isValidKey(password) == false)
         {
-            err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*****", 
+            err_message = ERR_INVALIDMODEPARAM(client.getNick(), this->getName(), "k", "*", 
                             "Invalid password: spaces forbidden and maximum length: 20");
             client.appendSendBuffer(err_message);
             return (false);
@@ -460,7 +460,6 @@ bool Channel::handleOperators(const bool& isAdding, int& target_fd, Client& clie
         else
             return (false);
     }
-
     return (true);
 }
 
@@ -477,16 +476,16 @@ void Channel::printModes(Client& client) const
     if (ind_k != std::string::npos && ind_l != std::string::npos)
     {
         if (ind_k > ind_l)
-            mode_params = ft_itos(this->_membersLimit) + " " + this->_key;
+            mode_params = ft_itos(this->_membersLimit) + " *";
         else 
-            mode_params = this->_key + " " + ft_itos(this->_membersLimit);
+            mode_params = "* " + ft_itos(this->_membersLimit);
     }
     else
     {
         if (ind_l != std::string::npos)
             mode_params = ft_itos(this->_membersLimit);
         if (ind_k != std::string::npos)
-            mode_params = this->_key;
+            mode_params = "*";
     }
 
     message = RPL_CHANNELMODEIS(client.getNick(), this->_name, modes, mode_params);
